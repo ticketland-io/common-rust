@@ -5,7 +5,7 @@ pub struct Store {
 }
 
 impl Store {
-  pub async fn new(firebase_auth_key: String) -> Self {
+  pub fn new(firebase_auth_key: String) -> Self {
     let firebase_auth = fireauth::FireAuth::new(firebase_auth_key.clone());
 
     Self {

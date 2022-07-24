@@ -3,7 +3,6 @@ use std::{
   rc::Rc,
 };
 use actix_web::{
-  web,
   HttpMessage,
   dev::{forward_ready, Payload, Service, ServiceRequest, ServiceResponse, Transform},
   FromRequest,
@@ -12,9 +11,9 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use fireauth::api::User;
-use crate::{
-  utils::store::Store,
+use fireauth::{
+  FireAuth,
+  api::User,
 };
 
 #[derive(Debug, Clone)]
@@ -35,7 +34,15 @@ impl FromRequest for AuthData {
   }
 }
 
-pub struct AuthnMiddlewareFactory;
+pub struct AuthnMiddlewareFactory {
+  firebase_auth: Rc<FireAuth>,
+}
+
+impl AuthnMiddlewareFactory {
+  pub fn new(firebase_auth: FireAuth) -> Self {
+    Self {firebase_auth: Rc::new(firebase_auth)}
+  }
+}
 
 impl<S, B> Transform<S, ServiceRequest> for AuthnMiddlewareFactory
 where
@@ -52,12 +59,14 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
       ready(Ok(AuthnMiddleware {
         service: Rc::new(service),
+        firebase_auth: self.firebase_auth.clone(),
       }))
     }
 }
 
 pub struct AuthnMiddleware<S> {
   service: Rc<S>,
+  firebase_auth: Rc<FireAuth>,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthnMiddleware<S>
@@ -70,12 +79,12 @@ where
 
   forward_ready!(service);
 
-  fn call(&self, mut req: ServiceRequest) -> Self::Future {
+  fn call(&self, req: ServiceRequest) -> Self::Future {
     let srv = self.service.clone();
+    let firebase_auth = self.firebase_auth.clone();
     
     Box::pin(
       async move {
-        let store = req.extract::<web::Data<Store>>().await;
         let headers = req.headers();
         let bearer = headers.get("Authorization");
         
@@ -97,7 +106,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         };
         
-        match store.unwrap().firebase_auth.get_user_info(&access_token).await {
+        match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
             // make the user available to the downstream handlers
             req.extensions_mut().insert(AuthData {user});

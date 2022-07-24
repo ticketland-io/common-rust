@@ -39,8 +39,12 @@ pub struct AuthnMiddlewareFactory {
 }
 
 impl AuthnMiddlewareFactory {
-  pub fn new(firebase_auth: FireAuth) -> Self {
-    Self {firebase_auth: Rc::new(firebase_auth)}
+  pub fn new(firebase_auth_key: String) -> Self {
+    let firebase_auth = Rc::new(
+      fireauth::FireAuth::new(firebase_auth_key.clone())
+    );
+
+    Self {firebase_auth}
   }
 }
 

@@ -4,7 +4,7 @@ use std::{
 };
 use bolt_proto::value::Value;
 use serde::{Deserialize, Serialize};
-use common::error::Error;
+use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
 
 #[derive(Serialize, Deserialize, Default)]

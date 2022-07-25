@@ -1,5 +1,5 @@
 use actix_web::{HttpResponse};
-use common::{
+use ticketland_core::{
   error::Error,
 };
 

@@ -1,7 +1,7 @@
 use actix::prelude::*;
 use std::sync::{Arc};
 use bolt_client::{Params};
-use common::{
+use ticketland_core::{
   error::{Error, map_bolt_result_err},
   async_helpers::with_retry,
   actor::neo4j::{Neo4jActor, Read, Write},

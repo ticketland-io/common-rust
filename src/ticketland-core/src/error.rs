@@ -13,6 +13,8 @@ pub enum Error {
   MailboxError(String),
   #[error("No records found")]
   EmptyDbResult,
+  #[error("S3 error")]
+  S3Error,
 }
 
 pub fn map_bolt_result_err(result: Result<(Vec<Record>, Message), Error>) -> Result<Vec<Record>, Error> {

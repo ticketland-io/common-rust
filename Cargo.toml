@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "src/common",
+  "src/ticketland-core",
   "src/api-helpers",
-  "src/data",
+  "src/common-data",
 ]

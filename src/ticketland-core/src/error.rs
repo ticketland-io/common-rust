@@ -15,7 +15,7 @@ pub enum Error {
   #[error("No records found")]
   EmptyDbResult,
   #[error("S3 error")]
-  S3Error,
+  S3Error(String),
 }
 
 impl ResponseError for Error {}
@@ -39,5 +39,11 @@ impl From<actix::MailboxError> for Error {
 impl From<Failure> for Error {
   fn from(error: Failure) -> Self {
     Error::Neo4jError(format!("{:?}", error))
+  }
+}
+
+impl From<s3::error::S3Error> for Error {
+  fn from(error: s3::error::S3Error) -> Self {
+    Error::S3Error(format!("{:?}", error))
   }
 }

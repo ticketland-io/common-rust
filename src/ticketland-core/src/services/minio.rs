@@ -1,6 +1,5 @@
 use s3::{
   bucket::Bucket,
-  BucketConfiguration,
   creds::Credentials,
   region::Region,
   error::S3Error,
@@ -30,16 +29,7 @@ impl Minio {
       None,
     ).expect("Wrong credentials provided");
 
-    let config = BucketConfiguration::default();
-    let bucket = Bucket::create_with_path_style(
-      &bucket_name,
-      region,
-      credentials,
-      config,
-    )
-    .await
-    .expect("cannot connect to Minio")
-    .bucket;
+    let bucket = Bucket::new(&bucket_name, region, credentials).expect("cannot init bucket");
 
     Self {
       bucket,

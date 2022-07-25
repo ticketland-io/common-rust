@@ -1,3 +1,4 @@
+use actix_web::ResponseError;
 use thiserror::Error;
 use bolt_proto::Message;
 use bolt_proto::message::{
@@ -16,6 +17,8 @@ pub enum Error {
   #[error("S3 error")]
   S3Error,
 }
+
+impl ResponseError for Error {}
 
 pub fn map_bolt_result_err(result: Result<(Vec<Record>, Message), Error>) -> Result<Vec<Record>, Error> {
   let (records, response) = result?;

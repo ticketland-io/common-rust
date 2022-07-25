@@ -5,7 +5,7 @@ use s3::{
   region::Region,
   error::S3Error,
 };
-
+use tokio::io::AsyncWrite;
 pub struct Minio {
   bucket: Bucket,
 }
@@ -50,5 +50,19 @@ impl Minio {
     self.bucket.put_object(path, content).await?;
     
     Ok(())
+  }
+
+  pub async fn delete(&self, path: &str) -> Result<(), S3Error> {
+    self.bucket.delete_object(path).await?;
+    
+    Ok(())
+  }
+
+  pub async fn get_object_stream<T: AsyncWrite + Send + Unpin, S: AsRef<str>>(
+    &self,
+    path: S,
+    mut writer: &mut T
+  ) -> Result<u16, S3Error> {
+    self.bucket.get_object_stream(path, &mut writer).await
   }
 }

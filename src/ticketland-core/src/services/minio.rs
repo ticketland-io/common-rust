@@ -63,6 +63,8 @@ impl Minio {
     path: S,
     mut writer: &mut T
   ) -> Result<u16, S3Error> {
-    self.bucket.get_object_stream(path, &mut writer).await
+    Ok(
+      self.bucket.get_object_stream(path, &mut writer).await?
+    )
   }
 }

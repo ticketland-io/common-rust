@@ -32,7 +32,7 @@ impl Minio {
     let bucket = Bucket::new(&bucket_name, region, credentials).expect("cannot init bucket");
 
     Self {
-      bucket,
+      bucket: bucket.with_path_style(),
     }
   }
 

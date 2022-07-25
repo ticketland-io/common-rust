@@ -9,7 +9,6 @@ use crate::types::Neo4jResult;
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Event {
-  pub event_organizer_uid: String,
   // TODO: Add additional fields
   pub title: String,
   pub description: String,

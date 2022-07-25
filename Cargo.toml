@@ -2,4 +2,5 @@
 members = [
   "src/common",
   "src/api-helpers",
+  "src/data",
 ]

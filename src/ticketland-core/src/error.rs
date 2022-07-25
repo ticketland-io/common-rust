@@ -16,6 +16,8 @@ pub enum Error {
   EmptyDbResult,
   #[error("S3 error")]
   S3Error(String),
+  #[error("Generic error")]
+  MultipartError(String),
 }
 
 impl ResponseError for Error {}
@@ -45,5 +47,11 @@ impl From<Failure> for Error {
 impl From<s3::error::S3Error> for Error {
   fn from(error: s3::error::S3Error) -> Self {
     Error::S3Error(format!("{:?}", error))
+  }
+}
+
+impl From<actix_multipart::MultipartError> for Error {
+  fn from(error: actix_multipart::MultipartError) -> Self {
+    Error::MultipartError(format!("{:?}", error))
   }
 }

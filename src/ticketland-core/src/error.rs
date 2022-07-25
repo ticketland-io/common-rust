@@ -18,6 +18,8 @@ pub enum Error {
   S3Error(String),
   #[error("Generic error")]
   MultipartError(String),
+  #[error("Serde serialization or deserialization error")]
+  SerdeJsonError(String),
 }
 
 impl ResponseError for Error {}
@@ -53,5 +55,11 @@ impl From<s3::error::S3Error> for Error {
 impl From<actix_multipart::MultipartError> for Error {
   fn from(error: actix_multipart::MultipartError) -> Self {
     Error::MultipartError(format!("{:?}", error))
+  }
+}
+
+impl From<serde_json::error::Error> for Error {
+  fn from(error: serde_json::error::Error) -> Self {
+    Error::SerdeJsonError(format!("{:?}", error))
   }
 }

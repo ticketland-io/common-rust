@@ -14,3 +14,9 @@ pub fn unauthorized_error() -> HttpResponse {
   .reason("401")
   .finish()
 }
+
+pub fn bad_request_error() -> HttpResponse {
+  HttpResponse::BadRequest()
+  .reason("400")
+  .finish()
+}

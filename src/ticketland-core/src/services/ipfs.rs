@@ -1,3 +1,4 @@
+use std::io::Cursor;
 use ipfs_api_backend_actix::{
   IpfsClient,
   TryFromUri, IpfsApi,
@@ -19,11 +20,12 @@ impl Ipfs {
     }
   }
 
-  pub async fn calc_cid(&self, data: &'static [u8]) -> Result<AddResponse, Error> {
+  pub async fn calc_cid(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
     let mut options = Add::default();
     options.only_hash = Some(true);
 
-    self.client.add_with_options(data,options)
+    let data = Cursor::new(data);
+    self.client.add_with_options(data, options)
     .await
     .map_err(Into::<Error>::into)
   }

@@ -10,23 +10,20 @@ use crate::error::Error;
 pub struct Pinata {
   pinata_client: Client,
   pinata_api_url: String,
-  pinata_api_key: String,
-  pinata_api_secret: String,
+  pinata_api_token: String,
 }
 
 impl Pinata {
   pub fn new(
     pinata_api_url: String,
-    pinata_api_key: String,
-    pinata_api_secret: String,
+    pinata_api_token: String,
   ) -> Self {
     let pinata_client = Client::new();
     
     Self {
       pinata_api_url,
       pinata_client,
-      pinata_api_key,
-      pinata_api_secret,
+      pinata_api_token,
     }
   }
 
@@ -44,8 +41,7 @@ impl Pinata {
     .text("pinataMetadata", format!("{{\"name\": \"{}\"}}", file_name));
 
     self.pinata_client.post(format!("{}/pinning/pinFileToIPFS", self.pinata_api_url))
-    .header("pinata_api_key", self.pinata_api_key.clone())
-    .header("pinata_secret_api_key", self.pinata_api_secret.clone())
+    .header("Authorization", format!("Bearer {}",self.pinata_api_token.clone()))
     .multipart(form)
     .send()
     .await

@@ -1,7 +1,8 @@
 use std::io::Cursor;
-use ipfs_api_backend_actix::{
+use ipfs_api_backend_hyper::{
   IpfsClient,
-  TryFromUri, IpfsApi,
+  TryFromUri,
+  IpfsApi,
   request::Add,
   response::AddResponse,
 };
@@ -25,6 +26,7 @@ impl Ipfs {
     options.only_hash = Some(true);
 
     let data = Cursor::new(data);
+
     self.client.add_with_options(data, options)
     .await
     .map_err(Into::<Error>::into)

@@ -1,6 +1,6 @@
 use actix_web::ResponseError;
 use thiserror::Error;
-use ipfs_api_backend_actix::Error as IpfsError;
+use ipfs_api_backend_hyper::Error as IpfsError;
 use bolt_proto::Message;
 use bolt_proto::message::{
   Failure,

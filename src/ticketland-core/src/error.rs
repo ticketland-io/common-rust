@@ -9,6 +9,8 @@ use bolt_proto::message::{
 
 #[derive(Error, Debug)]
 pub enum Error {
+  #[error("Generic Error")]
+  GenericError(String),
   #[error("Neo4j error")]
   Neo4jError(String),
   #[error("Actor mailbox error")]
@@ -34,6 +36,12 @@ pub fn map_bolt_result_err(result: Result<(Vec<Record>, Message), Error>) -> Res
     bolt_proto::Message::Success(_) => Ok(records),
     bolt_proto::Message::Failure(error) => Err(Error::Neo4jError(format!("{:?}", error))),
     _ => Err(Error::Neo4jError(format!("Unknown error")))
+  }
+}
+
+impl From<&str> for Error {
+  fn from(error: &str) -> Self {
+    Error::GenericError(format!("{:?}", error))
   }
 }
 

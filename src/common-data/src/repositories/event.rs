@@ -7,7 +7,7 @@ use ticketland_core::{
 pub fn read_event(event_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id: $event_id})
-    RETURN acc{.*}
+    RETURN evt{.*}
   "#;
 
   let params = create_params(vec![
@@ -34,16 +34,18 @@ pub fn read_account_events(uid: String) -> (&'static str, Option<Params>) {
 pub fn upsert_event(
   event_id: String,
   event_organizer_uid: String,
+  image_type: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
-    MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {event_id: $event_id})
+    MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {event_id: $event_id, image_type: $image_type})
     RETURN evt{.*}
   "#;
 
   let params = create_params(vec![
     ("event_organizer_uid", Value::String(event_organizer_uid)),
     ("event_id", Value::String(event_id)),
+    ("image_type", Value::String(image_type)),
   ]);
 
   (query, params)

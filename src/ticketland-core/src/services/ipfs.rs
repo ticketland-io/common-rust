@@ -31,4 +31,8 @@ impl Ipfs {
     .await
     .map_err(Into::<Error>::into)
   }
+
+  pub async fn upload() {
+    todo!()
+  }
 }

@@ -1,5 +1,6 @@
 use actix_web::ResponseError;
 use thiserror::Error;
+use ipfs_api_backend_actix::Error as IpfsError;
 use bolt_proto::Message;
 use bolt_proto::message::{
   Failure,
@@ -20,6 +21,8 @@ pub enum Error {
   MultipartError(String),
   #[error("Serde serialization or deserialization error")]
   SerdeJsonError(String),
+  #[error("Generic error")]
+  IpfsError(String),
 }
 
 impl ResponseError for Error {}
@@ -61,5 +64,11 @@ impl From<actix_multipart::MultipartError> for Error {
 impl From<serde_json::error::Error> for Error {
   fn from(error: serde_json::error::Error) -> Self {
     Error::SerdeJsonError(format!("{:?}", error))
+  }
+}
+
+impl From<IpfsError> for Error {
+  fn from(error: IpfsError) -> Self {
+    Error::IpfsError(format!("{:?}", error))
   }
 }

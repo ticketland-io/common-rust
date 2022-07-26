@@ -5,6 +5,7 @@ use s3::{
   error::S3Error,
 };
 use tokio::io::AsyncWrite;
+
 pub struct Minio {
   bucket: Bucket,
 }

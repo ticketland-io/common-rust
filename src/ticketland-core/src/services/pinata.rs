@@ -41,7 +41,7 @@ impl Pinata {
     .text("pinataMetadata", format!("{{\"name\": \"{}\"}}", file_name));
 
     self.pinata_client.post(format!("{}/pinning/pinFileToIPFS", self.pinata_api_url))
-    .header("Authorization", format!("Bearer {}",self.pinata_api_token.clone()))
+    .header("Authorization", format!("Bearer {}", self.pinata_api_token.clone()))
     .multipart(form)
     .send()
     .await

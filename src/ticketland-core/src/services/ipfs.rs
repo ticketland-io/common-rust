@@ -21,7 +21,7 @@ impl Ipfs {
     }
   }
 
-  pub async fn calc_cid(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
+  pub async fn dry_run(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
     let mut options = Add::default();
     options.only_hash = Some(true);
 

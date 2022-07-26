@@ -30,14 +30,18 @@ impl Pinata {
     }
   }
 
-  pub async fn upload<R>(&self, data_stream: ReaderStream<R>) -> Result<(), Error> 
+  pub async fn upload<R>(
+    &self,
+    file_name: &str,
+    data_stream: ReaderStream<R>
+  ) -> Result<(), Error> 
   where 
     R: AsyncRead + Send + Sync + 'static
   {
     let form = Form::new()
     .part("file", Part::stream(Body::wrap_stream(data_stream)))
     .text("pinataOptions", "{\"cidVersion\": 1}")
-    .text("pinataMetadata", "{\"name\": \"MyFile\", \"keyvalues\": {\"company\": \"Pinata\"}}");
+    .text("pinataMetadata", format!("{{\"name\": \"{}\"}}", file_name));
 
     self.pinata_client.post(format!("{}/pinning/pinFileToIPFS", self.pinata_api_url))
     .header("pinata_api_key", self.pinata_api_key.clone())

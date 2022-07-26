@@ -15,9 +15,9 @@ pub struct Ipfs {
 impl Ipfs {
   pub fn new(ipfs_server: String) -> Self {
     let client = IpfsClient::from_str(&ipfs_server).expect("cannot connect to ipfs server");
-
+    
     Self {
-      client
+      client,
     }
   }
 
@@ -30,9 +30,5 @@ impl Ipfs {
     self.client.add_with_options(data, options)
     .await
     .map_err(Into::<Error>::into)
-  }
-
-  pub async fn upload() {
-    todo!()
   }
 }

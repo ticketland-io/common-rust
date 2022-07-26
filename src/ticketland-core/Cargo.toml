@@ -12,6 +12,7 @@ actix-web = "4.0.1"
 actix-multipart = "0.4.0"
 bolt-client = { version = "0.10.1", features =["tokio-stream"] }
 bolt-proto = "0.11.0"
+futures-util = "0.3.21"
 tokio = { version = "1.14.1", features = ["full", "macros"] }
 tokio-retry = "0.3"
 tokio-util = { version = "0.7.1", features = ["compat"] }

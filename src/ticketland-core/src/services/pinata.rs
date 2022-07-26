@@ -1,0 +1,43 @@
+use reqwest::{Client, Body};
+use tokio::io::AsyncRead;
+use tokio_util::io::ReaderStream;
+use crate::error::Error;
+
+pub struct Pinata {
+  pinata_client: Client,
+  pinata_api_url: String,
+  pinata_api_key: String,
+  pinata_api_secret: String,
+}
+
+impl Pinata {
+  pub fn new(
+    pinata_api_url: String,
+    pinata_api_key: String,
+    pinata_api_secret: String,
+  ) -> Self {
+    let pinata_client = Client::new();
+    
+    Self {
+      pinata_api_url,
+      pinata_client,
+      pinata_api_key,
+      pinata_api_secret,
+    }
+  }
+
+  pub async fn upload<R>(&self, data_stream: ReaderStream<R>) -> Result<(), Error> 
+  where 
+    R: AsyncRead + Send + Sync + 'static
+  {
+    self.pinata_client.post(format!("{}/pinning/pinFileToIPFS", self.pinata_api_url))
+    .header("pinata_api_key", self.pinata_api_key.clone())
+    .header("pinata_secret_api_key", self.pinata_api_secret.clone())
+    .body(Body::wrap_stream(data_stream))
+    .send()
+    .await
+    .map_err(Into::<Error>::into)?;
+
+    Ok(())
+  }
+}

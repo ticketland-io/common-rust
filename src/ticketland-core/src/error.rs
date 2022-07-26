@@ -25,6 +25,8 @@ pub enum Error {
   SerdeJsonError(String),
   #[error("Generic error")]
   IpfsError(String),
+  #[error("Reqwest Error")]
+  ReqwestError(String),
 }
 
 impl ResponseError for Error {}
@@ -78,5 +80,11 @@ impl From<serde_json::error::Error> for Error {
 impl From<IpfsError> for Error {
   fn from(error: IpfsError) -> Self {
     Error::IpfsError(format!("{:?}", error))
+  }
+}
+
+impl From<reqwest::Error> for Error {
+  fn from(error: reqwest::Error) -> Self {
+    Error::ReqwestError(format!("{:?}", error))
   }
 }

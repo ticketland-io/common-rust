@@ -33,7 +33,7 @@ impl Pinata {
     data_stream: ReaderStream<R>
   ) -> Result<(), Error> 
   where 
-    R: AsyncRead + Send + Sync + 'static
+    R: 'static + AsyncRead + Send + Sync
   {
     let form = Form::new()
     .part("file", Part::stream(Body::wrap_stream(data_stream)))

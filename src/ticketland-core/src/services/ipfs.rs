@@ -6,7 +6,7 @@ use ipfs_api_backend_hyper::{
   request::Add,
   response::AddResponse,
 };
-use tokio::io::{AsyncRead, AsyncWrite, BufStream};
+use tokio::io::{AsyncRead};
 use tokio_util::compat::*;
 use crate::error::Error;
 
@@ -34,14 +34,11 @@ impl Ipfs {
     .map_err(Into::<Error>::into)
   }
 
-  pub async fn upload_stream<R>(&self, data_read: R) -> Result<AddResponse, Error> 
+  pub async fn upload_stream<R>(&self, async_reader: R) -> Result<AddResponse, Error> 
   where 
-    R: 'static + AsyncRead + AsyncWrite + Send + Sync + Unpin,
+    R: 'static + AsyncRead + Send + Sync + Unpin,
   {
-    // We need to use Compat because `add_async` expects AsyncRead from the futures crate
-    let data_stream = BufStream::new(data_read).compat();
-
-    self.client.add_async(data_stream)
+    self.client.add_async(async_reader.compat())
     .await
     .map_err(Into::<Error>::into)
   }

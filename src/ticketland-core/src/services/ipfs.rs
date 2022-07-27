@@ -34,7 +34,7 @@ impl Ipfs {
     .map_err(Into::<Error>::into)
   }
 
-  pub async fn upload<R>(&self, data_read: R) -> Result<AddResponse, Error> 
+  pub async fn upload_stream<R>(&self, data_read: R) -> Result<AddResponse, Error> 
   where 
     R: 'static + AsyncRead + AsyncWrite + Send + Sync + Unpin,
   {

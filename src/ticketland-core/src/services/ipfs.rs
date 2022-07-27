@@ -31,4 +31,10 @@ impl Ipfs {
     .await
     .map_err(Into::<Error>::into)
   }
+
+  pub async fn upload(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
+    self.client.add(Cursor::new(data))
+    .await
+    .map_err(Into::<Error>::into)
+  }
 }

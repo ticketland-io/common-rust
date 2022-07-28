@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use s3::{
   bucket::Bucket,
   creds::Credentials,
@@ -50,7 +51,7 @@ impl Minio {
   }
 
   pub async fn get_object_stream<T: AsyncWrite + Send + Unpin, S: AsRef<str>>(
-    &self,
+    self: Arc<Self>,
     path: S,
     mut writer: &mut T
   ) -> Result<u16, S3Error> {

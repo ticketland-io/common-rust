@@ -2,6 +2,7 @@ use std::{
   sync::{Arc, RwLock},
   future::Future,
   pin::Pin,
+  io::{Error, ErrorKind},
   ops::DerefMut,
 };
 use tokio::io::{duplex, DuplexStream};
@@ -14,7 +15,6 @@ use bytes::Bytes;
 use s3::error::S3Error;
 use crate::{
   services::minio::Minio,
-  error::Error,
 };
 
 type ObjectStream = Pin<Box<dyn Future<Output = Result<u16, S3Error>>>>;
@@ -43,13 +43,13 @@ impl S3ReadStream {
 }
 
 impl Stream for S3ReadStream {
-  type Item = anyhow::Result<Bytes>;
+  type Item = Result<Bytes, Error>;
 
   fn poll_next(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
     let slf = DerefMut::deref_mut(&mut self);
     
     match Pin::new(&mut slf.stream_reader).poll_next(ctx) {
-      Poll::Ready(Some(Err(error))) => return Poll::Ready(Some(Err(error.into()))),
+      Poll::Ready(Some(Err(error))) => return Poll::Ready(Some(Err(error))),
       Poll::Ready(Some(Ok(data))) => return Poll::Ready(Some(Ok(data))),
       Poll::Ready(None) => return Poll::Ready(None),
       // do nothing so we can move to the next part of the code
@@ -62,7 +62,7 @@ impl Stream for S3ReadStream {
       Poll::Ready(status_code) => {
         match status_code {
           Ok(_) => return Poll::Ready(Some(Ok(Bytes::default()))),
-          Err(error) => return Poll::Ready(Some(Err(Error::StreamError(error.to_string()).into()))),
+          Err(error) => return Poll::Ready(Some(Err(Error::new(ErrorKind::Other, error.to_string())))),
         }
         
       },

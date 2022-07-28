@@ -20,14 +20,14 @@ use crate::{
 
 type ObjectStream = Pin<Box<dyn Future<Output = Result<u16, S3Error>>>>;
 
-pub struct S3ReadStream {
+pub struct S3Stream {
   stream_reader: ReaderStream<DuplexStream>,
   get_object_stream: ObjectStream,
 }
 
 /// The `max_buf_size` argument is the maximum amount of bytes that can be
 /// written to a side before the write returns `Poll::Pending`.
-impl S3ReadStream {
+impl S3Stream {
   pub fn new(
     file_path: String,
     max_buf_size: usize,
@@ -43,7 +43,7 @@ impl S3ReadStream {
   }
 }
 
-impl Stream for S3ReadStream {
+impl Stream for S3Stream {
   type Item = Result<Bytes, Error>;
 
   fn poll_next(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -78,7 +78,7 @@ impl Stream for S3ReadStream {
   }
 }
 
-impl AsyncRead for S3ReadStream {
+impl AsyncRead for S3Stream {
   fn poll_read(
     mut self: Pin<&mut Self>,
     ctx: &mut Context<'_>,

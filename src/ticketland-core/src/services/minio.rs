@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use s3::{
   bucket::Bucket,
   creds::Credentials,
@@ -53,10 +53,12 @@ impl Minio {
   pub async fn get_object_stream<T: AsyncWrite + Send + Unpin, S: AsRef<str>>(
     self: Arc<Self>,
     path: S,
-    mut writer: &mut T
+    writer: Arc<RwLock<T>>,
   ) -> Result<u16, S3Error> {
+    let mut writer = writer.write().unwrap();
+
     Ok(
-      self.bucket.get_object_stream(path, &mut writer).await?
+      self.bucket.get_object_stream(path, &mut *writer).await?
     )
   }
 }

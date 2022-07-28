@@ -8,6 +8,7 @@ use std::{
 use tokio::io::{duplex, DuplexStream};
 use tokio_util::io::ReaderStream;
 use futures::{
+  io::{AsyncRead},
   stream::Stream,
   task::{Poll, Context},
 };
@@ -74,5 +75,30 @@ impl Stream for S3ReadStream {
         return Poll::Pending
       }
     }
+  }
+}
+
+impl AsyncRead for S3ReadStream {
+  fn poll_read(
+    mut self: Pin<&mut Self>,
+    ctx: &mut Context<'_>,
+    buf: &mut [u8],
+  ) -> Poll<futures::io::Result<usize>> {
+    let slf = DerefMut::deref_mut(&mut self);
+
+    match Pin::new(&mut slf.stream_reader).poll_next(ctx) {
+      Poll::Ready(Some(Err(error))) => return Poll::Ready(Err(error)),
+      Poll::Ready(Some(Ok(data))) => {
+        let len = data.len();
+        data.into_iter().collect::<Vec<u8>>().append(&mut buf.to_vec());
+
+        return Poll::Ready(Ok(len))
+      },
+      Poll::Ready(None) => return Poll::Ready(Ok(0)),
+      // do nothing so we can move to the next part of the code
+      Poll::Pending => {}, 
+    };
+
+    todo!()
   }
 }

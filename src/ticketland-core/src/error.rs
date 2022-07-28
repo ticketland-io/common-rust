@@ -27,6 +27,8 @@ pub enum Error {
   IpfsError(String),
   #[error("Reqwest Error")]
   ReqwestError(String),
+  #[error("Reqwest Error")]
+  StreamError(String)
 }
 
 impl ResponseError for Error {}

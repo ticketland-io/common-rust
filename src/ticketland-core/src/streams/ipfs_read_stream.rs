@@ -48,8 +48,7 @@ impl Stream for IpfsReadStream {
     let slf = std::ops::DerefMut::deref_mut(&mut self);
     
     match Pin::new(&mut slf.stream_reader).poll_next(ctx) {
-      // TODO: use a more specific error
-      Poll::Ready(Some(Err(_))) => return Poll::Ready(Some(Err(Error::GenericError("error".to_owned())))),
+      Poll::Ready(Some(Err(error))) => return Poll::Ready(Some(Err(Error::StreamError(error.to_string())))),
       Poll::Ready(Some(Ok(data))) => return Poll::Ready(Some(Ok(data))),
       Poll::Ready(None) => return Poll::Ready(None),
       // do nothing so we can move to the next part of the code

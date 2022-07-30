@@ -38,7 +38,8 @@ impl Ipfs {
   }
 
   pub async fn upload(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
-    let fut = self.client.add(Cursor::new(data));
+    let data = Cursor::new(data);
+    let fut = self.client.add(data);
     
     fut
     .await

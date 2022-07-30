@@ -26,7 +26,7 @@ pub struct S3Stream {
 }
 
 unsafe impl Send for S3Stream {}
-unsafe impl Send for S3Stream {}
+unsafe impl Sync for S3Stream {}
 
 /// The `max_buf_size` argument is the maximum amount of bytes that can be
 /// written to a side before the write returns `Poll::Pending`.

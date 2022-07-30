@@ -10,9 +10,6 @@ use tokio::io::{AsyncRead};
 use tokio_util::compat::*;
 use crate::error::Error;
 
-unsafe impl Send for Ipfs {}
-unsafe impl Sync for Ipfs {}
-
 pub struct Ipfs {
   client: IpfsClient,
 }
@@ -38,10 +35,7 @@ impl Ipfs {
   }
 
   pub async fn upload(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
-    let data = Cursor::new(data);
-    let fut = self.client.add(data);
-    
-    fut
+    self.client.add(Cursor::new(data))
     .await
     .map_err(Into::<Error>::into)
   }

@@ -7,6 +7,9 @@ use s3::{
 };
 use tokio::io::AsyncWrite;
 
+unsafe impl Send for Minio {}
+unsafe impl Sync for Minio {}
+
 pub struct Minio {
   bucket: Bucket,
 }

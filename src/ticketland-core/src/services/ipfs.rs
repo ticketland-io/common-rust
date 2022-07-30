@@ -10,6 +10,9 @@ use tokio::io::{AsyncRead};
 use tokio_util::compat::*;
 use crate::error::Error;
 
+unsafe impl Send for Ipfs {}
+unsafe impl Sync for Ipfs {}
+
 pub struct Ipfs {
   client: IpfsClient,
 }

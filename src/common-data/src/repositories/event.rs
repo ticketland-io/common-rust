@@ -41,7 +41,9 @@ pub fn upsert_event(
     MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {
       event_id:$event_id,
       image_type:$image_type,
-      metadata_cid:$metadata_cid
+      metadata_cid:$metadata_cid,
+      metadata_uploaded: false,
+      image_uploaded: false
     })
     RETURN evt{.*}
   "#;
@@ -51,6 +53,34 @@ pub fn upsert_event(
     ("event_id", Value::String(event_id)),
     ("image_type", Value::String(image_type)),
     ("metadata_cid", Value::String(metadata_cid)),
+  ]);
+
+  (query, params)
+}
+
+pub fn update_metadata_uploaded(event_id: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {event_id:$event_id})
+    SET evt.metadata_uploaded = true
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}
+
+pub fn update_image_uploaded(event_id: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {event_id:$event_id})
+    SET evt.image_uploaded = true
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
   ]);
 
   (query, params)

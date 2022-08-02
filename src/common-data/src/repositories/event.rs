@@ -33,14 +33,14 @@ pub fn read_account_events(uid: String) -> (&'static str, Option<Params>) {
 pub fn upsert_event(
   event_id: String,
   event_organizer_uid: String,
-  image_type: String,
+  file_type: String,
   metadata_cid: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
     MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {
       event_id:$event_id,
-      image_type:$image_type,
+      file_type:$file_type,
       metadata_cid:$metadata_cid,
       metadata_uploaded: false,
       image_uploaded: false
@@ -51,7 +51,7 @@ pub fn upsert_event(
   let params = create_params(vec![
     ("event_organizer_uid", Value::String(event_organizer_uid)),
     ("event_id", Value::String(event_id)),
-    ("image_type", Value::String(image_type)),
+    ("file_type", Value::String(file_type)),
     ("metadata_cid", Value::String(metadata_cid)),
   ]);
 

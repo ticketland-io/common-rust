@@ -35,7 +35,7 @@ impl TryFrom<Neo4jResult> for Event {
 
         for (k, v) in map {
           match k.as_str() {
-            "title" => {
+            "event_id" => {
               event.event_id = String::try_from(v).expect("cannot convert title");
             },
             "file_type" => {

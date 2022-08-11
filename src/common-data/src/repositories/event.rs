@@ -4,6 +4,24 @@ use ticketland_core::{
   actor::neo4j::{create_params}
 };
 
+pub fn read_events(skip: u32, limit: u32) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event)
+    RETURN evt{.*}
+    ORDER BY evt.created_at DESC
+    SKIP $skip
+    LIMIT $limit
+  "#;
+
+  let skip = skip * limit;
+  let params = create_params(vec![
+    ("skip", Value::Integer((skip as i32).into())),
+    ("limit", Value::Integer((limit as i32).into())),
+  ]);
+
+  (query, params)
+}
+
 pub fn read_event(event_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id: $event_id})
@@ -35,6 +53,7 @@ pub fn upsert_event(
   event_organizer_uid: String,
   file_type: String,
   metadata_cid: String,
+  created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
@@ -43,7 +62,8 @@ pub fn upsert_event(
       file_type:$file_type,
       metadata_cid:$metadata_cid,
       metadata_uploaded: false,
-      image_uploaded: false
+      image_uploaded: false,
+      createAt:$created_at
     })
     RETURN evt{.*}
   "#;
@@ -53,6 +73,7 @@ pub fn upsert_event(
     ("event_id", Value::String(event_id)),
     ("file_type", Value::String(file_type)),
     ("metadata_cid", Value::String(metadata_cid)),
+    ("created_at", Value::Integer(created_at.into())),
   ]);
 
   (query, params)

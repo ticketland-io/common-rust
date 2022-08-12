@@ -63,7 +63,7 @@ pub fn upsert_event(
       metadata_cid:$metadata_cid,
       metadata_uploaded: false,
       image_uploaded: false,
-      createAt:$created_at
+      created_at:$created_at
     })
     RETURN evt{.*}
   "#;

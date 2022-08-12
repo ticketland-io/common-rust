@@ -10,6 +10,7 @@ use crate::types::Neo4jResult;
 #[derive(Serialize, Deserialize, Default)]
 pub struct Event {
   pub event_id: String,
+  pub created_at: i64,
   pub file_type: String,
   pub metadata_cid: String,
   pub metadata_uploaded: bool,
@@ -37,6 +38,9 @@ impl TryFrom<Neo4jResult> for Event {
           match k.as_str() {
             "event_id" => {
               event.event_id = String::try_from(v).expect("cannot convert title");
+            },
+            "created_at" => {
+              event.created_at = i64::try_from(v).expect("cannot convert created_at");
             },
             "file_type" => {
               event.file_type = String::try_from(v).expect("cannot convert file_type");

@@ -106,3 +106,32 @@ pub fn update_image_uploaded(event_id: String) -> (&'static str, Option<Params>)
 
   (query, params)
 }
+
+pub fn create_user_ticket(
+  uid: String,
+  event_id: String,
+  seat_index: u32,
+  seat_name: String,
+  created_at: i64,
+) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {event_id:$event_id})
+    MATCH (acc:Account {uid: $uid})
+    MERGE (acc)->[:HAS_TICKET]-(t:Ticket {
+      seat_index:$seat_index,
+      seat_name:$seat_name,
+      created_at:$created_at
+    })-[:FROM]->(evt)
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("uid", Value::String(uid)),
+    ("event_id", Value::String(event_id)),
+    ("seat_index", Value::Integer(seat_index.into())),
+    ("seat_name", Value::String(seat_name)),
+    ("created_at", Value::Integer(created_at.into())),
+  ]);
+
+  (query, params)
+}

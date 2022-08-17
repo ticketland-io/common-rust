@@ -118,7 +118,7 @@ pub fn create_user_ticket(
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})
     MATCH (acc:Account {uid: $uid})
-    MERGE (acc)->[:HAS_TICKET]-(t:Ticket {
+    MERGE (acc)-[:HAS_TICKET]->(t:Ticket {
       ticket_nft:$ticket_nft,
       seat_index:$seat_index,
       seat_name:$seat_name,

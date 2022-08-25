@@ -15,19 +15,19 @@ use super::http::internal_server_error;
 
 #[macro_export]
 macro_rules! QueryString {
-	(#[derive($($derive:meta),*)] $pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
-		#[derive($($derive),*)]
-		$pub struct $name {
-			pub skip: Option<u32>,
-			pub limit: Option<u32>,
-			$($fpub $field : $type,)*
-		}
+  ($pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
+		#[derive(Deserialize, Debug, Clone)]
+    $pub struct $name {
+      pub skip: Option<u32>,
+      pub limit: Option<u32>,
+      $($fpub $field : $type,)*
+    }
 
-		impl QueryStringTrait for $name {
-			fn skip(&self) -> Option<u32> { self.skip }
-			fn limit(&self) -> Option<u32> { self.limit }
-		}
-	}
+    impl QueryStringTrait for $name {
+      fn skip(&self) -> Option<u32> { self.skip }
+      fn limit(&self) -> Option<u32> { self.limit }
+    }
+  }
 }
 
 pub trait QueryStringTrait {
@@ -36,7 +36,6 @@ pub trait QueryStringTrait {
 }
 
 QueryString! {
-  #[derive(Deserialize)]
   pub struct QueryString {}
 }
 

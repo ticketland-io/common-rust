@@ -55,6 +55,28 @@ pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> 
   (query, params)
 }
 
+pub fn read_buy_listings_for_event(event_id: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (bl:BuyListing)-[:FOR_TICKET_OF]->(evt:Event {event_id:$event_id})
+    RETURN bl{
+      .*,
+      metadata_cid: evt.metadata_cid
+    } as result
+    ORDER BY result.created_at DESC
+    SKIP $skip
+    LIMIT $limit
+  "#;
+
+  let skip = skip * limit;
+  let params = create_params(vec![
+    ("skip", Value::Integer((skip as i32).into())),
+    ("limit", Value::Integer((limit as i32).into())),
+    ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}
+
 pub fn create_buy_listing(
   uid: String,
   event_id: String,

@@ -38,3 +38,25 @@ pub fn create_user_ticket(
 
   (query, params)
 }
+
+
+pub fn read_user_tickets_for_event(
+  uid: String,
+  event_id: String,
+  skip: u32,
+  limit: u32,
+) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (acc:Account {uid: $uid})-[:HAS_TICKET {owner: true}]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
+  "#;
+
+  let skip = skip * limit;
+  let params = create_params(vec![
+    ("uid", Value::String(uid)),
+    ("event_id", Value::String(event_id)),
+    ("skip", Value::Integer((skip as i32).into())),
+    ("limit", Value::Integer((limit as i32).into())),
+  ]);
+
+  (query, params)
+}

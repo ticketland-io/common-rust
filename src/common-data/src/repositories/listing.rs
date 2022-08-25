@@ -8,7 +8,7 @@ pub fn create_sell_listing(
   uid: String,
   ticket_metadata: String,
   sell_listing_account: String,
-  ask_price: u64,
+  ask_price: i64,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -37,7 +37,7 @@ pub fn create_buy_listing(
   uid: String,
   event_id: String,
   buy_listing_account: String,
-  bid_price: u64,
+  bid_price: i64,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"

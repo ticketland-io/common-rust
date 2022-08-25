@@ -50,7 +50,7 @@ pub struct Neo4jBaseResponse {
   pub result: Neo4jResult,
 }
 
-pub type DbQueryBuilder = Box<dyn Fn() -> (&'static str, Option<Params>)>;
+pub type DbQueryBuilder = Box<dyn FnOnce() -> (&'static str, Option<Params>)>;
 
 pub async fn exec_basic_db_read_endpoint(
   neo4j: Arc<Addr<Neo4jActor>>,

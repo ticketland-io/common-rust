@@ -13,29 +13,32 @@ use common_data::{
 };
 use super::http::internal_server_error;
 
-/// Example `impl_query_string!(QueryString);`
 #[macro_export]
-macro_rules! impl_query_string {
-  ($ty:ident) => {
-    impl QueryStringTrait for $ty {
-      fn skip(&self) -> Option<u32> { self.skip }
-      fn limit(&self) -> Option<u32> { self.limit }
-    }
-  }
+macro_rules! QueryString {
+	(#[derive($($derive:meta),*)] $pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
+		#[derive($($derive),*)]
+		$pub struct $name {
+			pub skip: Option<u32>,
+			pub limit: Option<u32>,
+			$($fpub $field : $type,)*
+		}
+
+		impl QueryStringTrait for $name {
+			fn skip(&self) -> Option<u32> { self.skip }
+			fn limit(&self) -> Option<u32> { self.limit }
+		}
+	}
 }
 
 pub trait QueryStringTrait {
-  fn skip(&self) -> Option<u32>;
-  fn limit(&self) -> Option<u32>;
+	fn skip(&self) -> Option<u32>;
+	fn limit(&self) -> Option<u32>;
 }
 
-#[derive(Deserialize, Default)]
-pub struct QueryString {
-  pub skip: Option<u32>,
-  pub limit: Option<u32>
+QueryString! {
+  #[derive(Deserialize)]
+  pub struct QueryString {}
 }
-
-impl_query_string!(QueryString);
 
 #[derive(Serialize)]
 pub struct BaseResponse {

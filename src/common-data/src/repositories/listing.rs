@@ -133,3 +133,22 @@ pub fn cancel_sell_listing(
 
   (query, params)
 }
+
+pub fn cancel_buy_listing(
+  ticket_buyer_uid: String,
+  buy_listing_account: String,
+) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (ticket_buyer:Account {uid: $ticket_buyer_uid})
+    MATCH (ticket_buyer)-[hbl:HAS_BUY_LISTING {open: true}]->(sl:BuyListing {account:$buy_listing_account})
+    SET hbl.open = false
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("ticket_buyer_uid", Value::String(ticket_buyer_uid)),
+    ("buy_listing_account", Value::String(buy_listing_account)),
+  ]);
+
+  (query, params)
+}

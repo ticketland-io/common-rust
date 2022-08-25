@@ -16,7 +16,7 @@ use super::http::internal_server_error;
 #[macro_export]
 macro_rules! QueryString {
   ($pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
-		#[derive(Deserialize, Debug, Clone)]
+		#[derive(Deserialize,Debug, Clone)]
     $pub struct $name {
       pub skip: Option<u32>,
       pub limit: Option<u32>,

@@ -65,24 +65,49 @@ pub fn create_buy_listing(
 // this will close the sell listing and will create a new rel that indicates the new owner of the ticket
 // while invalidating the old owner. This way we can maintain the provenance of the ticket as well
 pub fn fill_sell_listing(
-  uid: String,
+  ticket_buyer_uid: String,
   sell_listing_account: String,
   ticket_metadata: String,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (acc:Account {uid: $uid})
-    MATCH (acc)-[hsl:HAS_SELL_LISTING {open: true}]->(sl:SellListing {sell_listing_account:sell_listing_account})
+    MATCH (ticket_buyer:Account {uid: $ticket_buyer_uid})
+    MATCH (ticket_buyer)-[hsl:HAS_SELL_LISTING {open: true}]->(sl:SellListing {sell_listing_account:$sell_listing_account})
     MATCH (:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
     SET hsl.open = false
     SET ht.owner = false
-    CREATE (acc)-[ht:HAS_TICKET {owner: true, created_at:$created_at}]->(t)
+    CREATE (ticket_buyer)-[:HAS_TICKET {owner: true, created_at:$created_at}]->(t)
     RETURN 1
   "#;
 
   let params = create_params(vec![
-    ("uid", Value::String(uid)),
+    ("ticket_buyer_uid", Value::String(ticket_buyer_uid)),
     ("sell_listing_account", Value::String(sell_listing_account)),
+    ("ticket_metadata", Value::String(ticket_metadata)),
+    ("created_at", Value::Integer(created_at.into())),
+  ]);
+
+  (query, params)
+}
+
+pub fn fill_buy_listing(
+  ticket_seller_uid: String,
+  buy_listing_account: String,
+  ticket_metadata: String,
+  created_at: i64,
+) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (ticket_seller:Account {uid: $ticket_seller_uid})-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (ticket_buyer:Account)-[hbl:HAS_BUY_LISTING {open: true}]->(bl:BuyListing {buy_listing_account:$buy_listing_account})
+    SET hbl.open = false
+    SET ht.owner = false
+    CREATE (ticket_buyer)-[ht:HAS_TICKET {owner: true, created_at:$created_at}]->(t)
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("ticket_seller_uid", Value::String(ticket_seller_uid)),
+    ("buy_listing_account", Value::String(buy_listing_account)),
     ("ticket_metadata", Value::String(ticket_metadata)),
     ("created_at", Value::Integer(created_at.into())),
   ]);

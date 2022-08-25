@@ -68,8 +68,6 @@ pub fn fill_sell_listing(
   uid: String,
   sell_listing_account: String,
   ticket_metadata: String,
-  event_id: String,
-  bid_price: u64,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -78,7 +76,16 @@ pub fn fill_sell_listing(
     MATCH (:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
     SET hsl.open = false
     SET ht.owner = false
-    CREATE (acc)-[ht:HAS_TICKET {owner: true}]->(t)
+    CREATE (acc)-[ht:HAS_TICKET {owner: true, created_at:$created_at}]->(t)
     RETURN 1
   "#;
+
+  let params = create_params(vec![
+    ("uid", Value::String(uid)),
+    ("sell_listing_account", Value::String(sell_listing_account)),
+    ("ticket_metadata", Value::String(ticket_metadata)),
+    ("created_at", Value::Integer(created_at.into())),
+  ]);
+
+  (query, params)
 }

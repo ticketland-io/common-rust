@@ -48,7 +48,10 @@ pub fn read_user_tickets_for_event(
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $uid})-[:HAS_TICKET {owner: true}]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
-    RETURN t{.*}
+    RETURN t{
+      .*,
+      metadata_cid: evt.metadata_cid
+    }
   "#;
 
   let skip = skip * limit;

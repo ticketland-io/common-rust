@@ -119,8 +119,8 @@ pub fn fill_sell_listing(
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (ticket_buyer:Account {uid: $ticket_buyer_uid})
-    MATCH (ticket_buyer)-[hsl:HAS_SELL_LISTING {open: true}]->(sl:SellListing {account:$sell_listing_account})
-    MATCH (:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (ticket_seller:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (ticket_seller)-[hsl:HAS_SELL_LISTING {open: true}]->(sl:SellListing {account:$sell_listing_account})
     SET hsl.open = false
     SET ht.owner = false
     CREATE (ticket_buyer)-[:HAS_TICKET {owner: true, created_at:$created_at}]->(t)

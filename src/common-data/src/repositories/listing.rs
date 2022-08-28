@@ -39,6 +39,7 @@ pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> 
     RETURN sl{
       .*,
       metadata_cid: evt.metadata_cid,
+      ticket_metadata: t.ticket_metadata,
       seat_index: t.seat_index,
       seat_name: t.seat_name
     } as result

@@ -38,7 +38,9 @@ pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> 
     MATCH (sl:SellListing)-[:FOR]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
     RETURN sl{
       .*,
-      metadata_cid: evt.metadata_cid
+      metadata_cid: evt.metadata_cid,
+      seat_index: t.seat_index,
+      seat_name: t.seat_name
     } as result
     ORDER BY result.created_at DESC
     SKIP $skip

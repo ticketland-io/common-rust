@@ -35,7 +35,7 @@ pub fn create_sell_listing(
 
 pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (sl:SellListing)-[:FOR]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
+    MATCH (:Account)-[:HAS_SELL_LISTING {open: true}]->(sl:SellListing)-[:FOR]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
     RETURN sl{
       .*,
       metadata_cid: evt.metadata_cid,
@@ -60,7 +60,7 @@ pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> 
 
 pub fn read_buy_listings_for_event(event_id: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (bl:BuyListing)-[:FOR_TICKET_OF]->(evt:Event {event_id:$event_id})
+    MATCH (:Account)-[:HAS_BUY_LISTING {open: true}]->(bl:BuyListing)-[:FOR_TICKET_OF]->(evt:Event {event_id:$event_id})
     RETURN bl{
       .*,
       metadata_cid: evt.metadata_cid
@@ -90,7 +90,7 @@ pub fn create_buy_listing(
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})
     MATCH (acc:Account {uid: $uid})
-    MERGE (acc)-[:HAS_BUY_LISTING]->(bl:BuyListing {
+    MERGE (acc)-[:HAS_BUY_LISTING {open: true}]->(bl:BuyListing {
       account:$buy_listing_account,
       bid_price:$bid_price,
       created_at:$created_at

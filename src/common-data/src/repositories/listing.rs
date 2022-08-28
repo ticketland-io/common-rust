@@ -15,7 +15,7 @@ pub fn create_sell_listing(
     MATCH (acc:Account {uid: $uid})
     MATCH (t:Ticket {ticket_metadata:$ticket_metadata})
     MERGE (acc)-[:HAS_SELL_LISTING {open: true}]->(sl:SellListing {
-      account:sell_listing_account,
+      account:$sell_listing_account,
       ask_price:$ask_price,
       created_at:$created_at
     })-[:FOR]->(t)

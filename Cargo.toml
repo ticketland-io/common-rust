@@ -3,4 +3,5 @@ members = [
   "src/ticketland-core",
   "src/api-helpers",
   "src/common-data",
+  "src/utils",
 ]

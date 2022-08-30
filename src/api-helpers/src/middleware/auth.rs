@@ -11,11 +11,8 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use fireauth::{
-  api::User,
-};
 use crate::{
-  auth::firebase_auth::FirebaseAuth,
+  auth::firebase_auth::{User, FirebaseAuth},
 };
 
 #[derive(Debug, Clone)]

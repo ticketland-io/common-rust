@@ -1,8 +1,9 @@
 use fireauth::{
   FireAuth,
-  api::User,
   Error,
 };
+
+pub use fireauth::api::User;
 
 pub struct FirebaseAuth {
   pub firebase_auth: FireAuth,
@@ -15,7 +16,7 @@ impl FirebaseAuth {
     }
   }
 
-  pub async fn get_user_info(&self, id_token: &str) -> Result<User, Error> {
+  pub async fn get_user_info(&self, id_token: &str) -> Result<fireauth::api::User, Error> {
     return self.firebase_auth.get_user_info(id_token).await
   }
 }

@@ -23,7 +23,7 @@ impl Logger for ConsoleLogger {
 }
 
 lazy_static! {
-  pub static ref LOGGER: Arc<ConsoleLogger> = Arc::new(
+  pub static ref LOGGER: Arc<dyn Logger + Send + Sync + 'static> = Arc::new(
     ConsoleLogger {}
   );
 }

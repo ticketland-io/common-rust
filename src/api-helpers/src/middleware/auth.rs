@@ -12,8 +12,10 @@ use actix_web::{
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
 use fireauth::{
-  FireAuth,
   api::User,
+};
+use crate::{
+  auth::firebase_auth::FirebaseAuth,
 };
 
 #[derive(Debug, Clone)]
@@ -35,13 +37,13 @@ impl FromRequest for AuthData {
 }
 
 pub struct AuthnMiddlewareFactory {
-  firebase_auth: Rc<FireAuth>,
+  firebase_auth: Rc<FirebaseAuth>,
 }
 
 impl AuthnMiddlewareFactory {
   pub fn new(firebase_auth_key: String) -> Self {
     let firebase_auth = Rc::new(
-      fireauth::FireAuth::new(firebase_auth_key.clone())
+      FirebaseAuth::new(firebase_auth_key.clone())
     );
 
     Self {firebase_auth}
@@ -70,7 +72,7 @@ where
 
 pub struct AuthnMiddleware<S> {
   service: Rc<S>,
-  firebase_auth: Rc<FireAuth>,
+  firebase_auth: Rc<FirebaseAuth>,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthnMiddleware<S>

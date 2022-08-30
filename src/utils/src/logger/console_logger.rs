@@ -1,6 +1,8 @@
+use std::sync::Arc;
+use lazy_static::lazy_static;
 use super::interface::Logger;
 
-struct ConsoleLogger;
+pub struct ConsoleLogger;
 
 impl Logger for ConsoleLogger {
   fn error(&self, message: &str) {
@@ -18,4 +20,10 @@ impl Logger for ConsoleLogger {
   fn debug(&self, message: &str) {
     println!("[Debug]: {}", message);
   }
+}
+
+lazy_static! {
+  pub static ref LOGGER: Arc<ConsoleLogger> = Arc::new(
+    ConsoleLogger {}
+  );
 }

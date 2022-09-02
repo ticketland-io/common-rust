@@ -11,6 +11,7 @@ use crate::types::Neo4jResult;
 pub struct Account {
   pub uid: String,
   pub mnemonic: String,
+  pub pubkey: String,
 }
 
 impl TryFrom<Neo4jResult> for Account {
@@ -33,10 +34,13 @@ impl TryFrom<Neo4jResult> for Account {
         for (k, v) in map {
           match k.as_str() {
             "uid" => {
-              account.uid = String::try_from(v).expect("cannot convert value to staking_token");
+              account.uid = String::try_from(v).expect("cannot convert uuid");
             },
             "mnemonic" => {
-              account.mnemonic = String::try_from(v).expect("cannot convert value to staking_token");
+              account.mnemonic = String::try_from(v).expect("cannot convert mnemonic");
+            },
+            "pubkey" => {
+              account.pubkey = String::try_from(v).expect("cannot convert pubkey");
             },
             _ => panic!("unknown field"),
           }

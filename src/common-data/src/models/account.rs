@@ -34,7 +34,7 @@ impl TryFrom<Neo4jResult> for Account {
         for (k, v) in map {
           match k.as_str() {
             "uid" => {
-              account.uid = String::try_from(v).expect("cannot convert uuid");
+              account.uid = String::try_from(v).expect("cannot convert uid");
             },
             "mnemonic" => {
               account.mnemonic = String::try_from(v).expect("cannot convert mnemonic");

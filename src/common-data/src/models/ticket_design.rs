@@ -8,11 +8,13 @@ use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
 
 #[derive(Serialize, Deserialize, Default)]
-pub struct CanvaAccount {
-  pub canva_uid: String,
+pub struct TicketDesign {
+  pub design_id: String,
+  pub url: String,
+  pub created_at: String,
 }
 
-impl TryFrom<Neo4jResult> for CanvaAccount {
+impl TryFrom<Neo4jResult> for TicketDesign {
   type Error = Error;
 
   fn try_from(v: Neo4jResult) -> Result<Self, Self::Error> {
@@ -25,14 +27,20 @@ impl TryFrom<Neo4jResult> for CanvaAccount {
     let account = match value {
       Value::Map(_) => {
         let map = HashMap::<String, Value>::try_from(value).expect("cannot convert value to map");
-        let mut account = CanvaAccount {
+        let mut account = TicketDesign {
           ..Default::default()
         };
 
         for (k, v) in map {
           match k.as_str() {
-            "canva_uid" => {
-              account.canva_uid = String::try_from(v).expect("cannot convert canva uid");
+            "design_id" => {
+              account.design_id = String::try_from(v).expect("cannot convert design_id");
+            },
+            "url" => {
+              account.url = String::try_from(v).expect("cannot convert url");
+            },
+            "created_at" => {
+              account.created_at = String::try_from(v).expect("cannot convert created_at");
             },
             _ => panic!("unknown field"),
           }

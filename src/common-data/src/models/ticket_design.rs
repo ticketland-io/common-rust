@@ -13,7 +13,7 @@ pub struct TicketDesign {
   pub url: String,
   pub name: String,
   pub file_type: String,
-  pub created_at: String,
+  pub created_at: i64,
 }
 
 impl TryFrom<Neo4jResult> for TicketDesign {
@@ -48,7 +48,7 @@ impl TryFrom<Neo4jResult> for TicketDesign {
               account.file_type = String::try_from(v).expect("cannot convert file_type");
             },
             "created_at" => {
-              account.created_at = String::try_from(v).expect("cannot convert created_at");
+              account.created_at = i64::try_from(v).expect("cannot convert created_at");
             },
             _ => panic!("unknown field"),
           }

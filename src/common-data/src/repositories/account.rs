@@ -49,3 +49,16 @@ pub fn create_canva_user(uid: String, canva_uid: String) -> (&'static str, Optio
 
   (query, params)
 }
+
+pub fn read_account_by_canva_id(canva_uid: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (acc:Account)-[:IS_CANVA_USER]->(cu:CanvaUser {canva_uid: $canva_uid})
+    RETURN acc{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("canva_uid", Value::String(canva_uid)),
+  ]);
+
+  (query, params)
+}

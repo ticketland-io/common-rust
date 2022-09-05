@@ -38,7 +38,8 @@ pub fn upsert_account(uid: String, mnemonic: String, pubkey: String) -> (&'stati
 
 pub fn create_canva_user(uid: String, canva_uid: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    CREATE (acc:Account {uid: $uid})-[:IS_CANVA_USER]->(cu:CanvaUser {canva_uid: $canva_uid})
+    MATCH (acc:Account {uid: $uid})
+    MERGE (acc)-[:IS_CANVA_USER]->(cu:CanvaUser {canva_uid: $canva_uid})
     RETURN cu{.*}
   "#;
 

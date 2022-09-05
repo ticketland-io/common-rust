@@ -21,13 +21,15 @@ pub fn upsert_ticket_design(
   uid: String,
   design_id: String,
   url: String,
+  created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $uid})
     MERGE (td:TicketDesign {design_id: $design_id})
     MERGE (acc)-[:DESIGNED]->(td)
     ON CREATE SET td += {
-      url:$url
+      url:$url,
+      created_at:$created_at
     }
     ON MATCH SET td += {
       url:$url
@@ -39,6 +41,7 @@ pub fn upsert_ticket_design(
     ("uid", Value::String(uid)),
     ("design_id", Value::String(design_id)),
     ("url", Value::String(url)),
+    ("created_at", Value::Integer(created_at.into()))
   ]);
 
   (query, params)

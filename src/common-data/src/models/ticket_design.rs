@@ -11,6 +11,8 @@ use crate::types::Neo4jResult;
 pub struct TicketDesign {
   pub design_id: String,
   pub url: String,
+  pub name: String,
+  pub file_type: String,
   pub created_at: String,
 }
 
@@ -38,6 +40,12 @@ impl TryFrom<Neo4jResult> for TicketDesign {
             },
             "url" => {
               account.url = String::try_from(v).expect("cannot convert url");
+            },
+            "name" => {
+              account.name = String::try_from(v).expect("cannot convert name");
+            },
+            "file_type" => {
+              account.file_type = String::try_from(v).expect("cannot convert file_type");
             },
             "created_at" => {
               account.created_at = String::try_from(v).expect("cannot convert created_at");

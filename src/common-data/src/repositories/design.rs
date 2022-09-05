@@ -20,7 +20,9 @@ let params = create_params(vec![
 pub fn upsert_ticket_design(
   canva_uid: String,
   design_id: String,
+  name: String,
   url: String,
+  file_type: String,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -28,18 +30,24 @@ pub fn upsert_ticket_design(
     MERGE (td:TicketDesign {design_id: $design_id})
     MERGE (cu)-[:DESIGNED]->(td)
     ON CREATE SET td += {
+      name:$name,
       url:$url,
+      file_type:$file_type,
       created_at:$created_at
     }
     ON MATCH SET td += {
-      url:$url
+      name:$name,
+      url:$url,
+      file_type:$file_type
     }
     RETURN td{.*}
   "#;
 
   let params = create_params(vec![
     ("canva_uid", Value::String(canva_uid)),
+    ("name", Value::String(name)),
     ("design_id", Value::String(design_id)),
+    ("file_type", Value::String(file_type)),
     ("url", Value::String(url)),
     ("created_at", Value::Integer(created_at.into()))
   ]);

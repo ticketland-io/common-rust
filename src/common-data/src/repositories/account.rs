@@ -35,3 +35,17 @@ pub fn upsert_account(uid: String, mnemonic: String, pubkey: String) -> (&'stati
 
   (query, params)
 }
+
+pub fn create_canva_user(uid: String, canva_uid: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    CREATE (acc:Account {uid: $uid})-[:IS_CANVA_USER]->(cu:CanvaUser {canva_uid: $canva_uid})
+    RETURN cu{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("uid", Value::String(uid)),
+    ("canva_uid", Value::String(canva_uid)),
+  ]);
+
+  (query, params)
+}

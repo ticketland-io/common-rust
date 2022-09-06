@@ -73,8 +73,6 @@ where
     let key = base64::decode(canva_key).unwrap();
     let mut mac = Hmac::<Sha256>::new_from_slice(key.as_ref()).unwrap();
 
-    println!(">>>> {}", format!("{}", message));
-
     mac.update(format!("{}", message).as_bytes());
     hex::encode(&mac.finalize().into_bytes()[..])
   }

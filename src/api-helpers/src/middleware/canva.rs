@@ -101,10 +101,10 @@ where
     }
 
     let (
-      time,
-      user,
-      brand,
       extensions,
+      user,
+      time,
+      brand,
       state,
       signatures
     ) = result.unwrap();

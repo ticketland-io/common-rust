@@ -1,11 +1,14 @@
 use std::{
-  sync::{Arc, RwLock},
+  sync::{Arc},
   future::Future,
   pin::Pin,
   io::{Error, ErrorKind},
   ops::DerefMut,
 };
-use tokio::io::{duplex, DuplexStream};
+use tokio::{
+  sync::RwLock,
+  io::{duplex, DuplexStream},
+};
 use tokio_util::io::ReaderStream;
 use futures::{
   io::{AsyncRead},
@@ -18,15 +21,12 @@ use crate::{
   services::minio::Minio,
 };
 
-type ObjectStream = Pin<Box<dyn Future<Output = Result<u16, S3Error>>>>;
+type ObjectStream = Pin<Box<dyn Future<Output = Result<u16, S3Error>> + Send>>;
 
 pub struct S3Stream {
   stream_reader: ReaderStream<DuplexStream>,
   get_object_stream: ObjectStream,
 }
-
-unsafe impl Send for S3Stream {}
-unsafe impl Sync for S3Stream {}
 
 /// The `max_buf_size` argument is the maximum amount of bytes that can be
 /// written to a side before the write returns `Poll::Pending`.

@@ -1,11 +1,14 @@
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use s3::{
   bucket::Bucket,
   creds::Credentials,
   region::Region,
   error::S3Error,
 };
-use tokio::io::AsyncWrite;
+use tokio::{
+  sync::RwLock,
+  io::AsyncWrite,
+};
 
 pub struct Minio {
   bucket: Bucket,
@@ -55,7 +58,7 @@ impl Minio {
     path: S,
     writer: Arc<RwLock<T>>,
   ) -> Result<u16, S3Error> {
-    let mut writer = writer.write().unwrap();
+    let mut writer = writer.write().await;
 
     Ok(
       self.bucket.get_object_stream(path, &mut *writer).await?

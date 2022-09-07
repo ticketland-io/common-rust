@@ -7,7 +7,7 @@ use s3::{
 };
 use tokio::{
   sync::RwLock,
-  io::AsyncWrite,
+  io::{AsyncRead, AsyncWrite},
 };
 
 pub struct Minio {
@@ -62,6 +62,18 @@ impl Minio {
 
     Ok(
       self.bucket.get_object_stream(path, &mut *writer).await?
+    )
+  }
+
+  pub async fn put_object_stream<T: AsyncRead + Send + Unpin, S: AsRef<str>>(
+    self: Arc<Self>,
+    path: S,
+    reader: Arc<RwLock<T>>,
+  ) -> Result<u16, S3Error> {
+    let mut reader = reader.write().await;
+
+    Ok(
+      self.bucket.put_object_stream(&mut *reader, path).await?
     )
   }
 }

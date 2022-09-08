@@ -17,12 +17,13 @@ pub struct Minio {
 impl Minio {
   pub async fn new(
     endpoint: &str,
+    region: &str,
     bucket_name: &str,
     access_key: &str,
     secret_key: &str,
   ) -> Self {
     let region = Region::Custom {
-      region: "".into(),
+      region: region.into(),
       endpoint: endpoint.into(),
     };
 

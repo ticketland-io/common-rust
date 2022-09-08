@@ -3,10 +3,10 @@ use std::{
   path::PathBuf,
 };
 use arloader::{
+  upload_files_stream,
   Arweave,
-  commands::*,
+  status::Status,
   error::Error,
-  status::OutputFormat,
   crypto::Provider,
   transaction::{Tag, Base64},
 };
@@ -14,6 +14,7 @@ use ring::{
   rand,
   signature,
 };
+use futures::StreamExt;
 use jsonwebkey::JsonWebKey;
 use url::Url;
 
@@ -47,10 +48,10 @@ impl Client {
     paths_iter: IP,
     tags: Option<Vec<(&str, &str)>>,
     reward_mult: f32,
-    buffer: usize,
-  ) -> CommandResult
+    buffer: usize, // check here what this value means https://docs.rs/futures/0.2.1/futures/trait.StreamExt.html#method.buffer_unordered
+  ) -> Result<Vec<Status>, Error>
   where
-    IP: Iterator<Item = PathBuf> + Send + Sync
+    IP: Iterator<Item = PathBuf> + Send + Sync,
   {
     let tags = tags
       .map(|tags| {
@@ -63,17 +64,31 @@ impl Client {
         .collect()
       });
 
-    command_upload(
-      &self.arweave,
-      paths_iter,
-      None,
-      tags,
-      reward_mult,
-      &OutputFormat::Display,
-      buffer,
-    )
-    .await?;
+      let price_terms = self.arweave.get_price_terms(reward_mult).await?;
+      
+      let mut stream = upload_files_stream(
+        &self.arweave,
+        paths_iter,
+        tags,
+        None,
+        None,
+        price_terms,
+        buffer,
+      );
+      
+    let mut statuses = vec![];
 
-    Ok(())
+    while let Some(result) = stream.next().await {
+      match result {
+        Ok(status) => {
+          statuses.push(status)
+        },
+        Err(error) => {
+          return Err(error);
+        },
+      }
+    }
+
+    Ok(statuses)
   }
 }

@@ -1,4 +1,7 @@
-use std::str::FromStr;
+use std::{
+  str::FromStr,
+  path::PathBuf,
+};
 use arloader::{
   Arweave,
   commands::*,
@@ -36,5 +39,28 @@ impl Client {
         arweave,
       }
     )
+  }
+
+  pub async fn upload<IP>(
+    &self, 
+    paths_iter: IP,
+    reward_mult: f32,
+    buffer: usize,
+  ) -> CommandResult
+  where
+    IP: Iterator<Item = PathBuf> + Send + Sync
+  {
+    command_upload(
+      &self.arweave,
+      paths_iter,
+      None,
+      None,
+      reward_mult,
+      &OutputFormat::Display,
+      buffer,
+    )
+    .await?;
+
+    Ok(())
   }
 }

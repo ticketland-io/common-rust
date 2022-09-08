@@ -16,17 +16,12 @@ pub struct Minio {
 
 impl Minio {
   pub async fn new(
-    endpoint: &str,
+    endpoint: Option<&str>,
     region: &str,
     bucket_name: &str,
     access_key: &str,
     secret_key: &str,
   ) -> Self {
-    let region = Region::Custom {
-      region: region.into(),
-      endpoint: endpoint.into(),
-    };
-
     let credentials = Credentials::new(
       Some(&access_key),
       Some(&secret_key),
@@ -35,7 +30,15 @@ impl Minio {
       None,
     ).expect("Wrong credentials provided");
 
-    let bucket = Bucket::new(&bucket_name, region, credentials).expect("cannot init bucket");
+    let bucket = if let Some(endpoint) = endpoint {
+      // Use when target is custom Minio instance
+      let region = Region::Custom {region: "".into(), endpoint: endpoint.into()};
+      Bucket::new(&bucket_name, region, credentials).expect("cannot init bucket")
+    } else {
+      // Use when target is AWS
+      let region = region.parse().unwrap();
+      Bucket::new(&bucket_name, region, credentials).expect("cannot init bucket")
+    };
 
     Self {
       bucket: bucket.with_path_style(),

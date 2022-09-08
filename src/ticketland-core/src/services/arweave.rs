@@ -8,6 +8,7 @@ use arloader::{
   error::Error,
   status::OutputFormat,
   crypto::Provider,
+  transaction::{Tag, Base64},
 };
 use ring::{
   rand,
@@ -44,6 +45,7 @@ impl Client {
   pub async fn upload<IP>(
     &self, 
     paths_iter: IP,
+    tags: Option<Vec<Tag<Base64>>>,
     reward_mult: f32,
     buffer: usize,
   ) -> CommandResult
@@ -54,7 +56,7 @@ impl Client {
       &self.arweave,
       paths_iter,
       None,
-      None,
+      tags,
       reward_mult,
       &OutputFormat::Display,
       buffer,

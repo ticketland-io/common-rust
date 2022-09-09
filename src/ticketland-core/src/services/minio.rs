@@ -57,6 +57,10 @@ impl Minio {
     Ok(())
   }
 
+  pub async fn get_object(&self, path: &str) -> Result<Vec<u8>, S3Error> {
+    Ok(self.bucket.get_object(path).await?.bytes().to_vec())
+  }
+
   pub async fn get_object_stream<T: AsyncWrite + Send + Unpin, S: AsRef<str>>(
     self: Arc<Self>,
     path: S,

@@ -13,3 +13,8 @@ pub struct Metadata {
   pub image: String,
   attributes: Vec<Attribute>,
 }
+
+impl Metadata {
+  fn is_default(&self) -> bool {
+    return self.name == ""
+  

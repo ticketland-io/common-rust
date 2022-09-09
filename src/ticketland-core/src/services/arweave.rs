@@ -56,8 +56,36 @@ impl Client {
     })
   }
 
-  pub async fn upload_data(&self) {
+  /// Upload the given binary data to Arweave. This does not handle bundles and the max
+  /// size should be MAX_TX_DATA 10mb.
+  /// 
+  /// # Arguments
+  /// 
+  /// * `data` - The binary data to upload
+  /// * `other_tags` - optional additional tags to upload
+  /// * `reward_mult` - used to calculate the price terms
+  /// * `last_tx` - That last blockchain tx. If none it will fetch it from the blockchain
+  /// * `auto_content_tag` - If true it will set the content-type tag which it will infer from the raw data (`infer::get(&data.0) {`)
+  pub async fn upload_data(
+    &self,
+    data: Vec<u8>,
+    other_tags: Option<Vec<(&str, &str)>>,
+    reward_mult: f32,
+    last_tx: Option<Base64>,
+    auto_content_tag: bool,
+  ) -> Result<(Base64, u64), Error> {
+    let price_terms = self.arweave.get_price_terms(reward_mult).await?;
 
+    let tx = self.arweave.create_transaction(
+      data,
+      Self::create_tags(other_tags),
+      last_tx,
+      price_terms, 
+      auto_content_tag
+    ).await?;
+
+    let signed_tx = self.arweave.sign_transaction(tx)?;
+    self.arweave.post_transaction(&signed_tx).await
   }
 
   pub async fn upload_file<IP>(

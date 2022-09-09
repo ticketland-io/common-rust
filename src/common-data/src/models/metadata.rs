@@ -6,7 +6,7 @@ struct Attribute {
   value: String,
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Default, Debug, Deserialize, Serialize)]
 pub struct Metadata {
   name: String,
   description: String,

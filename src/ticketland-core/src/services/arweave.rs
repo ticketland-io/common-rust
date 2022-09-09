@@ -66,6 +66,8 @@ impl Client {
   /// * `reward_mult` - used to calculate the price terms
   /// * `last_tx` - That last blockchain tx. If none it will fetch it from the blockchain
   /// * `auto_content_tag` - If true it will set the content-type tag which it will infer from the raw data (`infer::get(&data.0) {`)
+  /// 
+  /// * returns the transaction id as and the transaction reward
   pub async fn upload_data(
     &self,
     data: Vec<u8>,

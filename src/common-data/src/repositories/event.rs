@@ -52,7 +52,6 @@ pub fn upsert_event(
   event_id: String,
   event_organizer_uid: String,
   file_type: String,
-  metadata_cid: String,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -60,7 +59,6 @@ pub fn upsert_event(
     MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {
       event_id:$event_id,
       file_type:$file_type,
-      metadata_cid:$metadata_cid,
       metadata_uploaded: false,
       image_uploaded: false,
       created_at:$created_at
@@ -72,22 +70,23 @@ pub fn upsert_event(
     ("event_organizer_uid", Value::String(event_organizer_uid)),
     ("event_id", Value::String(event_id)),
     ("file_type", Value::String(file_type)),
-    ("metadata_cid", Value::String(metadata_cid)),
     ("created_at", Value::Integer(created_at.into())),
   ]);
 
   (query, params)
 }
 
-pub fn update_metadata_uploaded(event_id: String) -> (&'static str, Option<Params>) {
+pub fn update_metadata_uploaded(event_id: String, arweave_tx_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})
     SET evt.metadata_uploaded = true
+    SET evt.arweave_tx_id = $arweave_tx_id
     RETURN 1
   "#;
 
   let params = create_params(vec![
     ("event_id", Value::String(event_id)),
+    ("arweave_tx_id", Value::String(arweave_tx_id)),
   ]);
 
   (query, params)

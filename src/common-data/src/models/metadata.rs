@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Attribute {
+pub struct Attribute {
   pub trait_type: String,
   pub value: String,
 }

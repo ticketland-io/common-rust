@@ -6,6 +6,7 @@ use bolt_proto::message::{
   Failure,
   Record
 };
+use arloader::error::Error  as ArloaderError;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -28,7 +29,9 @@ pub enum Error {
   #[error("Reqwest Error")]
   ReqwestError(String),
   #[error("Stream Error")]
-  StreamError(String)
+  StreamError(String),
+  #[error("Arloder Error")]
+  ArloaderError(String),
 }
 
 impl ResponseError for Error {}
@@ -88,5 +91,11 @@ impl From<IpfsError> for Error {
 impl From<reqwest::Error> for Error {
   fn from(error: reqwest::Error) -> Self {
     Error::ReqwestError(format!("{:?}", error))
+  }
+}
+
+impl From<ArloaderError> for Error {
+  fn from(error: ArloaderError) -> Self {
+    Error::ArloaderError(format!("{:?}", error))
   }
 }

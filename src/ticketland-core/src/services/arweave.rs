@@ -43,7 +43,24 @@ impl Client {
     )
   }
 
-  pub async fn upload<IP>(
+  fn create_tags(tags: Option<Vec<(&str, &str)>>) -> Option<Vec<Tag<Base64>>>{
+    tags
+    .map(|tags| {
+      tags
+      .into_iter()
+      .map(|(name, value)| Tag {
+        name: Base64(name.as_bytes().into()),
+        value: Base64(value.as_bytes().into()),
+      })
+      .collect()
+    })
+  }
+
+  pub async fn upload_data(&self) {
+
+  }
+
+  pub async fn upload_file<IP>(
     &self, 
     paths_iter: IP,
     tags: Option<Vec<(&str, &str)>>,
@@ -53,23 +70,12 @@ impl Client {
   where
     IP: Iterator<Item = PathBuf> + Send + Sync,
   {
-    let tags = tags
-      .map(|tags| {
-        tags
-        .into_iter()
-        .map(|(name, value)| Tag {
-          name: Base64(name.as_bytes().into()),
-          value: Base64(value.as_bytes().into()),
-        })
-        .collect()
-      });
-
       let price_terms = self.arweave.get_price_terms(reward_mult).await?;
       
       let mut stream = upload_files_stream(
         &self.arweave,
         paths_iter,
-        tags,
+        Self::create_tags(tags),
         None,
         None,
         price_terms,

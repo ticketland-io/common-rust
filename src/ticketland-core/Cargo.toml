@@ -26,6 +26,3 @@ ipfs-api-backend-hyper = { git = "https://github.com/ferristseng/rust-ipfs-api/"
 reqwest = { version = "0.11.11", features = ["multipart"] }
 thiserror = "1.0.31"
 url = "2.2.2"
-
-[patch.crates-io]
-zeroize = { version ="1.4.0" }

@@ -10,6 +10,6 @@ struct Attribute {
 pub struct Metadata {
   name: String,
   description: String,
-  image: String,
+  pub image: String,
   attributes: Vec<Attribute>,
 }

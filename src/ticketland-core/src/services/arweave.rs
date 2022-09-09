@@ -8,7 +8,7 @@ use arloader::{
   status::Status,
   error::Error,
   crypto::Provider,
-  transaction::{Tag, Base64},
+  transaction::{Tag, Base64, FromUtf8Strs},
 };
 use ring::{
   rand,
@@ -48,10 +48,7 @@ impl Client {
     .map(|tags| {
       tags
       .into_iter()
-      .map(|(name, value)| Tag {
-        name: Base64(name.as_bytes().into()),
-        value: Base64(value.as_bytes().into()),
-      })
+      .map(|(name, value)| Tag::<Base64>::from_utf8_strs(name, value).expect("valid tag"))
       .collect()
     })
   }

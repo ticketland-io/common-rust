@@ -17,4 +17,6 @@ pub struct Metadata {
 impl Metadata {
   fn is_default(&self) -> bool {
     return self.name == ""
+  }
+}
   

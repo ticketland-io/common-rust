@@ -130,6 +130,19 @@ impl Client {
     self.arweave.post_transaction(&signed_tx).await
   }
 
+  /// Upload the given binary data to Arweave but unlike upload_data it will upload it as an Arweave Bundle.
+  /// This does not handle bundles and the max
+  /// size should be MAX_TX_DATA 10mb.
+  /// 
+  /// # Arguments
+  /// 
+  /// * `data` - The binary data to upload
+  /// * `other_tags` - optional additional tags to upload
+  /// * `reward_mult` - used to calculate the price terms
+  /// * `last_tx` - That last blockchain tx. If none it will fetch it from the blockchain
+  /// * `auto_content_tag` - If true it will set the content-type tag which it will infer from the raw data (`infer::get(&data.0) {`)
+  /// 
+  /// * returns the transaction id as and the transaction reward
   pub async fn upload_file_as_bundle(
     &self,
     data: Vec<u8>,

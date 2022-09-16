@@ -50,7 +50,7 @@ pub fn read_user_tickets_for_event(
     MATCH (acc:Account {uid: $uid})-[:HAS_TICKET {owner: true}]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})
     RETURN t{
       .*,
-      metadata_cid: evt.metadata_cid
+      arweave_tx_id: evt.arweave_tx_id
     }
   "#;
 

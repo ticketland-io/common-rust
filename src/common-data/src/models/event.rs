@@ -12,7 +12,7 @@ pub struct Event {
   pub event_id: String,
   pub created_at: i64,
   pub file_type: String,
-  pub metadata_cid: String,
+  pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
 }
@@ -45,8 +45,8 @@ impl TryFrom<Neo4jResult> for Event {
             "file_type" => {
               event.file_type = String::try_from(v).expect("cannot convert file_type");
             },
-            "metadata_cid" => {
-              event.metadata_cid = String::try_from(v).expect("cannot convert metadata_cid");
+            "arweave_tx_id" => {
+              event.arweave_tx_id = String::try_from(v).expect("cannot convert arweave_tx_id");
             },
             "metadata_uploaded" => {
               event.metadata_uploaded = bool::try_from(v).expect("cannot convert metadata_uploaded");

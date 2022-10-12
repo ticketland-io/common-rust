@@ -2,6 +2,7 @@
 name = "ticketland-utils"
 version = "0.2.3"
 edition = "2021"
+license = "BUSL-1.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

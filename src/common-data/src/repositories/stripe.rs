@@ -35,8 +35,8 @@ pub fn read_stripe_user(uid: String) -> (&'static str, Option<Params>) {
 
 pub fn create_account_link(uid: String, account_link: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (acc:Account {uid: $uid})-[:IS_STRIPE_USER]->(su:StripeUser)
-    SET su.account_link = $account_link
+    MATCH (acc:Account {uid: $uid})
+    MERGE (acc)-[:IS_STRIPE_USER]->(su:StripeUser {account_link: $account_link})
     RETURN su{.*}
   "#;
 

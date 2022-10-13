@@ -67,13 +67,26 @@ pub fn read_account_by_canva_id(canva_uid: String) -> (&'static str, Option<Para
 pub fn create_stripe_user(uid: String, stripe_uid: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $uid})
-    MERGE (acc)-[:IS_STRIPE_USER]->(cu:StripeUser {stripe_uid: $stripe_uid})
-    RETURN cu{.*}
+    MERGE (acc)-[:IS_STRIPE_USER]->(su:StripeUser {stripe_uid: $stripe_uid})
+    RETURN su{.*}
   "#;
 
   let params = create_params(vec![
     ("uid", Value::String(uid)),
     ("stripe_uid", Value::String(stripe_uid)),
+  ]);
+
+  (query, params)
+}
+
+pub fn read_stripe_user(uid: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (acc:Account {uid: $uid})-[:IS_STRIPE_USER]->(su:StripeUser {stripe_uid: $stripe_uid})
+    RETURN su{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("uid", Value::String(uid)),
   ]);
 
   (query, params)

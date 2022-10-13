@@ -37,8 +37,8 @@ pub fn upsert_account_link(uid: String, account_link: String) -> (&'static str, 
   let query = r#"
     MATCH (acc:Account {uid: $uid})
     MERGE (acc)-[:IS_STRIPE_USER]->(su:StripeUser)
-    ON CREATE SET td += {account_link: $account_link}
-    ON MATCH SET td += {account_link: $account_link}
+    ON CREATE SET su.account_link = $account_link
+    ON MATCH SET su.account_link = $account_link
     RETURN su{.*}
   "#;
 

@@ -1,4 +1,7 @@
-use actix_web::{HttpResponse};
+use actix_web::{
+  HttpRequest,
+  HttpResponse,
+};
 use ticketland_core::{
   error::Error,
 };
@@ -19,4 +22,11 @@ pub fn bad_request_error() -> HttpResponse {
   HttpResponse::BadRequest()
   .reason("400")
   .finish()
+}
+
+pub fn get_header_value<'b>(req: &'b HttpRequest, key: &'b str) -> Option<&'b str> {
+	req.headers()
+    .get(key)?
+    .to_str()
+    .ok()
 }

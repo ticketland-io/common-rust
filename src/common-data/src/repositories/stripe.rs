@@ -39,6 +39,7 @@ pub fn update_stripe_account_status(stripe_uid: String) -> (&'static str, Option
   let query = r#"
     MATCH (su:StripeUser {stripe_uid: $stripe_uid})
     SET su.status = 1
+    REMOVE su.account_link
     RETURN 1
   "#;
 

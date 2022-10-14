@@ -11,6 +11,7 @@ use crate::types::Neo4jResult;
 pub struct StripeAccount {
   pub stripe_uid: String,
   pub account_link: String,
+  pub status: i64,
 }
 
 impl TryFrom<Neo4jResult> for StripeAccount {
@@ -37,6 +38,9 @@ impl TryFrom<Neo4jResult> for StripeAccount {
             },
             "account_link" => {
               account.account_link = String::try_from(v).expect("cannot convert account_link");
+            },
+            "status" => {
+              account.status = i64::try_from(v).expect("cannot convert status");
             },
             _ => panic!("unknown field"),
           }

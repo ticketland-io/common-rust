@@ -105,3 +105,16 @@ pub fn update_image_uploaded(event_id: String) -> (&'static str, Option<Params>)
 
   (query, params)
 }
+
+pub fn read_event_organizer_account(event_id: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (acc:Account)-[:ORGANIZER_OF]->(evt:Event {event_id:$event_id})
+    RETURN acc{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}

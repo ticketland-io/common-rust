@@ -49,3 +49,16 @@ pub fn update_stripe_account_status(stripe_uid: String) -> (&'static str, Option
 
   (query, params)
 }
+
+pub fn read_event_organizer_stripe_account(event_id: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (su:StripeUser)<-[:IS_STRIPE_USER]-(acc:Account)-[:ORGANIZER_OF]->(evt:Event {event_id:$event_id})
+    RETURN su{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}

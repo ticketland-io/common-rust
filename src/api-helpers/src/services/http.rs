@@ -1,12 +1,10 @@
+use std::error::Error;
 use actix_web::{
   HttpRequest,
   HttpResponse,
 };
-use ticketland_core::{
-  error::Error,
-};
 
-pub fn internal_server_error(_error: Option<Error>) -> HttpResponse {
+pub fn internal_server_error<E: Error>(_error: Option<E>) -> HttpResponse {
   HttpResponse::InternalServerError()
   .reason("500")
   .body("")

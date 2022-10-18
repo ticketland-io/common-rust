@@ -24,6 +24,14 @@ impl Redis {
     .map_err(Into::<_>::into)
   }
 
+  pub async fn set_ex(&mut self, key: &str, value: &str, secs: usize) -> Result<()> {
+    cmd("SETEX")
+    .arg(&[key, value])
+    .arg(secs)
+    .query_async(&mut self.conn).await
+    .map_err(Into::<_>::into)
+  }
+
   pub async fn get(&mut self, key: &str) -> Result<()> {
     cmd("GET")
     .arg(&[key])

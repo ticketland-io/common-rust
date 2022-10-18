@@ -24,8 +24,11 @@ pub fn read_events(skip: u32, limit: u32) -> (&'static str, Option<Params>) {
 
 pub fn read_event(event_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (evt:Event {event_id: $event_id})
-    RETURN evt{.*}
+    MATCH (acc:Account)-[:ORGANIZER_OF]->(evt:Event {event_id: $event_id})
+    RETURN evt{
+      .*,
+      event_organizer: acc.pubkey
+    }
   "#;
 
   let params = create_params(vec![

@@ -11,6 +11,8 @@ use crate::types::Neo4jResult;
 pub struct Event {
   pub event_id: String,
   pub created_at: i64,
+  pub event_organizer: String,
+  pub event_capacity: String,
   pub file_type: String,
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
@@ -41,6 +43,12 @@ impl TryFrom<Neo4jResult> for Event {
             },
             "created_at" => {
               event.created_at = i64::try_from(v).expect("cannot convert created_at");
+            },
+            "event_organizer" => {
+              event.event_organizer = String::try_from(v).expect("cannot convert event organizer");
+            },
+            "event_capacity" => {
+              event.event_capacity = String::try_from(v).expect("cannot convert event capacity");
             },
             "file_type" => {
               event.file_type = String::try_from(v).expect("cannot convert file_type");

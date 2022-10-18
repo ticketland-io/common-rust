@@ -54,6 +54,7 @@ pub fn read_account_events(uid: String) -> (&'static str, Option<Params>) {
 pub fn upsert_event(
   event_id: String,
   event_organizer_uid: String,
+  event_capacity: String,
   file_type: String,
   created_at: i64,
 ) -> (&'static str, Option<Params>) {
@@ -61,6 +62,7 @@ pub fn upsert_event(
     MATCH (acc:Account {uid: $event_organizer_uid})
     MERGE (acc)-[:ORGANIZER_OF]->(evt:Event {
       event_id:$event_id,
+      event_capacity:$event_capacity,
       file_type:$file_type,
       metadata_uploaded: false,
       image_uploaded: false,
@@ -72,6 +74,7 @@ pub fn upsert_event(
   let params = create_params(vec![
     ("event_organizer_uid", Value::String(event_organizer_uid)),
     ("event_id", Value::String(event_id)),
+    ("event_capacity", Value::String(event_capacity)),
     ("file_type", Value::String(file_type)),
     ("created_at", Value::Integer(created_at.into())),
   ]);

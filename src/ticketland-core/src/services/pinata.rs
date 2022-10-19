@@ -1,3 +1,4 @@
+use eyre::Result;
 use reqwest::{
   Client,
   Body,
@@ -5,7 +6,6 @@ use reqwest::{
 };
 use tokio::io::AsyncRead;
 use tokio_util::io::ReaderStream;
-use crate::error::Error;
 
 pub struct Pinata {
   pinata_client: Client,
@@ -31,7 +31,7 @@ impl Pinata {
     &self,
     file_name: &str,
     data_stream: ReaderStream<R>
-  ) -> Result<(), Error> 
+  ) -> Result<()> 
   where 
     R: 'static + AsyncRead + Send + Sync
   {
@@ -44,8 +44,7 @@ impl Pinata {
     .header("Authorization", format!("Bearer {}", self.pinata_api_token.clone()))
     .multipart(form)
     .send()
-    .await
-    .map_err(Into::<Error>::into)?;
+    .await?;
 
     Ok(())
   }

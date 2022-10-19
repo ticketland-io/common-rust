@@ -1,4 +1,5 @@
 use std::io::Cursor;
+use eyre::Result;
 use ipfs_api_backend_hyper::{
   IpfsClient,
   TryFromUri,
@@ -8,7 +9,6 @@ use ipfs_api_backend_hyper::{
 };
 use tokio::io::{AsyncRead};
 use tokio_util::compat::*;
-use crate::error::Error;
 
 pub struct Ipfs {
   client: IpfsClient,
@@ -23,7 +23,7 @@ impl Ipfs {
     }
   }
 
-  pub async fn dry_run(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
+  pub async fn dry_run(&self, data: Vec<u8>) -> Result<AddResponse> {
     let mut options = Add::default();
     options.only_hash = Some(true);
 
@@ -31,21 +31,21 @@ impl Ipfs {
 
     self.client.add_with_options(data, options)
     .await
-    .map_err(Into::<Error>::into)
+    .map_err(Into::<_>::into)
   }
 
-  pub async fn upload(&self, data: Vec<u8>) -> Result<AddResponse, Error> {
+  pub async fn upload(&self, data: Vec<u8>) -> Result<AddResponse> {
     self.client.add(Cursor::new(data))
     .await
-    .map_err(Into::<Error>::into)
+    .map_err(Into::<_>::into)
   }
 
-  pub async fn upload_stream<R>(&self, async_reader: R) -> Result<AddResponse, Error> 
+  pub async fn upload_stream<R>(&self, async_reader: R) -> Result<AddResponse> 
   where 
     R: 'static + AsyncRead + Send + Sync + Unpin,
   {
     self.client.add_async(async_reader.compat())
     .await
-    .map_err(Into::<Error>::into)
+    .map_err(Into::<_>::into)
   }
 }

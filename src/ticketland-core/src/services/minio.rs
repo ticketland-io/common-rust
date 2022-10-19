@@ -1,9 +1,9 @@
 use std::sync::{Arc};
+use eyre::Result;
 use s3::{
   bucket::Bucket,
   creds::Credentials,
   region::Region,
-  error::S3Error,
 };
 use tokio::{
   sync::RwLock,
@@ -45,19 +45,19 @@ impl Minio {
     }
   }
 
-  pub async fn upload(&self, path: &str, content: &[u8]) -> Result<(), S3Error> {
+  pub async fn upload(&self, path: &str, content: &[u8]) -> Result<()> {
     self.bucket.put_object(path, content).await?;
     
     Ok(())
   }
 
-  pub async fn delete(&self, path: &str) -> Result<(), S3Error> {
+  pub async fn delete(&self, path: &str) -> Result<()> {
     self.bucket.delete_object(path).await?;
     
     Ok(())
   }
 
-  pub async fn get_object(&self, path: &str) -> Result<Vec<u8>, S3Error> {
+  pub async fn get_object(&self, path: &str) -> Result<Vec<u8>> {
     Ok(self.bucket.get_object(path).await?.bytes().to_vec())
   }
 
@@ -65,7 +65,7 @@ impl Minio {
     self: Arc<Self>,
     path: S,
     writer: Arc<RwLock<T>>,
-  ) -> Result<u16, S3Error> {
+  ) -> Result<u16> {
     let mut writer = writer.write().await;
 
     Ok(
@@ -77,7 +77,7 @@ impl Minio {
     self: Arc<Self>,
     path: S,
     reader: Arc<RwLock<T>>,
-  ) -> Result<u16, S3Error> {
+  ) -> Result<u16> {
     let mut reader = reader.write().await;
 
     Ok(

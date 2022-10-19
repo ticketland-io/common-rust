@@ -5,6 +5,7 @@ use std::{
   io::{Error, ErrorKind},
   ops::DerefMut,
 };
+use eyre::Result;
 use tokio::{
   sync::RwLock,
   io::{duplex, DuplexStream},
@@ -16,12 +17,11 @@ use futures::{
   task::{Poll, Context},
 };
 use bytes::Bytes;
-use s3::error::S3Error;
 use crate::{
   services::minio::Minio,
 };
 
-type ObjectStream = Pin<Box<dyn Future<Output = Result<u16, S3Error>> + Send>>;
+type ObjectStream = Pin<Box<dyn Future<Output = Result<u16>> + Send>>;
 
 pub struct S3Stream {
   stream_reader: ReaderStream<DuplexStream>,

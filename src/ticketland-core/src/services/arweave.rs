@@ -2,12 +2,12 @@ use std::{
   str::FromStr,
   path::PathBuf,
 };
+use eyre::Result;
 use arloader::{
   upload_files_stream,
   Arweave,
   bundle::DataItem,
   status::Status,
-  error::Error,
   crypto::Provider,
   transaction::{Tag, Base64, FromUtf8Strs},
 };
@@ -24,7 +24,7 @@ pub struct Client {
 }
 
 impl Client {
-  pub async fn new(key_pair: String) -> Result<Self, Error> {
+  pub async fn new(key_pair: String) -> Result<Self> {
     let jwk_parsed: JsonWebKey = key_pair.parse().unwrap();
     let crypto = Provider {
       keypair: signature::RsaKeyPair::from_pkcs8(&jwk_parsed.key.as_ref().to_der())?,
@@ -78,7 +78,7 @@ impl Client {
     data: Vec<u8>,
     other_tags: Option<Vec<(&str, &str)>>,
     auto_content_tag: bool,
-  ) -> Result<(DataItem, Status), Error> {
+  ) -> Result<(DataItem, Status)> {
     let content_type = Self::get_content_type(&data);
     let data_item = self.arweave.create_data_item(
       data,
@@ -115,7 +115,7 @@ impl Client {
     reward_mult: f32,
     last_tx: Option<Base64>,
     auto_content_tag: bool,
-  ) -> Result<(Base64, u64), Error> {
+  ) -> Result<(Base64, u64)> {
     let price_terms = self.arweave.get_price_terms(reward_mult).await?;
 
     let tx = self.arweave.create_transaction(
@@ -127,7 +127,7 @@ impl Client {
     ).await?;
 
     let signed_tx = self.arweave.sign_transaction(tx)?;
-    self.arweave.post_transaction(&signed_tx).await
+    self.arweave.post_transaction(&signed_tx).await.map_err(Into::<_>::into)
   }
 
   /// Upload the given binary data to Arweave but unlike upload_data it will upload it as an Arweave Bundle.
@@ -149,7 +149,7 @@ impl Client {
     other_tags: Option<Vec<(&str, &str)>>,
     reward_mult: f32,
     auto_content_tag: bool,
-  ) -> Result<(Base64, u64), Error> {
+  ) -> Result<(Base64, u64)> {
     let data_item = self.create_data_item(data, other_tags.clone(), auto_content_tag)?;
 
     let (bundle, _) = self.arweave.create_bundle_from_data_items(vec![data_item])?;
@@ -171,7 +171,7 @@ impl Client {
     .await?;
     let signed_tx = self.arweave.sign_transaction(tx)?;
 
-    self.arweave.post_transaction(&signed_tx).await
+    self.arweave.post_transaction(&signed_tx).await.map_err(Into::<_>::into)
   }
 
   pub async fn upload_file<IP>(
@@ -180,7 +180,7 @@ impl Client {
     tags: Option<Vec<(&str, &str)>>,
     reward_mult: f32,
     buffer: usize, // check here what this value means https://docs.rs/futures/0.2.1/futures/trait.StreamExt.html#method.buffer_unordered
-  ) -> Result<Vec<Status>, Error>
+  ) -> Result<Vec<Status>>
   where
     IP: Iterator<Item = PathBuf> + Send + Sync,
   {
@@ -204,7 +204,7 @@ impl Client {
           statuses.push(status)
         },
         Err(error) => {
-          return Err(error);
+          return Err(error.into());
         },
       }
     }

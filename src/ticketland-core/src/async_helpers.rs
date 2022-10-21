@@ -1,9 +1,11 @@
 use tokio_retry::strategy::{FibonacciBackoff, jitter};
-use std::future::Future;
 use std::{
+  time::Duration,
+  future::Future,
   iter::{Take, Map},
-  time::Duration
 };
+use eyre::Result;
+use tokio::time::timeout as TokioTimeout;
 
 fn retry_strategy(ms: u64, attempts: usize) -> Take<Map<FibonacciBackoff, fn(Duration) -> Duration>>{
   FibonacciBackoff::from_millis(ms)
@@ -40,4 +42,13 @@ pub async fn with_retry_panic<A, F, R, E>(ms: Option<u64>, attempts: Option<usiz
   }
 
   result
+}
+
+pub async fn timeout<T, F>(millis: u64, future: F) -> Result<T>
+where
+    F: Future<Output=T>
+{
+  TokioTimeout(Duration::from_millis(millis), future)
+  .await
+  .map_err(Into::<_>::into)
 }

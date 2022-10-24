@@ -4,6 +4,25 @@ use ticketland_core::{
   actor::neo4j::{create_params}
 };
 
+pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {category: $category})
+    RETURN evt{.*}
+    ORDER BY evt.category DESC
+    SKIP $skip
+    LIMIT $limit
+  "#;
+
+  let skip = skip * limit;
+  let params = create_params(vec![
+    ("skip", Value::Integer((skip as i32).into())),
+    ("limit", Value::Integer((limit as i32).into())),
+    ("category", Value::String(category))
+  ]);
+
+  (query, params)
+}
+
 pub fn read_events(skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event)

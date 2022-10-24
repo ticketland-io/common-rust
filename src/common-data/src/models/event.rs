@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Event {
   pub event_id: String,
   pub created_at: i64,
@@ -17,6 +17,14 @@ pub struct Event {
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
+  pub name: String,
+  pub description: String,
+  pub location: String,
+  pub venue: String,
+  pub event_type: String,
+  pub start_date: String,
+  pub end_date: String,
+  pub category: String,
 }
 
 impl TryFrom<Neo4jResult> for Event {

@@ -82,6 +82,8 @@ pub fn upsert_event(
   start_date: String,
   end_date: String,
   category: String,
+  name: String,
+  description: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
@@ -94,10 +96,12 @@ pub fn upsert_event(
       created_at:$created_at,
       location: $location,
       venue: $venue,
-      type: $type,
+      event_type: $event_type,
       start_date: $start_date,
       end_date: $end_date,
-      category: $category
+      category: $category,
+      name: $name,
+      description: $description
     })
     RETURN evt{.*}
   "#;
@@ -110,10 +114,12 @@ pub fn upsert_event(
     ("created_at", Value::Integer(created_at.into())),
     ("location", Value::String(location)),
     ("venue", Value::String(venue)),
-    ("type", Value::String(event_type)),
+    ("event_type", Value::String(event_type)),
     ("start_date", Value::String(start_date)),
     ("end_date", Value::String(end_date)),
-    ("category", Value::String(category))
+    ("category", Value::String(category)),
+    ("name", Value::String(name)),
+    ("description", Value::String(description))
     ]);
 
   (query, params)

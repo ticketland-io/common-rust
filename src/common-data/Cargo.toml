@@ -1,6 +1,6 @@
 [package]
 name = "common-data"
-version = "0.2.22"
+version = "0.2.23"
 edition = "2021"
 license = "BUSL-1.1"
 

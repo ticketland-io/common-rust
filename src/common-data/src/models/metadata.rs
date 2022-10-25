@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+  collections::HashMap,
+  ops::Deref,
+};
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,5 +35,31 @@ impl Metadata {
     }
 
     map
+  }
+}
+
+struct MetadataMap(HashMap<String, String>);
+
+impl From<Metadata> for MetadataMap {
+  fn from(metadata: Metadata) -> Self {
+    let mut map = HashMap::new();
+
+    map.insert("name".to_string(), metadata.name.clone());
+    map.insert("description".to_string(), metadata.description.clone());
+    map.insert("image".to_string(), metadata.image.clone());
+    
+    for attr in &metadata.attributes {
+      map.insert(attr.trait_type.clone(), attr.value.clone());
+    }
+
+    Self(map)
+  }
+}
+
+impl Deref for MetadataMap {
+  type Target = HashMap<String, String>;
+
+  fn deref(&self) -> &Self::Target {
+    &self.0
   }
 }

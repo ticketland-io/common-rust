@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,5 +19,18 @@ impl Metadata {
   pub fn is_default(&self) -> bool {
     return self.name == ""
   }
+
+  pub fn to_map(&self) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+
+    map.insert("name".to_string(), self.name.clone());
+    map.insert("description".to_string(), self.description.clone());
+    map.insert("image".to_string(), self.image.clone());
+    
+    for attr in &self.attributes {
+      map.insert(attr.trait_type.clone(), attr.value.clone());
+    }
+
+    map
+  }
 }
-  

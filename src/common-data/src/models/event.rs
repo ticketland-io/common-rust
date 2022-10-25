@@ -12,7 +12,7 @@ pub struct Event {
   pub event_id: String,
   pub created_at: i64,
   pub event_organizer: String,
-  pub event_capacity: String,
+  // pub event_capacity: String,
   pub file_type: String,
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
@@ -55,8 +55,32 @@ impl TryFrom<Neo4jResult> for Event {
             "event_organizer" => {
               event.event_organizer = String::try_from(v).expect("cannot convert event organizer");
             },
-            "event_capacity" => {
-              event.event_capacity = String::try_from(v).expect("cannot convert event capacity");
+            // "event_capacity" => {
+            //   event.event_capacity = String::try_from(v).expect("cannot convert event capacity");
+            // },
+            "name" => {
+              event.name = String::try_from(v).expect("cannot convert event name");
+            },
+            "location" => {
+              event.location = String::try_from(v).expect("cannot convert event location");
+            },
+            "venue" => {
+              event.venue = String::try_from(v).expect("cannot convert event venue");
+            },
+            "event_type" => {
+              event.event_type = String::try_from(v).expect("cannot convert event event_type");
+            },
+            "category" => {
+              event.category = String::try_from(v).expect("cannot convert event category");
+            },
+            "start_date" => {
+              event.start_date = String::try_from(v).expect("cannot convert event start_date");
+            },
+            "end_date" => {
+              event.end_date = String::try_from(v).expect("cannot convert event end_date");
+            },
+            "description" => {
+              event.description = String::try_from(v).expect("cannot convert event description");
             },
             "file_type" => {
               event.file_type = String::try_from(v).expect("cannot convert file_type");

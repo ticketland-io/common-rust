@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Event {
   pub event_id: String,
   pub created_at: i64,
@@ -17,6 +17,14 @@ pub struct Event {
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
+  pub name: String,
+  pub description: String,
+  pub location: String,
+  pub venue: String,
+  pub event_type: String,
+  pub start_date: String,
+  pub end_date: String,
+  pub category: String,
 }
 
 impl TryFrom<Neo4jResult> for Event {
@@ -49,6 +57,30 @@ impl TryFrom<Neo4jResult> for Event {
             },
             "event_capacity" => {
               event.event_capacity = String::try_from(v).expect("cannot convert event capacity");
+            },
+            "name" => {
+              event.name = String::try_from(v).expect("cannot convert event name");
+            },
+            "location" => {
+              event.location = String::try_from(v).expect("cannot convert event location");
+            },
+            "venue" => {
+              event.venue = String::try_from(v).expect("cannot convert event venue");
+            },
+            "event_type" => {
+              event.event_type = String::try_from(v).expect("cannot convert event event_type");
+            },
+            "category" => {
+              event.category = String::try_from(v).expect("cannot convert event category");
+            },
+            "start_date" => {
+              event.start_date = String::try_from(v).expect("cannot convert event start_date");
+            },
+            "end_date" => {
+              event.end_date = String::try_from(v).expect("cannot convert event end_date");
+            },
+            "description" => {
+              event.description = String::try_from(v).expect("cannot convert event description");
             },
             "file_type" => {
               event.file_type = String::try_from(v).expect("cannot convert file_type");

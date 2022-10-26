@@ -23,7 +23,6 @@ pub fn upsert_ticket_design(
   name: String,
   url: String,
   file_type: String,
-  created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (cu:CanvaUser {canva_uid:$canva_uid})
@@ -33,7 +32,7 @@ pub fn upsert_ticket_design(
       name:$name,
       url:$url,
       file_type:$file_type,
-      created_at:$created_at
+      created_at: timestamp()
     }
     ON MATCH SET td += {
       name:$name,
@@ -49,7 +48,6 @@ pub fn upsert_ticket_design(
     ("design_id", Value::String(design_id)),
     ("file_type", Value::String(file_type)),
     ("url", Value::String(url)),
-    ("created_at", Value::Integer(created_at.into()))
   ]);
 
   (query, params)

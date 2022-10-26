@@ -82,7 +82,7 @@ pub fn upsert_event(
   end_date: String,
   category: String,
   name: String,
-  description: String,
+  description: String
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
@@ -113,8 +113,8 @@ pub fn upsert_event(
     ("location", Value::String(location)),
     ("venue", Value::String(venue)),
     ("event_type", Value::String(event_type)),
-    ("start_date", Value::String(start_date)),
-    ("end_date", Value::String(end_date)),
+    ("start_date", Value::Integer(start_date.parse::<i64>().unwrap())),
+    ("end_date", Value::Integer(end_date.parse::<i64>().unwrap())),
     ("category", Value::String(category)),
     ("name", Value::String(name)),
     ("description", Value::String(description))

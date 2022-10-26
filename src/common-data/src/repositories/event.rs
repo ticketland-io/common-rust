@@ -103,6 +103,7 @@ pub fn upsert_event(
       name: $name,
       description: $description
     })
+    ON CREATE SET evt.created_at = timestamp()
     RETURN evt{.*}
   "#;
 
@@ -120,7 +121,7 @@ pub fn upsert_event(
     ("category", Value::String(category)),
     ("name", Value::String(name)),
     ("description", Value::String(description))
-    ]);
+  ]);
 
   (query, params)
 }

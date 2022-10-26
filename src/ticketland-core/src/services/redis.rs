@@ -32,16 +32,23 @@ impl Redis {
     .map_err(Into::<_>::into)
   }
 
-  pub async fn get(&mut self, key: &str) -> Result<()> {
+  pub async fn get(&mut self, key: &str) -> Result<String> {
     cmd("GET")
     .arg(&[key])
     .query_async(&mut self.conn).await
     .map_err(Into::<_>::into)
   }
 
-  pub async fn mget(&mut self, keys: &[&str]) -> Result<()> {
+  pub async fn mget(&mut self, keys: &[&str]) -> Result<Vec<String>> {
     cmd("MGET")
     .arg(keys)
+    .query_async(&mut self.conn).await
+    .map_err(Into::<_>::into)
+  }
+
+  pub async fn delete(&mut self, key: &str) -> Result<()> {
+    cmd("DEL")
+    .arg(key)
     .query_async(&mut self.conn).await
     .map_err(Into::<_>::into)
   }

@@ -56,7 +56,6 @@ pub fn upsert_event(
   event_organizer_uid: String,
   event_capacity: String,
   file_type: String,
-  created_at: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
@@ -66,8 +65,8 @@ pub fn upsert_event(
       file_type:$file_type,
       metadata_uploaded: false,
       image_uploaded: false,
-      created_at:$created_at
     })
+    ON CREATE SET evt.created_at = timestamp()
     RETURN evt{.*}
   "#;
 
@@ -76,7 +75,6 @@ pub fn upsert_event(
     ("event_id", Value::String(event_id)),
     ("event_capacity", Value::String(event_capacity)),
     ("file_type", Value::String(file_type)),
-    ("created_at", Value::Integer(created_at.into())),
   ]);
 
   (query, params)

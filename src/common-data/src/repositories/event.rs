@@ -7,8 +7,9 @@ use ticketland_core::{
 pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {category: $category})
+    WHERE evt.end_date > timestamp()
     RETURN evt{.*}
-    ORDER BY evt.category DESC
+    ORDER BY evt.start_date DESC
     SKIP $skip
     LIMIT $limit
   "#;

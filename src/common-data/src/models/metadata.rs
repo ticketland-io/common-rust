@@ -10,7 +10,7 @@ pub struct Attribute {
   pub value: String,
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, Clone)]
+#[derive(Default, Debug, Deserialize, Serialize)]
 pub struct Metadata {
   pub name: String,
   pub description: String,

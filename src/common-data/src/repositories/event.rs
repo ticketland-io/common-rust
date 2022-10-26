@@ -75,7 +75,6 @@ pub fn upsert_event(
   event_organizer_uid: String,
   event_capacity: String,
   file_type: String,
-  created_at: i64,
   location: String,
   venue: String,
   event_type: String,
@@ -93,7 +92,6 @@ pub fn upsert_event(
       file_type:$file_type,
       metadata_uploaded: false,
       image_uploaded: false,
-      created_at:$created_at,
       location: $location,
       venue: $venue,
       event_type: $event_type,
@@ -112,7 +110,6 @@ pub fn upsert_event(
     ("event_id", Value::String(event_id)),
     ("event_capacity", Value::String(event_capacity)),
     ("file_type", Value::String(file_type)),
-    ("created_at", Value::Integer(created_at.into())),
     ("location", Value::String(location)),
     ("venue", Value::String(venue)),
     ("event_type", Value::String(event_type)),
@@ -121,7 +118,7 @@ pub fn upsert_event(
     ("category", Value::String(category)),
     ("name", Value::String(name)),
     ("description", Value::String(description))
-    ]);
+  ]);
 
   (query, params)
 }

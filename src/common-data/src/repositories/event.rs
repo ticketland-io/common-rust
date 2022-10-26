@@ -103,6 +103,7 @@ pub fn upsert_event(
       name: $name,
       description: $description
     })
+    ON CREATE SET evt.created_at = timestamp()
     RETURN evt{.*}
   "#;
 

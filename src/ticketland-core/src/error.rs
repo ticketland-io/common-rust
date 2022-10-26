@@ -99,3 +99,9 @@ impl From<ArloaderError> for Error {
     Error::ArloaderError(format!("{:?}", error))
   }
 }
+
+impl From<eyre::ErrReport> for Error {
+  fn from(error: eyre::ErrReport) -> Self {
+    Error::GenericError(format!("{:?}", error))
+  }
+}

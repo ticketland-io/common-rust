@@ -130,6 +130,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
     UNWIND $sales AS sale
     MATCH (evt:Event {event_id:$event_id})
     MERGE (evt)-[:HAS_SALE]->(s:Sale {
+      account:sale.account,
       ticket_type_index:sale.ticket_type_index,
       n_tickets:sale.n_tickets,
       sale_start_ts:sale.sale_start_ts,

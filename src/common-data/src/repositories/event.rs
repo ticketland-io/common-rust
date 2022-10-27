@@ -3,6 +3,7 @@ use bolt_client::{Params};
 use ticketland_core::{
   actor::neo4j::{create_params}
 };
+use crate::models::sale::Sale;
 
 pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -118,6 +119,33 @@ pub fn upsert_event(
     ("category", Value::String(category)),
     ("name", Value::String(name)),
     ("description", Value::String(description))
+  ]);
+
+  (query, params)
+}
+
+pub fn upsert_event_sale(
+  event_id: String,
+  sale: Sale,
+) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {event_id:$event_id})
+    MERGE (evt)-[:HAS_SALE]->(s:Sale {
+      ticket_type_index:$ticket_type_index,
+      n_tickets:$n_tickets,
+      sale_start_ts:$sale_start_ts,
+      sale_end_ts:$sale_end_ts
+    })
+    RETURN evt{.*}
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+    ("ticket_type_index", Value::Integer(sale.ticket_type_index.into())),
+    ("n_tickets", Value::Integer(sale.n_tickets.into())),
+    ("sale_start_ts", Value::Integer(sale.sale_start_ts.into())),
+    ("sale_end_ts", Value::Integer(sale.sale_end_ts.into())),
+    ("sale_type", Value::Map(sale.sale_end_ts.into())),
   ]);
 
   (query, params)

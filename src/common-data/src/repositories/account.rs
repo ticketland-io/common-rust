@@ -21,6 +21,7 @@ pub fn upsert_account(
   uid: String,
   email: String,
   name: String,
+  photo_url: String,
   mnemonic: String,
   pubkey: String
 ) -> (&'static str, Option<Params>) {
@@ -29,6 +30,7 @@ pub fn upsert_account(
     ON CREATE SET acc += {
       email:$email,
       name:$name,
+      photo_url:$photo_url,
       mnemonic:$mnemonic,
       pubkey:$pubkey
     }
@@ -39,6 +41,7 @@ pub fn upsert_account(
     ("uid", Value::String(uid)),
     ("email", Value::String(email)),
     ("name", Value::String(name)),
+    ("photo_url", Value::String(photo_url)),
     ("mnemonic", Value::String(mnemonic)),
     ("pubkey", Value::String(pubkey)),
   ]);

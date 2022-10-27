@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use bolt_proto::value::{Value};
+use serde_aux::prelude::*;
 use serde::{Deserialize, Serialize};
+use bolt_proto::value::{Value};
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,10 +33,18 @@ impl Sale {
 #[serde(rename_all = "camelCase")]
 pub enum SaleType {
   Free {},
-  FixedPrice {price: u64},
-  Refundable {price: u64},
+  FixedPrice {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    price: u64
+  },
+  Refundable {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    price: u64
+  },
   DutchAuction {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     start_price: u64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     end_price: u64,
     curve_length: u16,
     drop_interval: u16,

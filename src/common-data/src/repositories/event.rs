@@ -135,7 +135,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
       sale_start_ts:sale.sale_start_ts,
       sale_end_ts:sale.sale_end_ts
     })
-    WITH s
+    WITH s, sale
     CALL apoc.do.when(
       EXISTS((sr:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(st:SaleType)),
       '
@@ -150,7 +150,6 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
       ',
       {sale:sale.sale_type, seat_range:sale.seat_range}
     ) YIELD val
-    MERGE (s)-[:HAS_TYPE]->()
     RETURN 1
   "#;
 

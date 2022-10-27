@@ -22,8 +22,8 @@ pub struct Event {
   pub location: String,
   pub venue: String,
   pub event_type: String,
-  pub start_date: String,
-  pub end_date: String,
+  pub start_date: i64,
+  pub end_date: i64,
   pub category: String,
 }
 
@@ -74,10 +74,10 @@ impl TryFrom<Neo4jResult> for Event {
               event.category = String::try_from(v).expect("cannot convert event category");
             },
             "start_date" => {
-              event.start_date = String::try_from(v).expect("cannot convert event start_date");
+              event.start_date = i64::try_from(v).expect("cannot convert event start_date");
             },
             "end_date" => {
-              event.end_date = String::try_from(v).expect("cannot convert event end_date");
+              event.end_date = i64::try_from(v).expect("cannot convert event end_date");
             },
             "description" => {
               event.description = String::try_from(v).expect("cannot convert event description");

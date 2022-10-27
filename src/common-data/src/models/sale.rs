@@ -6,6 +6,7 @@ use bolt_proto::value::{Value};
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Sale {
+  pub account: String,
   pub ticket_type_index: u8,
   pub n_tickets: u32,
   pub sale_start_ts: u32,
@@ -17,7 +18,8 @@ pub struct Sale {
 impl Sale {
   pub fn to_neo4j_map(&self) -> HashMap<String, Value> {
     let mut map = HashMap::new();
-
+    
+    map.insert("account".to_string(), Value::String(self.account.clone()));
     map.insert("ticket_type_index".to_string(), Value::Integer(self.ticket_type_index as i64));
     map.insert("n_tickets".to_string(), Value::Integer(self.n_tickets as i64));
     map.insert("sale_start_ts".to_string(), Value::Integer(self.sale_start_ts as i64));

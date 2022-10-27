@@ -137,7 +137,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
     })
     WITH s, sale
     CALL apoc.do.when(
-      EXISTS((sr:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(st:SaleType)),
+      EXISTS((:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(:SaleType)),
       '
       MATCH (s)-[:HAS_TYPE]->(st:SaleType)
       SET st = $sale.sale_type

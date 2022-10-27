@@ -145,11 +145,11 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
       ',
       '
       CREATE (sr:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(st:SaleType)
-      SET st = $sale_type
-      SET sr = $seat_range
+      SET st = $sale.sale_type
+      SET sr = $sale.seat_range
       ',
       {sale:sale}
-    ) YIELD val
+    ) YIELD value
     RETURN 1
   "#;
 

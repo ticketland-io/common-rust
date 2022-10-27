@@ -124,17 +124,15 @@ pub fn upsert_event(
   (query, params)
 }
 
-pub fn upsert_event_sale(
-  event_id: String,
-  sale: Sale,
-) -> (&'static str, Option<Params>) {
+pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, Option<Params>) {
   let query = r#"
+    UNWIND $sales AS sale
     MATCH (evt:Event {event_id:$event_id})
     MERGE (evt)-[:HAS_SALE]->(s:Sale {
-      ticket_type_index:$ticket_type_index,
-      n_tickets:$n_tickets,
-      sale_start_ts:$sale_start_ts,
-      sale_end_ts:$sale_end_ts
+      ticket_type_index:sale.ticket_type_index,
+      n_tickets:sale.n_tickets,
+      sale_start_ts:sale.sale_start_ts,
+      sale_end_ts:sale.sale_end_ts
     })
     WITH s
     CALL apoc.do.when(
@@ -149,20 +147,17 @@ pub fn upsert_event_sale(
       SET st = $sale_type
       SET sr = $seat_range
       ',
-      {sale_type:$sale_type, seat_range:$seat_range}
+      {sale:sale.sale_type, seat_range:sale.seat_range}
     ) YIELD val
     MERGE (s)-[:HAS_TYPE]->()
     RETURN 1
   "#;
 
+  let sales: Vec<Value> = sales.iter().map(|s| Value::Map(s.to_neo4j_map())).collect();
+  
   let params = create_params(vec![
     ("event_id", Value::String(event_id)),
-    ("ticket_type_index", Value::Integer(sale.ticket_type_index.into())),
-    ("n_tickets", Value::Integer(sale.n_tickets.into())),
-    ("sale_start_ts", Value::Integer(sale.sale_start_ts.into())),
-    ("sale_end_ts", Value::Integer(sale.sale_end_ts.into())),
-    ("sale_type", Value::Map(sale.sale_type.to_neo4j_map())),
-    ("seat_range", Value::Map(sale.seat_range.to_neo4j_map())),
+    ("sales", Value::List(sales.into())),
   ]);
 
   (query, params)

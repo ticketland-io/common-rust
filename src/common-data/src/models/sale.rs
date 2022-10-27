@@ -12,6 +12,21 @@ pub struct Sale {
   pub seat_range: SeatRange,
 }
 
+impl Sale {
+  pub fn to_neo4j_map(&self) -> HashMap<String, Value> {
+    let mut map = HashMap::new();
+
+    map.insert("ticket_type_index".to_string(), Value::Integer(self.ticket_type_index as i64));
+    map.insert("n_tickets".to_string(), Value::Integer(self.n_tickets as i64));
+    map.insert("sale_start_ts".to_string(), Value::Integer(self.sale_start_ts as i64));
+    map.insert("sale_end_ts".to_string(), Value::Integer(self.sale_end_ts as i64));
+    map.insert("sale_type".to_string(), Value::Map(self.sale_type.to_neo4j_map()));
+    map.insert("seat_range".to_string(), Value::Map(self.seat_range.to_neo4j_map()));
+
+    map
+  }
+}
+
 #[derive(Serialize, Deserialize)]
 pub enum SaleType {
   Free,
@@ -51,14 +66,6 @@ impl SaleType {
     };
     
     map
-  }
-}
-
-struct SaleTypeMap(HashMap<String, Value>);
-
-impl From<SaleType> for SaleTypeMap {
-  fn from(sale_type: SaleType) -> Self {
-    Self(sale_type.to_neo4j_map())
   }
 }
 

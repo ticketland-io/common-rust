@@ -31,7 +31,7 @@ impl Sale {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SaleType {
-  Free,
+  Free {},
   FixedPrice {price: u64},
   Refundable {price: u64},
   DutchAuction {
@@ -47,7 +47,7 @@ impl SaleType {
     let mut map = HashMap::new();
 
      match self {
-      Self::Free => {
+      Self::Free {} => {
         map.insert("type".to_string(), Value::Integer(0));
       },
       Self::FixedPrice {price} => {

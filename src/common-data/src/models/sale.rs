@@ -2,8 +2,10 @@ use std::collections::HashMap;
 use serde_aux::prelude::*;
 use serde::{Deserialize, Serialize};
 use bolt_proto::value::{Value};
+use ticketland_core::error::Error;
+use crate::types::Neo4jResult;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Sale {
   pub account: String,
@@ -31,6 +33,79 @@ impl Sale {
   }
 }
 
+impl TryFrom<Neo4jResult> for Sale {
+  type Error = Error;
+
+  fn try_from(v: Neo4jResult) -> Result<Self, Self::Error> {
+    if v.0.len() == 0 {
+      return Err(Error::EmptyDbResult)
+    }
+
+    let value = v.0.get(0).unwrap().clone();
+
+    let sale = match value {
+      Value::Map(_) => {
+        let map = HashMap::<String, Value>::try_from(value).expect("cannot convert value to map");
+        let mut sale = Sale {
+          ..Default::default()
+        };
+
+        for (k, v) in map {
+          match k.as_str() {
+            "account" => {
+              sale.account = String::try_from(v).expect("cannot convert account");
+            },
+            "ticket_type_index" => {
+              sale.ticket_type_index = i8::try_from(v).expect("cannot convert ticket_type_index") as u8;
+            },
+            "n_tickets" => {
+              sale.n_tickets = i32::try_from(v).expect("cannot convert n_tickets") as u32;
+            },
+            "sale_start_ts" => {
+              sale.sale_start_ts = i32::try_from(v).expect("cannot convert sale_start_ts") as u32;
+            },
+            "sale_end_ts" => {
+              sale.sale_end_ts = i32::try_from(v).expect("cannot convert sale_end_ts") as u32;
+            },
+            "sale_type" => {
+              let mut map = HashMap::<String, Value>::try_from(v).expect("cannot convert value to map");
+              let s_type = i8::try_from(map.remove("type").unwrap()).expect("cannot convert sale_type") as u8;
+              
+              let sale_type = match s_type {
+                0 => SaleType::Free {},
+                1 => SaleType::FixedPrice { price: i64::try_from(map.remove("price").unwrap()).expect("cannot convert price") as u64 },
+                2 => SaleType::Refundable { price: i64::try_from(map.remove("price").unwrap()).expect("cannot convert price") as u64 },
+                3 => SaleType::DutchAuction {
+                  start_price: i64::try_from(map.remove("start_price").unwrap()).expect("cannot convert start_price") as u64,
+                  end_price: i64::try_from(map.remove("end_price").unwrap()).expect("cannot convert end_price") as u64,
+                  curve_length: i16::try_from(map.remove("curve_length").unwrap()).expect("cannot convert curve_length") as u16,
+                  drop_interval: i16::try_from(map.remove("drop_interval").unwrap()).expect("cannot convert drop_interval") as u16,
+                },
+                _ => panic!("Sale type not found"),
+              };
+
+              sale.sale_type = sale_type;
+            },
+            "seat_range" => {
+              let mut map = HashMap::<String, Value>::try_from(v).expect("cannot convert value to map");
+              sale.seat_range = SeatRange {
+                l: i32::try_from(map.remove("l").unwrap()).expect("cannot convert l") as u32,
+                r: i32::try_from(map.remove("r").unwrap()).expect("cannot convert r") as u32
+              }
+            },
+            _ => panic!("unknown field"),
+          }
+        }
+
+        sale
+      }
+      _ => panic!("neo4j result should be a Value::Map"),
+    };
+
+    Ok(sale)
+  }
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SaleType {
@@ -50,6 +125,12 @@ pub enum SaleType {
     end_price: u64,
     curve_length: u16,
     drop_interval: u16,
+  }
+}
+
+impl Default for SaleType {
+  fn default() -> Self {
+    Self::Free {}
   }
 }
 
@@ -82,7 +163,7 @@ impl SaleType {
   }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SeatRange {
   pub l: u32,

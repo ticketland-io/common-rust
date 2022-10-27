@@ -153,10 +153,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
     RETURN 1
   "#;
 
-  println!("before {:?}", sales);
   let sales: Vec<Value> = sales.iter().map(|s| Value::Map(s.to_neo4j_map())).collect();
-  println!("after {:?}", sales);
-  
   let params = create_params(vec![
     ("event_id", Value::String(event_id)),
     ("sales", Value::List(sales.into())),

@@ -3,7 +3,7 @@ use serde_aux::prelude::*;
 use serde::{Deserialize, Serialize};
 use bolt_proto::value::{Value};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Sale {
   pub ticket_type_index: u8,
@@ -29,7 +29,7 @@ impl Sale {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SaleType {
   Free {},
@@ -80,7 +80,7 @@ impl SaleType {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SeatRange {
   pub l: u32,

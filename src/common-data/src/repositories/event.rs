@@ -148,7 +148,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
       SET st = $sale.sale_type
       SET sr = $sale.seat_range
       ',
-      {sale:sale}
+      {s:s, sale:sale}
     ) YIELD value
     RETURN 1
   "#;

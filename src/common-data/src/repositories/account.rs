@@ -17,10 +17,18 @@ pub fn read_account(uid: String) -> (&'static str, Option<Params>) {
   (query, params)
 }
 
-pub fn upsert_account(uid: String, mnemonic: String, pubkey: String) -> (&'static str, Option<Params>) {
+pub fn upsert_account(
+  uid: String,
+  email: String,
+  name: String,
+  mnemonic: String,
+  pubkey: String
+) -> (&'static str, Option<Params>) {
   let query = r#"
     MERGE (acc:Account {uid: $uid})
     ON CREATE SET acc += {
+      email:$email,
+      name:$name,
       mnemonic:$mnemonic,
       pubkey:$pubkey
     }
@@ -29,6 +37,8 @@ pub fn upsert_account(uid: String, mnemonic: String, pubkey: String) -> (&'stati
 
   let params = create_params(vec![
     ("uid", Value::String(uid)),
+    ("email", Value::String(email)),
+    ("name", Value::String(name)),
     ("mnemonic", Value::String(mnemonic)),
     ("pubkey", Value::String(pubkey)),
   ]);

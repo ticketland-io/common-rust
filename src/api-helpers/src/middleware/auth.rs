@@ -111,6 +111,10 @@ where
         
         match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
+            if !user.email_verified {
+              return Err(ErrorUnauthorized("Unauthorized"))
+            }
+
             // make the user available to the downstream handlers
             req.extensions_mut().insert(AuthData {user});
   

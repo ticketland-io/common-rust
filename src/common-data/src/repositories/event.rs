@@ -145,7 +145,7 @@ pub fn upsert_event_sale(
     ("n_tickets", Value::Integer(sale.n_tickets.into())),
     ("sale_start_ts", Value::Integer(sale.sale_start_ts.into())),
     ("sale_end_ts", Value::Integer(sale.sale_end_ts.into())),
-    ("sale_type", Value::Map(sale.sale_end_ts.into())),
+    ("sale_type", Value::Map(sale.sale_type.to_map())),
   ]);
 
   (query, params)

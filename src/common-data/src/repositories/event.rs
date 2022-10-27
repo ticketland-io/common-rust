@@ -136,7 +136,23 @@ pub fn upsert_event_sale(
       sale_start_ts:$sale_start_ts,
       sale_end_ts:$sale_end_ts
     })
-    RETURN evt{.*}
+    WITH s
+    CALL apoc.do.when(
+      EXISTS((sr:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(st:SaleType)),
+      '
+      MATCH (s)-[:HAS_TYPE]->(st:SaleType)
+      SET st = $sale_type
+      SET sr = $seat_range
+      ',
+      '
+      CREATE (sr:SeatRange)<-[:SEAT_RANGE]-(s)-[:HAS_TYPE]->(st:SaleType)
+      SET st = $sale_type
+      SET sr = $seat_range
+      ',
+      {sale_type:$sale_type, seat_range:$seat_range}
+    ) YIELD val
+    MERGE (s)-[:HAS_TYPE]->()
+    RETURN 1
   "#;
 
   let params = create_params(vec![
@@ -146,6 +162,7 @@ pub fn upsert_event_sale(
     ("sale_start_ts", Value::Integer(sale.sale_start_ts.into())),
     ("sale_end_ts", Value::Integer(sale.sale_end_ts.into())),
     ("sale_type", Value::Map(sale.sale_type.to_neo4j_map())),
+    ("seat_range", Value::Map(sale.seat_range.to_neo4j_map())),
   ]);
 
   (query, params)

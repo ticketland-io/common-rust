@@ -1,7 +1,4 @@
-use std::{
-  collections::HashMap,
-  ops::Deref,
-};
+use std::collections::HashMap;
 use bolt_proto::value::{Value};
 use serde::{Deserialize, Serialize};
 
@@ -65,16 +62,19 @@ impl From<SaleType> for SaleTypeMap {
   }
 }
 
-impl Deref for SaleTypeMap {
-  type Target = HashMap<String, Value>;
-
-  fn deref(&self) -> &Self::Target {
-    &self.0
-  }
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct SeatRange {
   pub l: u32,
   pub r: u32,  
+}
+
+impl SeatRange {
+  pub fn to_neo4j_map(&self) -> HashMap<String, Value> {
+    let mut map = HashMap::new();
+
+    map.insert("l".to_string(), Value::Integer(self.l as i64));
+    map.insert("r".to_string(), Value::Integer(self.r as i64));
+
+    map
+  }
 }

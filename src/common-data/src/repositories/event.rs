@@ -163,6 +163,23 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
   (query, params)
 }
 
+pub fn read_event_sale(sale_account: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+  MATCH (sr:SeatRange)<-[:SEAT_RANGE]-(s:Sale {account:$sale_account})-[:HAS_TYPE]->(st:SaleType)
+  RETURN s {
+    .*,
+    seat_range: sr{.*},
+    sale_type: st{.*}
+  }
+  "#;
+
+  let params = create_params(vec![
+    ("sale_account", Value::String(sale_account)),
+  ]);
+
+  (query, params)
+}
+
 pub fn update_metadata_uploaded(event_id: String, arweave_tx_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})

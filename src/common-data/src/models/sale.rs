@@ -29,7 +29,7 @@ pub enum SaleType {
 }
 
 impl SaleType {
-  pub fn to_map(&self) -> HashMap<String, Value> {
+  pub fn to_neo4j_map(&self) -> HashMap<String, Value> {
     let mut map = HashMap::new();
 
      match self {
@@ -61,7 +61,7 @@ struct SaleTypeMap(HashMap<String, Value>);
 
 impl From<SaleType> for SaleTypeMap {
   fn from(sale_type: SaleType) -> Self {
-    Self(sale_type.to_map())
+    Self(sale_type.to_neo4j_map())
   }
 }
 

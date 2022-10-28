@@ -46,7 +46,7 @@ pub async fn with_retry_panic<A, F, R, E>(ms: Option<u64>, attempts: Option<usiz
 
 pub async fn timeout<T, F>(millis: u64, future: F) -> Result<T>
 where
-    F: Future<Output=T> + 'static
+    F: Future<Output=T>
 {
   TokioTimeout(Duration::from_millis(millis), future)
   .await

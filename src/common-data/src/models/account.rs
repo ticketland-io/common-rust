@@ -12,6 +12,9 @@ pub struct Account {
   pub uid: String,
   pub mnemonic: String,
   pub pubkey: String,
+  pub email: String,
+  pub name: String,
+  pub photo_url: String,
 }
 
 impl TryFrom<Neo4jResult> for Account {
@@ -41,6 +44,15 @@ impl TryFrom<Neo4jResult> for Account {
             },
             "pubkey" => {
               account.pubkey = String::try_from(v).expect("cannot convert pubkey");
+            },
+            "email" => {
+              account.email = String::try_from(v).expect("cannot convert email");
+            },
+            "name" => {
+              account.name = String::try_from(v).expect("cannot convert name");
+            },
+            "photo_url" => {
+              account.photo_url = String::try_from(v).expect("cannot convert photo_url");
             },
             _ => panic!("unknown field"),
           }

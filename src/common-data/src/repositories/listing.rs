@@ -31,6 +31,19 @@ pub fn create_sell_listing(
   (query, params)
 }
 
+pub fn read_sell_listing(sell_listing_account: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (sl:SellListing {account:$sell_listing_account})
+    RETURN sl {.*}
+  "#;
+
+  let params = create_params(vec![
+    ("sell_listing_account", Value::String(sell_listing_account)),
+  ]);
+
+  (query, params)
+}
+
 pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (:Account)-[:HAS_SELL_LISTING {open: true}]->(sl:SellListing)-[:FOR]->(t:Ticket)-[:FROM]->(evt:Event {event_id:$event_id})

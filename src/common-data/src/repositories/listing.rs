@@ -33,8 +33,11 @@ pub fn create_sell_listing(
 
 pub fn read_sell_listing(sell_listing_account: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (sl:SellListing {account:$sell_listing_account})
-    RETURN sl {.*}
+    MATCH (acc:Account)-[:HAS_SELL_LISTING {open: true}]->(sl:SellListing {account:$sell_listing_account})-[:FOR]->(t:Ticket)
+    RETURN sl {
+      .*,
+      ticket_nft: t.ticket_nft
+    }
   "#;
 
   let params = create_params(vec![

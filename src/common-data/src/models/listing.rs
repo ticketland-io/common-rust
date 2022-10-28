@@ -8,6 +8,7 @@ use crate::types::Neo4jResult;
 #[serde(rename_all = "camelCase")]
 pub struct SellListing {
   pub account: String,
+  pub ticket_nft: String,
   pub ask_price: u64,
 }
 
@@ -32,6 +33,9 @@ impl TryFrom<Neo4jResult> for SellListing {
           match k.as_str() {
             "account" => {
               sell_listing.account = String::try_from(v).expect("cannot convert account");
+            },
+            "ticket_nft" => {
+              sell_listing.ticket_nft = String::try_from(v).expect("cannot convert ticket_nft");
             },
             "ask_price" => {
               sell_listing.ask_price = i64::try_from(v).expect("cannot convert ask_price") as u64;

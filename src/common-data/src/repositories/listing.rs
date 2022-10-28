@@ -6,13 +6,13 @@ use ticketland_core::{
 
 pub fn create_sell_listing(
   uid: String,
-  ticket_metadata: String,
+  ticket_nft: String,
   sell_listing_account: String,
   ask_price: i64,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $uid})
-    MATCH (t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (t:Ticket {ticket_nft:$ticket_nft})
     MERGE (acc)-[:HAS_SELL_LISTING {open: true}]->(sl:SellListing {
       account:$sell_listing_account,
       ask_price:$ask_price
@@ -23,7 +23,7 @@ pub fn create_sell_listing(
 
   let params = create_params(vec![
     ("uid", Value::String(uid)),
-    ("ticket_metadata", Value::String(ticket_metadata)),
+    ("ticket_metadata", Value::String(ticket_nft)),
     ("sell_listing_account", Value::String(sell_listing_account)),
     ("ask_price", Value::Integer(ask_price.into())),
   ]);
@@ -37,7 +37,7 @@ pub fn read_sell_listings_for_event(event_id: String, skip: u32, limit: u32) -> 
     RETURN sl{
       .*,
       metadata_cid: evt.metadata_cid,
-      ticket_metadata: t.ticket_metadata,
+      ticket_nft: t.ticket_nft,
       seat_index: t.seat_index,
       seat_name: t.seat_name
     } as result
@@ -110,11 +110,11 @@ pub fn create_buy_listing(
 pub fn fill_sell_listing(
   ticket_buyer_uid: String,
   sell_listing_account: String,
-  ticket_metadata: String,
+  ticket_nft: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (ticket_buyer:Account {uid: $ticket_buyer_uid})
-    MATCH (ticket_seller:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (ticket_seller:Account)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_nft:$ticket_nft})
     MATCH (ticket_seller)-[hsl:HAS_SELL_LISTING {open: true}]->(sl:SellListing {account:$sell_listing_account})
     SET hsl.open = false
     SET ht.owner = false
@@ -125,7 +125,7 @@ pub fn fill_sell_listing(
   let params = create_params(vec![
     ("ticket_buyer_uid", Value::String(ticket_buyer_uid)),
     ("sell_listing_account", Value::String(sell_listing_account)),
-    ("ticket_metadata", Value::String(ticket_metadata)),
+    ("ticket_metadata", Value::String(ticket_nft)),
   ]);
 
   (query, params)
@@ -134,10 +134,10 @@ pub fn fill_sell_listing(
 pub fn fill_buy_listing(
   ticket_seller_uid: String,
   buy_listing_account: String,
-  ticket_metadata: String,
+  ticket_nft: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (ticket_seller:Account {uid: $ticket_seller_uid})-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_metadata:$ticket_metadata})
+    MATCH (ticket_seller:Account {uid: $ticket_seller_uid})-[ht:HAS_TICKET {owner: true}]->(t:Ticket {ticket_nft:$ticket_nft})
     MATCH (ticket_buyer:Account)-[hbl:HAS_BUY_LISTING {open: true}]->(bl:BuyListing {account:$buy_listing_account})
     SET hbl.open = false
     SET ht.owner = false
@@ -148,7 +148,7 @@ pub fn fill_buy_listing(
   let params = create_params(vec![
     ("ticket_seller_uid", Value::String(ticket_seller_uid)),
     ("buy_listing_account", Value::String(buy_listing_account)),
-    ("ticket_metadata", Value::String(ticket_metadata)),
+    ("ticket_metadata", Value::String(ticket_nft)),
   ]);
 
   (query, params)

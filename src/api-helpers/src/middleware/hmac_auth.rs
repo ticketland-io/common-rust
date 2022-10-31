@@ -62,10 +62,18 @@ where
         .split_whitespace();
         
         if let Some(prefix) = iter.next() {
-          if prefix != "Bearer" {
+          if prefix != "TL-HMAC" {
             return Err(ErrorUnauthorized("Unauthorized"))
           }
         }
+
+        let _access_token = if let Some(access_token) = iter.next() {
+          access_token
+        } else {
+          return Err(ErrorUnauthorized("Unauthorized"))
+        };
+
+        //TODO: validate the access token
 
         return Ok(srv.call(req).await?)
       }

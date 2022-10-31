@@ -64,7 +64,7 @@ where
     let ts = parts.get(1).context("Unauthorized")?;
 
     Self::is_valid_ts(ts)?;
-    ed25519::verify
+    ed25519::verify(msg.as_bytes(), client_id.as_bytes(), client_id)?;
 
     todo!()
   }

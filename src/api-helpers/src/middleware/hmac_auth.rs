@@ -18,6 +18,8 @@ use futures_util::future::{LocalBoxFuture, ok, err, Ready};
 use sha2::Sha256;
 use hmac::{Hmac, Mac};
 use common_data::{
+  helpers::{send_read},
+  models::api_client::ApiClient,
   repositories::api_client::read_api_client,
 };
 use ticketland_core::actor::neo4j::Neo4jActor;
@@ -100,7 +102,7 @@ where
     Ok(hex::encode(&mac.finalize().into_bytes()[..]))
   }
 
-  fn verify_sig(neo4j: Arc<Addr<Neo4jActor>>, msg: &str, sig: &str) -> Result<String> {
+  async fn verify_sig(neo4j: Arc<Addr<Neo4jActor>>, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
 
@@ -109,8 +111,12 @@ where
 
     Self::is_valid_ts(ts)?;
     
-    let secret_key = "";
-    let local_sig = Self::calculate_sig(secret_key, msg)?;
+    let (query, db_query_params) = read_api_client(client_id.to_string());
+    let api_client = send_read(Arc::clone(&neo4j), query, db_query_params)
+    .await?
+    .map(TryInto::<ApiClient>::try_into)?;
+
+    let local_sig = Self::calculate_sig(api_client.secret_key, msg)?;
 
     if sig != local_sig {
       return Err(Report::msg("Unauthorized"));
@@ -159,7 +165,9 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         };
 
-        let client_id = Self::verify_sig(neo4j, msg, access_token).map_err(|_| ErrorUnauthorized("Unauthorized"))?;
+        let client_id = Self::verify_sig(neo4j, msg, access_token)
+        .await
+        .map_err(|_| ErrorUnauthorized("Unauthorized"))?;
 
         req.extensions_mut().insert(ClientAuth {client_id});
 

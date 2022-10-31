@@ -74,7 +74,6 @@ where
         };
 
         //TODO: validate the access token
-
         return Ok(srv.call(req).await?)
       }
     )

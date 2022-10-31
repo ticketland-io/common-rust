@@ -67,13 +67,6 @@ impl<S, B> CanvaMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
-  fn calculate_sig(canva_key: String, message: String) -> String {
-    let key = base64::decode(canva_key).unwrap();
-    let mut mac = Hmac::<Sha256>::new_from_slice(key.as_ref()).unwrap();
-
-    mac.update(format!("{}", message).as_bytes());
-    hex::encode(&mac.finalize().into_bytes()[..])
-  }
 
   async fn create_get_message(req: &mut ServiceRequest) -> Result<(Vec<String>, String), Error> {
     let qs = QString::from(req.query_string());

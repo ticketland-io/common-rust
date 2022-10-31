@@ -18,7 +18,7 @@ use ticketland_crypto::{
   asymetric::ed25519,
 };
 
-const MAX_TOKEN_VALIDITY_SECS: i64 = 5; // 5 secs;
+const MAX_TOKEN_VALIDITY_SECS: i64 = 60; // 60 secs;
 
 #[derive(Debug, Clone)]
 pub struct ClientAuth {

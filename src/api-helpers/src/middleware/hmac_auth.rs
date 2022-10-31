@@ -25,7 +25,7 @@ use ticketland_crypto::{
 };
 use ticketland_core::actor::neo4j::Neo4jActor;
 
-const MAX_TOKEN_VALIDITY_SECS: i64 = 100000; // 60 secs;
+const MAX_TOKEN_VALIDITY_SECS: i64 = 60; // 60 secs;
 
 #[derive(Debug, Clone)]
 pub struct ClientAuth {

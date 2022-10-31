@@ -17,6 +17,9 @@ use actix_web::{
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
 use sha2::Sha256;
 use hmac::{Hmac, Mac};
+use common_data::{
+  repositories::api_client::read_api_client,
+};
 use ticketland_core::actor::neo4j::Neo4jActor;
 
 const MAX_TOKEN_VALIDITY_SECS: i64 = 5; // 5 secs;

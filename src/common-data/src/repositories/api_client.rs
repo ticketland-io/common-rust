@@ -7,7 +7,7 @@ use ticketland_core::{
 pub fn read_api_client(client_id: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (ac:ApiClient {client_id: $client_id})
-    RETURN acc{.*}
+    RETURN ac{.*}
   "#;
 
   let params = create_params(vec![

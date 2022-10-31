@@ -78,10 +78,11 @@ where
   fn verify_sig(msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
+    let pub_key = base64::decode(client_id)?;
     let ts = parts.get(1).context("Unauthorized")?;
 
     Self::is_valid_ts(ts)?;
-    ed25519::verify(msg.as_bytes(), client_id.as_bytes(), sig)?;
+    ed25519::verify(msg.as_bytes(), &pub_key, sig)?;
 
     Ok(client_id.to_string())
   }

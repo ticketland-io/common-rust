@@ -17,6 +17,23 @@ use ticketland_crypto::ec::ed25519;
 
 const MAX_TOKEN_VALIDITY_SECS: i64 = 5; // 5 secs;
 
+#[derive(Debug, Clone)]
+pub struct ClientAuth {
+  pub client_id: String,
+}
+
+impl FromRequest for ClientAuth {
+  type Error = Error;
+  type Future = Ready<Result<Self, Self::Error>>;
+
+  fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+    req.extensions()
+      .get::<ClientAuth>()
+      .map(|client_auth| client_auth.clone())
+      .map(ok)
+      .unwrap_or_else(|| err(ErrorUnauthorized("not authorized")))
+  }
+}
 pub struct EcAuthnMiddlewareFactory {}
 
 impl<S, B> Transform<S, ServiceRequest> for EcAuthnMiddlewareFactory
@@ -64,9 +81,9 @@ where
     let ts = parts.get(1).context("Unauthorized")?;
 
     Self::is_valid_ts(ts)?;
-    ed25519::verify(msg.as_bytes(), client_id.as_bytes(), client_id)?;
+    ed25519::verify(msg.as_bytes(), client_id.as_bytes(), sig)?;
 
-    todo!()
+    Ok(client_id.to_string())
   }
 }
 
@@ -110,7 +127,8 @@ where
 
         let client_id = Self::verify_sig(msg, access_token).map_err(|_| ErrorUnauthorized("Unauthorized"))?;
 
-        //TODO: validate the access token
+        req.extensions_mut().insert(ClientAuth {client_id});
+
         return Ok(srv.call(req).await?)
       }
     )

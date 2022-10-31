@@ -6,3 +6,4 @@ pub mod metadata;
 pub mod stripe_account;
 pub mod sale;
 pub mod listing;
+pub mod api_client;

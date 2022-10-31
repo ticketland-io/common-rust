@@ -1,0 +1,13 @@
+[package]
+name = "ticketland-crypto"
+version = "0.1.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "1.0"
+serde_json = "1.0"
+ed25519-dalek = { version = "1.0.1", features = ["serde"] }
+eyre = "0.6.8"
+rand = "0.7"

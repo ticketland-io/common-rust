@@ -89,13 +89,12 @@ where
     Box::pin(
       async move {
         let headers = req.headers();
-        let bearer = headers.get("Authorization");
+        let bearer = headers.get("Authorization").ok_or(ErrorUnauthorized("Unauthorized"))?;
         
-        if bearer.is_none() {
-          return Err(ErrorUnauthorized("Unauthorized"))
-        }
-        
-        let mut iter = bearer.unwrap().to_str().unwrap().split_whitespace();
+        let mut iter = bearer
+        .to_str()
+        .map_err(|_| ErrorUnauthorized("Unauthorized"))?
+        .split_whitespace();
         
         if let Some(prefix) = iter.next() {
           if prefix != "Bearer" {

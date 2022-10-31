@@ -15,8 +15,6 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use sha2::Sha256;
-use hmac::{Hmac, Mac};
 use common_data::{
   helpers::{send_read},
   models::api_client::ApiClient,

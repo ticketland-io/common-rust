@@ -12,8 +12,6 @@ use actix_web::{
   Error,
   error::ErrorUnauthorized,
 };
-use sha2::Sha256;
-use hmac::{Hmac, Mac};
 use chrono::{Utc};
 use futures_util::{
   stream::StreamExt,

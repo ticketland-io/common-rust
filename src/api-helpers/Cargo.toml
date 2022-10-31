@@ -20,8 +20,4 @@ common-data = { git = "https://github.com/ticketland-io/common-rust", version = 
 ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.1" }
 serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1.57"
-base64 = "0.13.0"
-hmac = "0.12.1"
-sha2 = "0.10.5"
-hex = "0.4"
 qstring = "0.7.2"

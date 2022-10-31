@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use bolt_proto::value::{Value};
 use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
-use serde_hex::{SerHex,CompactPfx};
+use serde_hex::{SerHex, CompactPfx};
 
 #[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]

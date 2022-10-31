@@ -1,9 +1,9 @@
 use std::collections::HashMap;
-use serde_aux::prelude::*;
 use serde::{Deserialize, Serialize};
 use bolt_proto::value::{Value};
 use ticketland_core::error::Error;
 use crate::types::Neo4jResult;
+use serde_hex::{SerHex,CompactPfx};
 
 #[derive(Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -111,17 +111,17 @@ impl TryFrom<Neo4jResult> for Sale {
 pub enum SaleType {
   Free {},
   FixedPrice {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(with = "SerHex::<CompactPfx>")]
     price: u64
   },
   Refundable {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(with = "SerHex::<CompactPfx>")]
     price: u64
   },
   DutchAuction {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(with = "SerHex::<CompactPfx>")]
     start_price: u64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(with = "SerHex::<CompactPfx>")]
     end_price: u64,
     curve_length: u16,
     drop_interval: u16,

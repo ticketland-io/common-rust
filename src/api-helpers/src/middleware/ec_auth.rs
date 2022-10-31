@@ -13,7 +13,10 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use ticketland_crypto::ec::ed25519;
+use ticketland_crypto::{
+  encoding::base64,
+  asymetric::ed25519,
+};
 
 const MAX_TOKEN_VALIDITY_SECS: i64 = 5; // 5 secs;
 

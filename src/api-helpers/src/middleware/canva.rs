@@ -18,6 +18,9 @@ use futures_util::{
   future::{LocalBoxFuture},
 };
 use qstring::QString;
+use ticketland_crypto::{
+  symetric::hmac::sign_sha256,
+};
 
 const LENIENCY_IN_SECS: i64 = 300;
 const VERSION: &str = "v1";
@@ -183,7 +186,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         }
 
-        let sig = Self::calculate_sig(canva_key, message);
+        let sig = sign_sha256(&canva_key, &message).map_err(|_| ErrorUnauthorized("Unauthorized"))?;
       
         if !signatures.iter().any(|v| *v == sig) {
           return Err(ErrorUnauthorized("Unauthorized"))

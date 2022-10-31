@@ -20,6 +20,9 @@ use common_data::{
   models::api_client::ApiClient,
   repositories::api_client::read_api_client,
 };
+use ticketland_crypto::{
+  symetric::hmac::sign_sha256,
+};
 use ticketland_core::actor::neo4j::Neo4jActor;
 
 const MAX_TOKEN_VALIDITY_SECS: i64 = 5; // 5 secs;
@@ -92,14 +95,6 @@ where
     Ok(())
   }
 
-  fn calculate_sig(secret_key: &str, message: &str) -> Result<String> {
-    let key = base64::decode(secret_key)?;
-    let mut mac = Hmac::<Sha256>::new_from_slice(key.as_ref()).unwrap();
-
-    mac.update(format!("{}", message).as_bytes());
-    Ok(hex::encode(&mac.finalize().into_bytes()[..]))
-  }
-
   async fn verify_sig(neo4j: Arc<Addr<Neo4jActor>>, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
@@ -112,7 +107,7 @@ where
     .await
     .map(TryInto::<ApiClient>::try_into)??;
 
-    let local_sig = Self::calculate_sig(&api_client.client_secret, msg)?;
+    let local_sig = sign_sha256(&api_client.client_secret, msg)?;
 
     if sig != local_sig {
       return Err(Report::msg("Unauthorized"));

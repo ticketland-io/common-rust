@@ -1,7 +1,8 @@
-pub fn encode() -> String {
-  let pub_key = base64::encode(client_id)?;
-}
+use eyre::Result;
 
-pub fn decode() -> String {
-  let pub_key = base64::decode(client_id)?;
+pub fn encode(data: &str) -> String {
+  base64::encode(data)
+}
+pub fn decode(data: &str) -> Result<Vec<u8>> {
+  Ok(base64::decode(data)?)
 }

@@ -26,10 +26,10 @@ impl FromRequest for AuthData {
 
   fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
     req.extensions()
-      .get::<AuthData>()
-      .map(|auth_data| auth_data.clone())
-      .map(ok)
-      .unwrap_or_else(|| err(ErrorUnauthorized("not authorized")))
+    .get::<AuthData>()
+    .map(|auth_data| auth_data.clone())
+    .map(ok)
+    .unwrap_or_else(|| err(ErrorUnauthorized("not authorized")))
   }
 }
 

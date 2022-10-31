@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 ed25519-dalek = "1.0.1"
+eyre = "0.6.8"
 rand = "0.7"

@@ -105,18 +105,16 @@ where
   async fn verify_sig(neo4j: Arc<Addr<Neo4jActor>>, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
-
-    // LOAD the priv key for this client
     let ts = parts.get(1).context("Unauthorized")?;
-
+    
     Self::is_valid_ts(ts)?;
     
     let (query, db_query_params) = read_api_client(client_id.to_string());
     let api_client = send_read(Arc::clone(&neo4j), query, db_query_params)
-    .await?
-    .map(TryInto::<ApiClient>::try_into)?;
+    .await
+    .map(TryInto::<ApiClient>::try_into)??;
 
-    let local_sig = Self::calculate_sig(api_client.secret_key, msg)?;
+    let local_sig = Self::calculate_sig(&api_client.client_secret, msg)?;
 
     if sig != local_sig {
       return Err(Report::msg("Unauthorized"));

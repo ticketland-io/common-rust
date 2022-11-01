@@ -19,7 +19,7 @@ pub fn upsert_user_ticket(
       ticket_nft:$ticket_nft,
       ticket_metadata:$ticket_metadata,
       seat_index:$seat_index,
-      seat_name:$seat_name,
+      seat_name:$seat_name
     })-[:FROM]->(evt)
     ON CREATE SET
       ht.created_at = timestamp(),

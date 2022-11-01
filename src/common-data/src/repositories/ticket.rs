@@ -78,3 +78,16 @@ pub fn update_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
 
   (query, params)
 }
+
+pub fn read_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {ticket_nft:$ticket_nft})
+    RETURN evt.attended
+  "#;
+
+  let params = create_params(vec![
+    ("ticket_nft", Value::String(ticket_nft)),
+  ]);
+
+  (query, params)
+}

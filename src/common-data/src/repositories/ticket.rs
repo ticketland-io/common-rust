@@ -67,7 +67,7 @@ pub fn read_user_tickets_for_event(
 
 pub fn update_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (evt:Event {ticket_nft:$ticket_nft})
+    MATCH (t:Ticket {ticket_nft:$ticket_nft})
     SET evt.attended = true
     RETURN 1
   "#;
@@ -81,7 +81,7 @@ pub fn update_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
 
 pub fn read_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
   let query = r#"
-    MATCH (evt:Event {ticket_nft:$ticket_nft})
+    MATCH (t:Ticket {ticket_nft:$ticket_nft})
     RETURN evt.attended
   "#;
 

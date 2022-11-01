@@ -11,6 +11,7 @@ pub fn upsert_user_ticket(
   ticket_metadata: String,
   seat_index: u32,
   seat_name: String,
+  ticket_type_index: u8,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})
@@ -18,6 +19,7 @@ pub fn upsert_user_ticket(
     MERGE (acc)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {
       ticket_nft:$ticket_nft,
       ticket_metadata:$ticket_metadata,
+      ticket_type_index:$ticket_type_index,
       seat_index:$seat_index,
       seat_name:$seat_name
     })-[:FROM]->(evt)
@@ -34,6 +36,8 @@ pub fn upsert_user_ticket(
     ("ticket_metadata", Value::String(ticket_metadata)),
     ("seat_index", Value::Integer(seat_index.into())),
     ("seat_name", Value::String(seat_name)),
+    ("ticket_type_index", Value::Integer(ticket_type_index.into())),
+
   ]);
 
   (query, params)

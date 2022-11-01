@@ -12,14 +12,15 @@ use actix_web::{
   Error,
   error::ErrorUnauthorized,
 };
-use sha2::Sha256;
-use hmac::{Hmac, Mac};
 use chrono::{Utc};
 use futures_util::{
   stream::StreamExt,
   future::{LocalBoxFuture},
 };
 use qstring::QString;
+use ticketland_crypto::{
+  symetric::hmac::sign_sha256,
+};
 
 const LENIENCY_IN_SECS: i64 = 300;
 const VERSION: &str = "v1";
@@ -69,13 +70,6 @@ impl<S, B> CanvaMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
-  fn calculate_sig(canva_key: String, message: String) -> String {
-    let key = base64::decode(canva_key).unwrap();
-    let mut mac = Hmac::<Sha256>::new_from_slice(key.as_ref()).unwrap();
-
-    mac.update(format!("{}", message).as_bytes());
-    hex::encode(&mac.finalize().into_bytes()[..])
-  }
 
   async fn create_get_message(req: &mut ServiceRequest) -> Result<(Vec<String>, String), Error> {
     let qs = QString::from(req.query_string());
@@ -192,7 +186,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         }
 
-        let sig = Self::calculate_sig(canva_key, message);
+        let sig = sign_sha256(&canva_key, &message).map_err(|_| ErrorUnauthorized("Unauthorized"))?;
       
         if !signatures.iter().any(|v| *v == sig) {
           return Err(ErrorUnauthorized("Unauthorized"))

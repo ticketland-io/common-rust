@@ -1,6 +1,6 @@
 [package]
 name = "api-helpers"
-version = "0.3.1"
+version = "0.3.9"
 edition = "2021"
 license = "BUSL-1.1"
 
@@ -12,14 +12,12 @@ actix-web = "4.0.1"
 actix-http = "3.2.1"
 bolt-client = "0.10.1"
 chrono = "0.4.21"
+eyre = "0.6.8"
 futures-util = "0.3.15"
 fireauth =  { git = "https://github.com/Apocentre/fireauth", version = "0.1.6" }
-ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.8" }
-common-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.3.0" }
+ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.13" }
+common-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.3.28" }
+ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.10" }
 serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1.57"
-base64 = "0.13.0"
-hmac = "0.12.1"
-sha2 = "0.10.5"
-hex = "0.4"
 qstring = "0.7.2"

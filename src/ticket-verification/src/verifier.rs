@@ -3,7 +3,8 @@ use std::{
   str::FromStr,
 };
 use eyre::{Result};
-use borsh::BorshSerialize;
+use serde::{Serialize, Deserialize};
+use borsh::{BorshSerialize};
 use solana_sdk::{
   pubkey::Pubkey,
   signer::keypair::Keypair,
@@ -30,6 +31,15 @@ struct VerifyTicketResult<'a> {
   pub ticket_metadata: &'a str,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct VerificationResponse {
+  pub event_id: String,
+  pub code_challenge: String,
+  pub ticket_owner_pubkey: String,
+  pub ticket_metadata: String,
+  pub server_sig: String,
+}
+
 fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketResult<'a>) -> String {
   let signer = Keypair::from_base58_string(signer_key);
   let mut message: Vec<u8> = Vec::new();
@@ -47,7 +57,7 @@ pub async fn verify_ticket(
   ticket_metadata: &str,
   ticket_owner_pubkey: &str,
   sig: &str,
-) -> Result<String> {
+) -> Result<VerificationResponse> {
   // 1. recover the signer
   let raw_message = VerifyTicketMsg {
     event_id: &event_id,
@@ -69,14 +79,20 @@ pub async fn verify_ticket(
     ).await?;
 
     if ticket_metadata_account.owner == ticket_owner {
-      let sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketResult {
+      let server_sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketResult {
         event_id: &event_id,
         code_challenge: &code_challenge,
         ticket_owner_pubkey: &ticket_owner_pubkey,
         ticket_metadata: &ticket_metadata,
       });
 
-      Ok(sig)
+      Ok(VerificationResponse {
+        event_id: event_id.to_string(),
+        code_challenge: code_challenge.to_string(),
+        ticket_owner_pubkey: ticket_owner_pubkey.to_string(),
+        ticket_metadata: ticket_metadata.to_string(),
+        server_sig,
+      })
     } else {
       return Err(Error::TicketVerificationError)?
     }
@@ -84,3 +100,12 @@ pub async fn verify_ticket(
     return Err(Error::TicketVerificationError)?
   }
 }
+
+// pub fn validate_verification_result() -> Result<()> {
+//   let local_sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketResult {
+//     event_id: &event_id,
+//     code_challenge: &code_challenge,
+//     ticket_owner_pubkey: &ticket_owner_pubkey,
+//     ticket_metadata: &ticket_metadata,
+//   });
+// }

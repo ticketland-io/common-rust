@@ -1,6 +1,6 @@
 [package]
 name = "ticket-verification"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "BUSL-1.1"
 
@@ -14,3 +14,4 @@ solana-sdk = "1.11.10"
 thiserror = "1.0.33"
 program-artifacts = { git = "https://github.com/ticketland-io/program-artifacts", version = "0.1.22" }
 solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", version = "0.1.9" }
+serde = "1.0"

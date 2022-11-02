@@ -8,7 +8,13 @@ pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'st
   let query = r#"
     MATCH (evt:Event {category: $category})
     WHERE evt.end_date > timestamp()
-    RETURN evt{.*}
+    MATCH (evt)-[:HAS_SALE]->(s)
+    MATCH (s)-[:HAS_TYPE]->(st)
+    WITH evt, COLLECT(s{.*, sale_type: st{.*}}) as sales
+    RETURN DISTINCT evt {
+        .*,
+        sales: sales
+    }
     ORDER BY evt.start_date DESC
     SKIP $skip
     LIMIT $limit

@@ -31,7 +31,7 @@ struct VerifyTicketResult<'a> {
   pub ticket_metadata: &'a str,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct VerificationResponse {
   pub event_id: String,
   pub code_challenge: String,

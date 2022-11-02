@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
-use serde::ser::{Serialize, Serializer, SerializeMap};
+use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
 use bolt_proto::{value::Value};
 use crate::types::{WrappedValue};
 
@@ -25,6 +25,16 @@ impl Serialize for WrappedValue {
         }
         
         result.end()
+      },
+      Value::List(_) => {
+        let list = <Vec<Value>>::try_from(self.0.clone()).unwrap();
+        let mut seq = serializer.serialize_seq(Some(list.len()))?;
+
+        for item in list.into_iter() {
+          seq.serialize_element(&WrappedValue(item))?;
+        }
+
+        seq.end()
       },
       _ => serializer.serialize_str("")
     } 

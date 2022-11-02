@@ -5,4 +5,5 @@ members = [
   "src/common-data",
   "src/utils",
   "src/ticketland-crypto",
+  "src/ticket-verification",
 ]

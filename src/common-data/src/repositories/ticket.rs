@@ -11,6 +11,7 @@ pub fn upsert_user_ticket(
   ticket_metadata: String,
   seat_index: u32,
   seat_name: String,
+  ticket_type_index: u8,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (evt:Event {event_id:$event_id})
@@ -18,8 +19,9 @@ pub fn upsert_user_ticket(
     MERGE (acc)-[ht:HAS_TICKET {owner: true}]->(t:Ticket {
       ticket_nft:$ticket_nft,
       ticket_metadata:$ticket_metadata,
+      ticket_type_index:$ticket_type_index,
       seat_index:$seat_index,
-      seat_name:$seat_name,
+      seat_name:$seat_name
     })-[:FROM]->(evt)
     ON CREATE SET
       ht.created_at = timestamp(),
@@ -34,6 +36,8 @@ pub fn upsert_user_ticket(
     ("ticket_metadata", Value::String(ticket_metadata)),
     ("seat_index", Value::Integer(seat_index.into())),
     ("seat_name", Value::String(seat_name)),
+    ("ticket_type_index", Value::Integer(ticket_type_index.into())),
+
   ]);
 
   (query, params)
@@ -87,6 +91,19 @@ pub fn read_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
 
   let params = create_params(vec![
     ("ticket_nft", Value::String(ticket_nft)),
+  ]);
+
+  (query, params)
+}
+
+pub fn read_ticket_by_ticket_metadata(ticket_metadata: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (t:Ticket {ticket_metadata:$ticket_metadata})
+    RETURN t{.*}
+  "#;
+  
+  let params = create_params(vec![
+    ("ticket_metadata", Value::String(ticket_metadata)),
   ]);
 
   (query, params)

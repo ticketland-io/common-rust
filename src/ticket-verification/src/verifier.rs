@@ -101,11 +101,28 @@ pub async fn verify_ticket(
   }
 }
 
-// pub fn validate_verification_result() -> Result<()> {
-//   let local_sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketResult {
-//     event_id: &event_id,
-//     code_challenge: &code_challenge,
-//     ticket_owner_pubkey: &ticket_owner_pubkey,
-//     ticket_metadata: &ticket_metadata,
-//   });
-// }
+pub fn validate_verification_result(
+  verification_result: VerificationResponse,
+  ticket_verifier_priv_key: String,
+) -> Result<()> {
+  let VerificationResponse {
+    event_id,
+    code_challenge,
+    ticket_owner_pubkey,
+    ticket_metadata,
+    server_sig,
+  } = verification_result;
+  
+  let local_sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketResult {
+    event_id: &event_id,
+    code_challenge: &code_challenge,
+    ticket_owner_pubkey: &ticket_owner_pubkey,
+    ticket_metadata: &ticket_metadata,
+  });
+
+  if local_sig != server_sig {
+    return Err(Error::InvalidVerificationResult)?
+  }
+
+  Ok(())
+}

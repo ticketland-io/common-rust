@@ -2,6 +2,7 @@ use std::{
   sync::Arc,
   str::FromStr,
 };
+use actix::prelude::*;
 use eyre::{Result};
 use serde::{Serialize, Deserialize};
 use borsh::{BorshSerialize};
@@ -14,9 +15,10 @@ use solana_sdk::{
 };
 use common_data::{
   helpers::{send_read},
-  // models::ticket::Ticket,
-  // repositories::ticket::{read_event},
+  models::ticket::Ticket,
+  repositories::ticket::{read_ticket_by_ticket_metadata},
 };
+use ticketland_core::actor::neo4j::Neo4jActor;
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
 use crate::error::Error;
@@ -58,6 +60,7 @@ fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> String {
 
 pub async fn verify_ticket(
   rpc_client: Arc<RpcClient>,
+  neo4j: Arc<Addr<Neo4jActor>>,
   ticket_verifier_priv_key: String,
   event_id: &str,
   code_challenge: &str,
@@ -81,7 +84,12 @@ pub async fn verify_ticket(
 
   if sig.verify(&ticket_owner.to_bytes(), message_hash) {
     // 2. Load the ticket type index for the given ticket
-    let ticket_type_index = 0;
+    let (query, db_query_params) = read_ticket_by_ticket_metadata(ticket_metadata.to_string());
+    let ticket = send_read(neo4j, query, db_query_params)
+    .await
+    .map(TryInto::<Ticket>::try_into)??;
+    let ticket_type_index = ticket.ticket_type_index;
+    
 
     // 3. check that signer is the owner of the given ticket_metadata 
     let ticket_metadata_account = rpc_client.get_anchor_account_data::<TicketMetadata>(

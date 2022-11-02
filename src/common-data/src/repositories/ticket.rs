@@ -68,3 +68,16 @@ pub fn read_user_tickets_for_event(
 
   (query, params)
 }
+
+pub fn read_ticket_by_ticket_metadata(ticket_metadata: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (t:Ticket {ticket_metadata:$ticket_metadata})
+    RETURN t{.*}
+  "#;
+  
+  let params = create_params(vec![
+    ("ticket_metadata", Value::String(ticket_metadata)),
+  ]);
+
+  (query, params)
+}

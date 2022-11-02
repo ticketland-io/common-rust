@@ -1,6 +1,6 @@
 [package]
 name = "ticket-verification"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "BUSL-1.1"
 
@@ -12,6 +12,7 @@ bs58 = "0.4.0"
 eyre = "0.6.8"
 solana-sdk = "1.11.10"
 thiserror = "1.0.33"
+common-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.3.30" }
 program-artifacts = { git = "https://github.com/ticketland-io/program-artifacts", version = "0.1.22" }
 solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", version = "0.1.9" }
 serde = "1.0"

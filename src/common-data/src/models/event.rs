@@ -27,10 +27,6 @@ pub struct Event {
   pub category: String,
 }
 
-pub fn normalize_event_id(event_id: String) -> String {
-  event_id.replace("-", "")
-}
-
 impl TryFrom<Neo4jResult> for Event {
   type Error = Error;
 

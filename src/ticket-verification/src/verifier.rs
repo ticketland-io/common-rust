@@ -14,8 +14,8 @@ use solana_sdk::{
 };
 use common_data::{
   helpers::{send_read},
-  models::ticket::Ticket,
-  repositories::ticket::{read_event},
+  // models::ticket::Ticket,
+  // repositories::ticket::{read_event},
 };
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
@@ -81,7 +81,7 @@ pub async fn verify_ticket(
 
   if sig.verify(&ticket_owner.to_bytes(), message_hash) {
     // 2. Load the ticket type index for the given ticket
-
+    let ticket_type_index = 0;
 
     // 3. check that signer is the owner of the given ticket_metadata 
     let ticket_metadata_account = rpc_client.get_anchor_account_data::<TicketMetadata>(
@@ -94,6 +94,7 @@ pub async fn verify_ticket(
         code_challenge: &code_challenge,
         ticket_owner_pubkey: &ticket_owner_pubkey,
         ticket_metadata: &ticket_metadata,
+        ticket_type_index,
       });
 
       Ok(VerificationResponse {

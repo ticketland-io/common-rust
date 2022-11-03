@@ -10,7 +10,7 @@ pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'st
     WHERE evt.end_date > timestamp()
     MATCH (evt)-[:HAS_SALE]->(s)
     MATCH (s)-[:HAS_TYPE]->(st)
-    WITH evt, COLLECT(s{.*, price: st.price}) as sales
+    WITH evt, COLLECT(s{.*, saleType: st{.*}}) as sales
     RETURN DISTINCT evt {
       .*,
       sales: sales

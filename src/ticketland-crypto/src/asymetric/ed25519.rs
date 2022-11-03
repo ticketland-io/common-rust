@@ -22,6 +22,7 @@ use ed25519_dalek::{
   Signer,
   Verifier,
 };
+use crate::hash::keccak256;
 
 pub fn create_keypair() -> Keypair {
   let mut csprng = OsRng{};
@@ -31,11 +32,15 @@ pub fn create_keypair() -> Keypair {
 pub fn sign(msg: &[u8], keypair: &[u8]) -> Result<Signature> {
   let keypair = base64::decode(keypair)?;
   let keypair: Keypair = serde_json::from_slice(&keypair)?;
-  Ok(keypair.sign(msg))
+  let msg = keccak256::hash(msg);
+
+  Ok(keypair.sign(msg.as_ref()))
 }
 
 pub fn verify(msg: &[u8], pub_key: &[u8], sig: &str) -> Result<()> {
   let pub_key = base64::decode(pub_key)?;
   let public_key: PublicKey = serde_json::from_slice(&pub_key)?;
-  Ok(public_key.verify(msg, &Signature::from_str(sig)?)?)
+  let msg = keccak256::hash(msg);
+
+  Ok(public_key.verify(msg.as_ref(), &Signature::from_str(sig)?)?)
 }

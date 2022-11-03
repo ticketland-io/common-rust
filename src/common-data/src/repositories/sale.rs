@@ -13,6 +13,7 @@ pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, O
     MERGE (evt)-[:HAS_SALE]->(s:Sale {
       account:sale.account,
       ticket_type_index:sale.ticket_type_index,
+      ticket_type_name:sale.ticket_type_name,
       n_tickets:sale.n_tickets,
       sale_start_ts:sale.sale_start_ts,
       sale_end_ts:sale.sale_end_ts

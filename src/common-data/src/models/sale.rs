@@ -10,6 +10,7 @@ use crate::types::Neo4jResult;
 pub struct Sale {
   pub account: String,
   pub ticket_type_index: u8,
+  pub ticket_type_name: String,
   pub n_tickets: u32,
   pub sale_start_ts: u32,
   pub sale_end_ts: u32,
@@ -23,6 +24,7 @@ impl Sale {
     
     map.insert("account".to_string(), Value::String(self.account.clone()));
     map.insert("ticket_type_index".to_string(), Value::Integer(self.ticket_type_index as i64));
+    map.insert("ticket_type_name".to_string(), Value::String(self.account.clone()));
     map.insert("n_tickets".to_string(), Value::Integer(self.n_tickets as i64));
     map.insert("sale_start_ts".to_string(), Value::Integer(self.sale_start_ts as i64));
     map.insert("sale_end_ts".to_string(), Value::Integer(self.sale_end_ts as i64));
@@ -57,6 +59,9 @@ impl TryFrom<Neo4jResult> for Sale {
             },
             "ticket_type_index" => {
               sale.ticket_type_index = i8::try_from(v).expect("cannot convert ticket_type_index") as u8;
+            },
+            "ticket_type_name" => {
+              sale.ticket_type_name = String::try_from(v).expect("cannot convert ticket_type_name");
             },
             "n_tickets" => {
               sale.n_tickets = i32::try_from(v).expect("cannot convert n_tickets") as u32;

@@ -3,13 +3,11 @@ use std::{
   str::FromStr,
 };
 use actix::prelude::*;
-use eyre::{Result};
+use eyre::Result;
 use serde::{Serialize, Deserialize};
 use borsh::{BorshSerialize};
 use solana_sdk::{
   pubkey::Pubkey,
-  signer::keypair::Keypair,
-  signature::Signer,
   signature::Signature,
   keccak::hashv,
 };
@@ -18,6 +16,7 @@ use common_data::{
   models::ticket::Ticket,
   repositories::ticket::{read_ticket_by_ticket_metadata},
 };
+use ticketland_crypto::asymetric::ed25519;
 use ticketland_core::actor::neo4j::Neo4jActor;
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
@@ -49,13 +48,17 @@ pub struct VerificationResponse {
   pub server_sig: String,
 }
 
-fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> String {
-  let signer = Keypair::from_base58_string(signer_key);
+fn create_mesage<'a>(msg: VerifyTicketMsg<'a>) -> [u8; 32] {
   let mut message: Vec<u8> = Vec::new();
   msg.serialize(&mut message).unwrap();
-  let message_hash = &hashv(&[&message]).0;
+  hashv(&[&message]).0
+}
 
-  bs58::encode(signer.sign_message(message_hash)).into_string()
+fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> Result<String> {
+  let message_hash = create_mesage(msg);
+  let sig = ed25519::sign(&message_hash.as_ref(), signer_key.as_bytes())?;
+  
+  Ok(sig.to_string())
 }
 
 pub async fn verify_ticket(
@@ -103,7 +106,7 @@ pub async fn verify_ticket(
         ticket_owner_pubkey: &ticket_owner_pubkey,
         ticket_metadata: &ticket_metadata,
         ticket_type_index,
-      });
+      })?;
 
       Ok(VerificationResponse {
         event_id: event_id.to_string(),
@@ -123,7 +126,7 @@ pub async fn verify_ticket(
 
 pub fn validate_verification_result(
   verification_result: VerificationResponse,
-  ticket_verifier_priv_key: String,
+  ticket_verifier_pub_key: String,
 ) -> Result<()> {
   let VerificationResponse {
     event_id,
@@ -134,7 +137,7 @@ pub fn validate_verification_result(
     server_sig,
   } = verification_result;
   
-  let local_sig = sign_msg(&ticket_verifier_priv_key, VerifyTicketMsg {
+  let message_hash = create_mesage(VerifyTicketMsg {
     event_id: &event_id,
     code_challenge: &code_challenge,
     ticket_owner_pubkey: &ticket_owner_pubkey,
@@ -142,9 +145,7 @@ pub fn validate_verification_result(
     ticket_type_index,
   });
 
-  if local_sig != server_sig {
-    return Err(Error::InvalidVerificationResult)?
-  }
+  ed25519::verify(message_hash.as_ref(), ticket_verifier_pub_key.as_bytes(), &server_sig)?;
 
   Ok(())
 }

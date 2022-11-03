@@ -57,8 +57,7 @@ fn create_mesage<'a>(msg: VerifyTicketMsg<'a>) -> Result<Vec<u8>> {
 
 fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> Result<String> {
   let msg = create_mesage(msg)?;
-  let message_hash = hashv(&[&msg]).0;
-  let sig = ed25519::sign(&message_hash.as_ref(), signer_key.as_bytes())?;
+  let sig = ed25519::sign(&msg, signer_key.as_bytes())?;
   
   Ok(sig.to_string())
 }

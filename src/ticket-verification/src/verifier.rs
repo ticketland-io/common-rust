@@ -48,14 +48,16 @@ pub struct VerificationResponse {
   pub server_sig: String,
 }
 
-fn create_mesage<'a>(msg: VerifyTicketMsg<'a>) -> [u8; 32] {
+fn create_mesage<'a>(msg: VerifyTicketMsg<'a>) -> Result<Vec<u8>> {
   let mut message: Vec<u8> = Vec::new();
-  msg.serialize(&mut message).unwrap();
-  hashv(&[&message]).0
+  msg.serialize(&mut message)?;
+
+  Ok(message)
 }
 
 fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> Result<String> {
-  let message_hash = create_mesage(msg);
+  let msg = create_mesage(msg)?;
+  let message_hash = hashv(&[&msg]).0;
   let sig = ed25519::sign(&message_hash.as_ref(), signer_key.as_bytes())?;
   
   Ok(sig.to_string())
@@ -137,15 +139,15 @@ pub fn validate_verification_result(
     server_sig,
   } = verification_result;
   
-  let message_hash = create_mesage(VerifyTicketMsg {
+  let msg = create_mesage(VerifyTicketMsg {
     event_id: &event_id,
     code_challenge: &code_challenge,
     ticket_owner_pubkey: &ticket_owner_pubkey,
     ticket_metadata: &ticket_metadata,
     ticket_type_index,
-  });
+  })?;
 
-  ed25519::verify(message_hash.as_ref(), ticket_verifier_pub_key.as_bytes(), &server_sig)?;
+  ed25519::verify(&msg, ticket_verifier_pub_key.as_bytes(), &server_sig)?;
 
   Ok(())
 }

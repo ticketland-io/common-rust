@@ -12,8 +12,8 @@ pub fn read_events_by_category(category: String, skip: u32, limit: u32) -> (&'st
     MATCH (s)-[:HAS_TYPE]->(st)
     WITH evt, COLLECT(s{.*, price: st.price}) as sales
     RETURN DISTINCT evt {
-        .*,
-        sales: sales
+      .*,
+      sales: sales
     }
     ORDER BY evt.start_date DESC
     SKIP $skip

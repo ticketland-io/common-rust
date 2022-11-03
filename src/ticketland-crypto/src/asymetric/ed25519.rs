@@ -16,6 +16,7 @@ pub fn create_keypair() -> Keypair {
 }
 
 pub fn sign(msg: &[u8], keypair: &[u8]) -> Result<Signature> {
+  let keypair = base64::decode(keypair)?;
   let keypair: Keypair = serde_json::from_slice(&keypair)?;
   Ok(keypair.sign(msg))
 }

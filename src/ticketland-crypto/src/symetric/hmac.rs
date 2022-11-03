@@ -17,5 +17,5 @@ pub fn create_key() -> Result<String>{
   let rng = rand::SystemRandom::new();
   let key_value: [u8; digest::SHA256_OUTPUT_LEN] = rand::generate(&rng)?.expose();
 
-  Ok(hex::encode(&key_value))
+  Ok(base64::encode(&key_value))
 }

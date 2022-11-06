@@ -71,6 +71,27 @@ pub fn read_event(event_id: String) -> (&'static str, Option<Params>) {
   (query, params)
 }
 
+pub fn read_event_with_sales(event_id: String) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (acc:Account)-[:ORGANIZER_OF]->(evt:Event {event_id: $event_id})
+    MATCH (evt)-[:HAS_SALE]->(s:Sale)
+    MATCH (s)-[:SEAT_RANGE]->(sr:SeatRange)
+    MATCH (s)-[:HAS_TYPE]->(st:SaleType)
+    WITH COLLECT(s{.*, seat_range: sr{.*}, sale_type: st{.*}}) AS sales, acc, evt
+    RETURN evt{
+      .*,
+      sales: sales,
+      event_organizer: acc.pubkey
+    }
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}
+
 pub fn read_account_events(uid: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $uid})-[:ORGANIZER_OF]->(evt:Event)
@@ -81,7 +102,7 @@ pub fn read_account_events(uid: String) -> (&'static str, Option<Params>) {
     ("uid", Value::String(uid)),
   ]);
 
-  (query, params)
+  (query, params) 
 }
 
 pub fn upsert_event(
@@ -95,8 +116,9 @@ pub fn upsert_event(
   start_date: String,
   end_date: String,
   category: String,
+  publicity: String,
   name: String,
-  description: String
+  description: String,
 ) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (acc:Account {uid: $event_organizer_uid})
@@ -106,6 +128,7 @@ pub fn upsert_event(
       file_type:$file_type,
       metadata_uploaded: false,
       image_uploaded: false,
+      draft: true,
       attended: false,
       location: $location,
       venue: $venue,
@@ -113,6 +136,7 @@ pub fn upsert_event(
       start_date: $start_date,
       end_date: $end_date,
       category: $category,
+      publicity: $publicity,
       name: $name,
       description: $description
     })
@@ -131,6 +155,7 @@ pub fn upsert_event(
     ("start_date", Value::Integer(start_date.parse::<i64>().unwrap())),
     ("end_date", Value::Integer(end_date.parse::<i64>().unwrap())),
     ("category", Value::String(category)),
+    ("publicity", Value::String(publicity)),
     ("name", Value::String(name)),
     ("description", Value::String(description))
   ]);
@@ -163,6 +188,21 @@ pub fn update_image_uploaded(event_id: String) -> (&'static str, Option<Params>)
 
   let params = create_params(vec![
     ("event_id", Value::String(event_id)),
+  ]);
+
+  (query, params)
+}
+
+pub fn update_draft(event_id: String, draft: bool) -> (&'static str, Option<Params>) {
+  let query = r#"
+    MATCH (evt:Event {event_id: $event_id})
+    SET evt.draft = $draft
+    RETURN 1
+  "#;
+
+  let params = create_params(vec![
+    ("event_id", Value::String(event_id)),
+    ("draft", Value::Boolean(draft)),
   ]);
 
   (query, params)

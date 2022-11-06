@@ -8,3 +8,4 @@ pub mod sale;
 pub mod listing;
 pub mod api_client;
 pub mod ticket;
+pub mod bool;

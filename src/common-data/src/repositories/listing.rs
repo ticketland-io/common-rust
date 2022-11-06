@@ -23,7 +23,7 @@ pub fn create_sell_listing(
 
   let params = create_params(vec![
     ("uid", Value::String(uid)),
-    ("ticket_metadata", Value::String(ticket_nft)),
+    ("ticket_nft", Value::String(ticket_nft)),
     ("sell_listing_account", Value::String(sell_listing_account)),
     ("ask_price", Value::Integer(ask_price.into())),
   ]);

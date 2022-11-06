@@ -6,7 +6,7 @@ use ticketland_core::{
 
 pub fn read_ticket_designs(uid: String) -> (&'static str, Option<Params>) {
   let query = r#"
-  MATCH (acc:Account {uid: $uid})-[:DESIGNED]->(td:TicketDesign)
+  MATCH (acc:Account {uid: $uid})-[:IS_CANVA_USER]->(cu:CanvaUser)-[:DESIGNED]->(td:TicketDesign)
   RETURN td{.*}
 "#;
 

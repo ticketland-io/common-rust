@@ -20,11 +20,11 @@ pub enum Error {
   EmptyDbResult,
   #[error("S3 error")]
   S3Error(String),
-  #[error("Generic error")]
+  #[error("Multipart error")]
   MultipartError(String),
   #[error("Serde serialization or deserialization error")]
   SerdeJsonError(String),
-  #[error("Generic error")]
+  #[error("Ipfs error")]
   IpfsError(String),
   #[error("Reqwest Error")]
   ReqwestError(String),

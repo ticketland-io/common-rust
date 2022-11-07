@@ -6,4 +6,5 @@ members = [
   "src/utils",
   "src/ticketland-crypto",
   "src/ticket-verification",
+  "src/fiat-payment",
 ]

@@ -98,6 +98,7 @@ impl TryFrom<Neo4jResult> for Event {
             "attended" => {
               event.attended = bool::try_from(v).expect("cannot convert attended");
             },
+            _ => panic!("unknown field"),
           }
         }
 

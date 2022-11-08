@@ -1,7 +1,8 @@
 use std::{
-  sync::Arc,
+  sync::{Arc, Mutex},
   str::FromStr,
 };
+use chrono::Duration;
 use actix::prelude::*;
 use eyre::Result;
 use serde::{Serialize, Deserialize};
@@ -17,7 +18,7 @@ use common_data::{
   repositories::ticket::{read_ticket_by_ticket_metadata},
 };
 use ticketland_crypto::asymetric::ed25519;
-use ticketland_core::actor::neo4j::Neo4jActor;
+use ticketland_core::{actor::neo4j::Neo4jActor, services::{redis::Redis, redlock::RedLock}};
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
 use crate::error::Error;
@@ -62,9 +63,15 @@ fn sign_msg<'a>(signer_key: &str, msg: VerifyTicketMsg<'a>) -> Result<String> {
   Ok(sig.to_string())
 }
 
+fn redis_ticket_attended_key(event_id: &str, ticket_metadata: &str) -> String {
+  format!("{}:{}:attended", event_id, ticket_metadata)
+}
+
 pub async fn verify_ticket(
   rpc_client: Arc<RpcClient>,
   neo4j: Arc<Addr<Neo4jActor>>,
+  redis: Arc<Mutex<Redis>>,
+  redlock: Arc<RedLock>,
   ticket_verifier_priv_key: String,
   event_id: &str,
   code_challenge: &str,
@@ -108,6 +115,21 @@ pub async fn verify_ticket(
         ticket_metadata: &ticket_metadata,
         ticket_type_index,
       })?;
+      let redis_key = redis_ticket_attended_key(event_id, ticket_metadata);
+
+      let lock = redlock.lock(
+        redis_key.as_bytes(),
+        Duration::seconds(5).num_milliseconds() as usize,
+      ).await?;
+      let mut redis = redis.lock().unwrap();
+
+      // If key exists, it means someone has already attended this event
+      if let Ok(_) = redis.get(&redis_key).await {
+        return Err(Error::TicketVerificationError)?
+      }
+
+      redis.set(&redis_key, &"1".to_owned()).await?;
+      redlock.unlock(lock).await;
 
       Ok(VerificationResponse {
         event_id: event_id.to_string(),

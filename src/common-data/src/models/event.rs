@@ -17,6 +17,7 @@ pub struct Event {
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
+  pub attended: bool,
   pub name: String,
   pub description: String,
   pub location: String,
@@ -93,6 +94,9 @@ impl TryFrom<Neo4jResult> for Event {
             },
             "image_uploaded" => {
               event.image_uploaded = bool::try_from(v).expect("cannot convert image_uploaded");
+            },
+            "attended" => {
+              event.attended = bool::try_from(v).expect("cannot convert attended");
             },
             _ => panic!("unknown field"),
           }

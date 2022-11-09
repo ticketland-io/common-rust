@@ -24,7 +24,7 @@ impl Sale {
     
     map.insert("account".to_string(), Value::String(self.account.clone()));
     map.insert("ticket_type_index".to_string(), Value::Integer(self.ticket_type_index as i64));
-    map.insert("ticket_type_name".to_string(), Value::String(self.account.clone()));
+    map.insert("ticket_type_name".to_string(), Value::String(self.ticket_type_name.clone()));
     map.insert("n_tickets".to_string(), Value::Integer(self.n_tickets as i64));
     map.insert("sale_start_ts".to_string(), Value::Integer(self.sale_start_ts as i64));
     map.insert("sale_end_ts".to_string(), Value::Integer(self.sale_end_ts as i64));

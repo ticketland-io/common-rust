@@ -5,6 +5,7 @@ diesel::table! {
         id -> Int4,
         uid -> Varchar,
         mnemonic -> Varchar,
+        pubkey -> Varchar,
         name -> Nullable<Varchar>,
         email -> Nullable<Varchar>,
         photo_url -> Nullable<Varchar>,

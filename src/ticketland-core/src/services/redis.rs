@@ -39,6 +39,13 @@ impl Redis {
     .map_err(Into::<_>::into)
   }
 
+  pub async fn get_mult(&mut self, key: &str) -> Result<Vec<String>> {
+    cmd("GET")
+    .arg(&[key])
+    .query_async(&mut self.conn).await
+    .map_err(Into::<_>::into)
+  }
+
   pub async fn mget(&mut self, keys: &[&str]) -> Result<Vec<String>> {
     cmd("MGET")
     .arg(keys)

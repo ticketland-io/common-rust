@@ -27,7 +27,8 @@ pub struct Event {
   pub start_date: i64,
   pub end_date: i64,
   pub category: String,
-  pub publicity: String
+  pub publicity: String,
+  pub payment_type: String,
 }
 
 impl TryFrom<Neo4jResult> for Event {
@@ -102,6 +103,9 @@ impl TryFrom<Neo4jResult> for Event {
             },
             "attended" => {
               event.attended = bool::try_from(v).expect("cannot convert attended");
+            },
+            "payment_type" => {
+              event.payment_type = String::try_from(v).expect("cannot convert payment_type");
             },
             "publicity" => {
               event.publicity = String::try_from(v).expect("cannot convert publicity");

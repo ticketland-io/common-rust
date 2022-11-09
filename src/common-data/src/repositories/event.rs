@@ -117,6 +117,7 @@ pub fn upsert_event(
   end_date: String,
   category: String,
   publicity: String,
+  payment_type: String,
   name: String,
   description: String,
 ) -> (&'static str, Option<Params>) {
@@ -137,6 +138,7 @@ pub fn upsert_event(
       end_date: $end_date,
       category: $category,
       publicity: $publicity,
+      payment_type: $payment_type,
       name: $name,
       description: $description
     })
@@ -156,6 +158,7 @@ pub fn upsert_event(
     ("end_date", Value::Integer(end_date.parse::<i64>().unwrap())),
     ("category", Value::String(category)),
     ("publicity", Value::String(publicity)),
+    ("payment_type", Value::String(payment_type)),
     ("name", Value::String(name)),
     ("description", Value::String(description))
   ]);

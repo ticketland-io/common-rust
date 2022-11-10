@@ -1,13 +1,6 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    account_events (account_id, event_id) {
-        account_id -> Varchar,
-        event_id -> Varchar,
-    }
-}
-
-diesel::table! {
     accounts (uid) {
         uid -> Varchar,
         created_at -> Timestamp,
@@ -62,6 +55,7 @@ diesel::table! {
 diesel::table! {
     events (event_id) {
         event_id -> Varchar,
+        account_id -> Varchar,
         created_at -> Timestamp,
         name -> Varchar,
         description -> Varchar,
@@ -165,13 +159,12 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(account_events -> accounts (account_id));
-diesel::joinable!(account_events -> events (event_id));
 diesel::joinable!(api_clients -> accounts (account_id));
 diesel::joinable!(buy_listings -> accounts (account_id));
 diesel::joinable!(buy_listings -> events (event_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
+diesel::joinable!(events -> accounts (account_id));
 diesel::joinable!(metadata -> events (event_id));
 diesel::joinable!(metadata_attributes -> metadata (metadata_id));
 diesel::joinable!(sales -> events (event_id));
@@ -185,7 +178,6 @@ diesel::joinable!(tickets -> events (event_id));
 diesel::joinable!(tickets -> ticket_onchain_accounts (ticket_nft));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    account_events,
     accounts,
     api_clients,
     buy_listings,

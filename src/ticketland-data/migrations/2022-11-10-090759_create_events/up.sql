@@ -17,6 +17,7 @@ CREATE TABLE canva_accounts (
 
 CREATE TABLE events (
   event_id VARCHAR PRIMARY KEY,
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
   name VARCHAR NOT NULL,
   description VARCHAR NOT NULL,
@@ -113,12 +114,6 @@ CREATE TABLE stripe_accounts (
   created_at TIMESTAMP NOT NULL,
   account_link VARCHAR,
   status SMALLINT NOT NULL
-);
-
-CREATE TABLE account_events (
-  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
-  event_id VARCHAR NOT NULL REFERENCES events(event_id),
-  PRIMARY KEY(account_id, event_id)
 );
 
 CREATE TABLE seat_ranges (

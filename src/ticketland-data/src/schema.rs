@@ -139,6 +139,7 @@ diesel::table! {
     stripe_accounts (stripe_uid) {
         stripe_uid -> Varchar,
         account_id -> Varchar,
+        created_at -> Timestamp,
         account_link -> Nullable<Varchar>,
         status -> Int2,
     }

@@ -110,6 +110,7 @@ CREATE TABLE canva_designs (
 CREATE TABLE stripe_accounts (
   stripe_uid VARCHAR PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
+  created_at TIMESTAMP NOT NULL,
   account_link VARCHAR,
   status SMALLINT NOT NULL
 );

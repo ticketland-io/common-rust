@@ -101,9 +101,6 @@ impl TryFrom<Neo4jResult> for Event {
             "draft" => {
               event.draft = bool::try_from(v).expect("cannot convert draft");
             },
-            "attended" => {
-              event.attended = bool::try_from(v).expect("cannot convert attended");
-            },
             "payment_type" => {
               event.payment_type = String::try_from(v).expect("cannot convert payment_type");
             },

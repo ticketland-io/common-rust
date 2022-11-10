@@ -130,7 +130,6 @@ pub fn upsert_event(
       metadata_uploaded: false,
       image_uploaded: false,
       draft: true,
-      attended: false,
       location: $location,
       venue: $venue,
       event_type: $event_type,

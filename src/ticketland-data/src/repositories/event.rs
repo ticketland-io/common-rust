@@ -6,10 +6,11 @@ use crate::{
   connection::PostgresConnection,
   models::{
     account::Account,
-    event::{Event, AccountEvent},
+    event::{Event, AccountEvent, EventWithSale},
+    sale::Sale,
   },
   schema::{
-    events::dsl::{self as event_dsl, *},
+    events::dsl::{self as events_dsl, *},
     accounts::dsl::{
       self as accounts_dsl,
       accounts,
@@ -18,6 +19,10 @@ use crate::{
       self as acount_events_dsl,
       account_events,
     },
+    sales::dsl::{
+      self as sales_dsl,
+      sales,
+    }
   },
 };
 
@@ -94,22 +99,23 @@ impl PostgresConnection {
     Ok(
       events
       .limit(limit as i64)
-      .order_by(event_dsl::created_at.desc())
+      .order_by(events_dsl::created_at.desc())
       .offset((skip * limit) as i64)
       .load(self.borrow_mut())
       .await?
     )
   }
 
-  pub async fn read_events_by_category(&mut self, categ: i32, skip: u32, limit: u32) -> Result<Vec<Event>> {
-    Ok(
-      events
-      .filter(category.eq(categ))
-      .filter(end_date.gt(now))
-      .order_by(event_dsl::start_date.desc())
-      .offset((skip * limit) as i64)
-      .load(self.borrow_mut())
-      .await?
-    )
+  pub async fn read_events_by_category(&mut self, categ: i32, skip: u32, limit: u32) -> Result<Vec<EventWithSale>> {
+    let records =  events
+    .filter(category.eq(categ))
+    .filter(end_date.gt(now))
+    .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
+    .order_by(events_dsl::start_date.desc())
+    .offset((skip * limit) as i64)
+    .load::<(Event, Sale)>(self.borrow_mut())
+    .await?;
+
+    Ok(EventWithSale::from_tuple(records))
   }
 }

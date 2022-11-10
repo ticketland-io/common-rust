@@ -4,10 +4,17 @@ use eyre::Result;
 use crate::{
   connection::PostgresConnection,
   models::{
-    event::Event,
+    account::Account,
+    event::{Event, AccountEvent},
   },
   schema::{
     events::dsl::*,
+    accounts::dsl::*,
+    account_events::dsl::{
+      account_events,
+      event_id as account_event_event_id,
+      account_id as account_events_account_id,
+    },
   },
 };
 
@@ -42,5 +49,19 @@ impl PostgresConnection {
     .await?;
 
     Ok(())
+  }
+
+  pub async fn read_event_organizer_account(&mut self, id: String) -> Result<Account> {
+    Ok(
+      account_events
+      .filter(account_event_event_id.eq(id))
+      .inner_join(accounts.on(uid.eq(account_events_account_id)))
+      .load::<(AccountEvent, Account)>(self.borrow_mut())
+      .await?
+      .into_iter()
+      .map(|r| r.1)
+      .collect::<Vec<_>>()
+      .remove(0)
+    )
   }
 }

@@ -4,8 +4,15 @@ use chrono::{
   NaiveDateTime,
   naive::serde::ts_milliseconds::serialize as to_milli_ts,
 };
-use crate::schema::events;
+use crate::schema::{events, account_events};
 
+
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[diesel(table_name = account_events)]
+pub struct AccountEvent {
+  pub event_id: String,
+  pub account_id: String,
+}
 
 #[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
 #[diesel(table_name = events)]

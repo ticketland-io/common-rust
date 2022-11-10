@@ -33,7 +33,7 @@ diesel::table! {
         id -> Int4,
         created_at -> Timestamp,
         buyer_pub_key -> Varchar,
-        bid_price -> Int4,
+        bid_price -> Int8,
     }
 }
 
@@ -125,7 +125,7 @@ diesel::table! {
         account_id -> Varchar,
         ticket_nft -> Varchar,
         created_at -> Timestamp,
-        ask_price -> Int4,
+        ask_price -> Int8,
     }
 }
 

@@ -67,14 +67,14 @@ CREATE TABLE sell_listings (
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
   created_at TIMESTAMP NOT NULL,
-  ask_price INT NOT NULL
+  ask_price BIGINT NOT NULL
 );
 
 CREATE TABLE buy_listings (
   id SERIAL PRIMARY KEY,
   created_at TIMESTAMP NOT NULL,
   buyer_pub_key VARCHAR NOT NULL,
-  bid_price INT NOT NULL
+  bid_price BIGINT NOT NULL
 );
 
 CREATE TABLE metadata (

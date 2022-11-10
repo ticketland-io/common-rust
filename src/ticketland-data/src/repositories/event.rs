@@ -33,4 +33,14 @@ impl PostgresConnection {
 
     Ok(())
   }
+
+  pub async fn update_image_uploaded(&mut self, id: String) -> Result<()> {
+    diesel::update(events)
+    .filter(event_id.eq(id))
+    .set(image_uploaded.eq(true))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
 }

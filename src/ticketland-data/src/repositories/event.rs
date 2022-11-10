@@ -64,4 +64,17 @@ impl PostgresConnection {
       .remove(0)
     )
   }
+
+  pub async fn read_account_events(&mut self, user_id: String) -> Result<Vec<Event>> {
+    Ok(
+      account_events
+      .filter(account_events_account_id.eq(user_id))
+      .inner_join(events.on(event_id.eq(account_event_event_id)))
+      .load::<(AccountEvent, Event)>(self.borrow_mut())
+      .await?
+      .into_iter()
+      .map(|r| r.1)
+      .collect::<Vec<_>>()
+    )
+  }
 }

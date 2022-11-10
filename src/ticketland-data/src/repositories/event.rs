@@ -8,7 +8,13 @@ use crate::{
     event::{Event, AccountEvent},
   },
   schema::{
-    events::dsl::*,
+    events::dsl::{
+      events,
+      event_id,
+      created_at as event_created_at,
+      arweave_tx_id,
+      image_uploaded,
+    },
     accounts::dsl::*,
     account_events::dsl::{
       account_events,
@@ -83,6 +89,17 @@ impl PostgresConnection {
       events
       .filter(event_id.eq(id))
       .first(self.borrow_mut())
+      .await?
+    )
+  }
+
+  pub async fn read_events(&mut self, skip: u32, limit: u32) -> Result<Vec<Event>> {
+    Ok(
+      events
+      .limit(limit as i64)
+      .order_by(event_created_at.desc())
+      .offset((skip * limit) as i64)
+      .load(self.borrow_mut())
       .await?
     )
   }

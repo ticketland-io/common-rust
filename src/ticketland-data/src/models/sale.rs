@@ -11,17 +11,6 @@ use chrono::{
 use diesel_as_jsonb::AsJsonb;
 use crate::schema::sales;
 
-// id SERIAL PRIMARY KEY,
-// event_id VARCHAR NOT NULL REFERENCES events(event_id),
-// created_at TIMESTAMP NOT NULL,
-// ticket_type_index SMALLINT NOT NULL,
-// ticket_type_name VARCHAR NOT NULL,
-// n_tickets INT NOT NULL,
-// sale_start_ts TIMESTAMP NOT NULL,
-// sale_end_ts TIMESTAMP NOT NULL,
-// sale_type JSONB
-
-
 #[derive(AsJsonb)]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

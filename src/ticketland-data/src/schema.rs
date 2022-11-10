@@ -31,8 +31,8 @@ diesel::table! {
 diesel::table! {
     buy_listings (id) {
         id -> Int4,
+        account_id -> Varchar,
         created_at -> Timestamp,
-        buyer_pub_key -> Varchar,
         bid_price -> Int8,
     }
 }
@@ -161,6 +161,7 @@ diesel::table! {
 diesel::joinable!(account_events -> accounts (account_id));
 diesel::joinable!(account_events -> events (event_id));
 diesel::joinable!(api_clients -> accounts (account_id));
+diesel::joinable!(buy_listings -> accounts (account_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
 diesel::joinable!(metadata -> events (event_id));

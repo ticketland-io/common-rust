@@ -5,7 +5,6 @@ use ticketland_core::{
 };
 use crate::models::sale::Sale;
 
-
 pub fn upsert_event_sale(event_id: String, sales: Vec<Sale>) -> (&'static str, Option<Params>) {
   let query = r#"
     UNWIND $sales AS sale

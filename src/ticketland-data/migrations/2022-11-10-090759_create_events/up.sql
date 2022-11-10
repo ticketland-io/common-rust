@@ -72,8 +72,8 @@ CREATE TABLE sell_listings (
 
 CREATE TABLE buy_listings (
   id SERIAL PRIMARY KEY,
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
-  buyer_pub_key VARCHAR NOT NULL,
   bid_price BIGINT NOT NULL
 );
 

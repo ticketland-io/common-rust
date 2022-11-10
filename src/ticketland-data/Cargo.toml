@@ -1,0 +1,17 @@
+[package]
+name = "ticketland-data"
+version = "0.1.0"
+edition = "2021"
+license = "BUSL-1.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+eyre = "0.6.8"
+chrono = { version = "0.4.22", features = ["serde"] }
+diesel = {version = "2.0.0", features = ["postgres", "chrono"]}
+diesel-async = {version = "0.1.1", features = ["postgres"]}
+diesel_as_jsonb = "1.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+futures = "0.3.12"

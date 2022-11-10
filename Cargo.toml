@@ -3,6 +3,7 @@ members = [
   "src/ticketland-core",
   "src/api-helpers",
   "src/common-data",
+  "src/ticketland-data",
   "src/utils",
   "src/ticketland-crypto",
   "src/ticket-verification",

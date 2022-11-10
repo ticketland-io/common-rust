@@ -6,7 +6,7 @@ use crate::schema::seat_ranges;
 #[diesel(table_name = seat_ranges)]
 pub struct SeatRange {
   pub id: i32,
-  pub sale_id: i32,
+  pub sale_id: String,
   pub l: i32,
   pub r: i32,
 }

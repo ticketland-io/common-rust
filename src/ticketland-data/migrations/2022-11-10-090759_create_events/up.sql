@@ -34,9 +34,10 @@ CREATE TABLE events (
 );
 
 CREATE TABLE sales (
-  id SERIAL PRIMARY KEY,
+  id VARCHAR PRIMARY KEY,
   event_id VARCHAR NOT NULL REFERENCES events(event_id),
   created_at TIMESTAMP NOT NULL,
+  account VARCHAR NOT NULL,
   ticket_type_index SMALLINT NOT NULL,
   ticket_type_name VARCHAR NOT NULL,
   n_tickets INT NOT NULL,
@@ -115,7 +116,7 @@ CREATE TABLE account_events (
 
 CREATE TABLE seat_ranges (
   id SERIAL PRIMARY KEY,
-  sale_id INT NOT NULL REFERENCES sales(id),
+  sale_id VARCHAR NOT NULL REFERENCES sales(id),
   l INT NOT NULL,
   r INT NOT NULL
 );

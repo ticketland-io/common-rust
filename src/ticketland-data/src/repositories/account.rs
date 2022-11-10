@@ -35,11 +35,12 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_by_canva_id(&mut self, canva_id: String) -> Result<CanvaAccount> {
+  pub async fn read_account_by_canva_id(&mut self, canva_id: String) -> Result<(Account, CanvaAccount)> {
     Ok(
-      canva_accounts
+      accounts
       .filter(canva_uid.eq(canva_id))
-      .first(self.borrow_mut())
+      .inner_join(canva_accounts.on(account_id.eq(uid)))
+      .first::<(Account, CanvaAccount)>(self.borrow_mut())
       .await?
     )
   }

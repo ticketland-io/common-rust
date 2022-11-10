@@ -7,4 +7,9 @@ CREATE TABLE accounts (
   name VARCHAR,
   email VARCHAR,
   photo_url VARCHAR
-)
+);
+
+CREATE TABLE canva_accounts (
+  id SERIAL PRIMARY KEY,
+  account_id INT REFERENCES accounts(id)
+);

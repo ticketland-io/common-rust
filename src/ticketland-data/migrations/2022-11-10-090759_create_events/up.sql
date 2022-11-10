@@ -11,7 +11,7 @@ CREATE TABLE accounts (
 
 CREATE TABLE canva_accounts (
   canva_uid VARCHAR PRIMARY KEY,
-  account_id VARCHAR REFERENCES accounts(uid),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE events (
 
 CREATE TABLE sales (
   id SERIAL PRIMARY KEY,
-  event_id VARCHAR REFERENCES events(event_id),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
   created_at TIMESTAMP NOT NULL,
   ticket_type_index SMALLINT NOT NULL,
   ticket_type_name VARCHAR NOT NULL,
@@ -52,9 +52,9 @@ CREATE TABLE ticket_onchain_accounts (
 
 CREATE TABLE tickets (
   id SERIAL PRIMARY KEY,
-  ticket_nft VARCHAR REFERENCES ticket_onchain_accounts(ticket_nft),
-  event_id VARCHAR REFERENCES events(event_id),
-  account_id VARCHAR REFERENCES accounts(uid),
+  ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
   ticket_type_index SMALLINT NOT NULL,
   seat_name VARCHAR NOT NULL,
@@ -63,8 +63,8 @@ CREATE TABLE tickets (
 
 CREATE TABLE sell_listings (
   id SERIAL PRIMARY KEY,
-  account_id VARCHAR REFERENCES accounts(uid),
-  ticket_nft VARCHAR REFERENCES ticket_onchain_accounts(ticket_nft),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
+  ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
   created_at TIMESTAMP NOT NULL,
   ask_price INT NOT NULL
 );
@@ -78,7 +78,7 @@ CREATE TABLE buy_listings (
 
 CREATE TABLE metadata (
   id SERIAL PRIMARY KEY,
-  event_id VARCHAR REFERENCES events(event_id),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
   name VARCHAR NOT NULL,
   description VARCHAR NOT NULL,
   image VARCHAR NOT NULL
@@ -86,14 +86,14 @@ CREATE TABLE metadata (
 
 CREATE TABLE metadata_attributes (
   id SERIAL PRIMARY KEY,
-  metadata_id INT REFERENCES metadata(id),
+  metadata_id INT NOT NULL REFERENCES metadata(id),
   trait_type VARCHAR NOT NULL,
   value VARCHAR NOT NULL
 );
 
 CREATE TABLE account_designs (
   design_id VARCHAR PRIMARY KEY,
-  account_id VARCHAR REFERENCES accounts(uid),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
   url VARCHAR NOT NULL,
   name VARCHAR NOT NULL,
@@ -102,27 +102,27 @@ CREATE TABLE account_designs (
 
 CREATE TABLE stripe_accounts (
   stripe_uid VARCHAR PRIMARY KEY,
-  account_id VARCHAR REFERENCES accounts(uid),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   account_link VARCHAR,
   status SMALLINT NOT NULL
 );
 
 CREATE TABLE account_events (
-  account_id VARCHAR REFERENCES accounts(uid),
-  event_id VARCHAR REFERENCES events(event_id),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
   PRIMARY KEY(account_id, event_id)
 );
 
 CREATE TABLE seat_ranges (
   id SERIAL PRIMARY KEY,
-  sale_id INT REFERENCES sales(id),
+  sale_id INT NOT NULL REFERENCES sales(id),
   l INT NOT NULL,
   r INT NOT NULL
 );
   
 CREATE TABLE api_clients (
   client_id VARCHAR PRIMARY KEY,
-  account_id VARCHAR REFERENCES accounts(uid),
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
   client_secret VARCHAR NOT NULL
 );

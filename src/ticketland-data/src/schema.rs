@@ -3,7 +3,7 @@
 diesel::table! {
     account_designs (design_id) {
         design_id -> Varchar,
-        account_id -> Nullable<Varchar>,
+        account_id -> Varchar,
         created_at -> Timestamp,
         url -> Varchar,
         name -> Varchar,
@@ -33,7 +33,7 @@ diesel::table! {
 diesel::table! {
     api_clients (client_id) {
         client_id -> Varchar,
-        account_id -> Nullable<Varchar>,
+        account_id -> Varchar,
         created_at -> Timestamp,
         client_secret -> Varchar,
     }
@@ -51,7 +51,7 @@ diesel::table! {
 diesel::table! {
     canva_accounts (canva_uid) {
         canva_uid -> Varchar,
-        account_id -> Nullable<Varchar>,
+        account_id -> Varchar,
         created_at -> Timestamp,
     }
 }
@@ -79,7 +79,7 @@ diesel::table! {
 diesel::table! {
     metadata (id) {
         id -> Int4,
-        event_id -> Nullable<Varchar>,
+        event_id -> Varchar,
         name -> Varchar,
         description -> Varchar,
         image -> Varchar,
@@ -89,7 +89,7 @@ diesel::table! {
 diesel::table! {
     metadata_attributes (id) {
         id -> Int4,
-        metadata_id -> Nullable<Int4>,
+        metadata_id -> Int4,
         trait_type -> Varchar,
         value -> Varchar,
     }
@@ -98,7 +98,7 @@ diesel::table! {
 diesel::table! {
     sales (id) {
         id -> Int4,
-        event_id -> Nullable<Varchar>,
+        event_id -> Varchar,
         created_at -> Timestamp,
         ticket_type_index -> Int2,
         ticket_type_name -> Varchar,
@@ -112,7 +112,7 @@ diesel::table! {
 diesel::table! {
     seat_ranges (id) {
         id -> Int4,
-        sale_id -> Nullable<Int4>,
+        sale_id -> Int4,
         l -> Int4,
         r -> Int4,
     }
@@ -121,8 +121,8 @@ diesel::table! {
 diesel::table! {
     sell_listings (id) {
         id -> Int4,
-        account_id -> Nullable<Varchar>,
-        ticket_nft -> Nullable<Varchar>,
+        account_id -> Varchar,
+        ticket_nft -> Varchar,
         created_at -> Timestamp,
         ask_price -> Int4,
     }
@@ -131,7 +131,7 @@ diesel::table! {
 diesel::table! {
     stripe_accounts (stripe_uid) {
         stripe_uid -> Varchar,
-        account_id -> Nullable<Varchar>,
+        account_id -> Varchar,
         account_link -> Nullable<Varchar>,
         status -> Int2,
     }
@@ -147,9 +147,9 @@ diesel::table! {
 diesel::table! {
     tickets (id) {
         id -> Int4,
-        ticket_nft -> Nullable<Varchar>,
-        event_id -> Nullable<Varchar>,
-        account_id -> Nullable<Varchar>,
+        ticket_nft -> Varchar,
+        event_id -> Varchar,
+        account_id -> Varchar,
         created_at -> Timestamp,
         ticket_type_index -> Int2,
         seat_name -> Varchar,

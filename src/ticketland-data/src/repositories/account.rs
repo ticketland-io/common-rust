@@ -3,8 +3,14 @@ use eyre::Result;
 use diesel_async::RunQueryDsl;
 use crate::{
   connection::PostgresConnection,
-  models::account::Account,
-  schema::accounts::dsl::*,
+  models::{
+    account::Account,
+    canva_account::CanvaAccount,
+  },
+  schema::{
+    accounts::dsl::*,
+    canva_accounts::dsl::*,
+  },
 };
 
 impl PostgresConnection {
@@ -24,6 +30,15 @@ impl PostgresConnection {
     Ok(
       accounts
       .filter(uid.eq(user_id))
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
+
+  pub async fn read_account_by_canva_id(&mut self, canva_id: String) -> Result<CanvaAccount> {
+    Ok(
+      canva_accounts
+      .filter(canva_uid.eq(canva_id))
       .first(self.borrow_mut())
       .await?
     )

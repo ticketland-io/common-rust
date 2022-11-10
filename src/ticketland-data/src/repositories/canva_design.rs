@@ -37,11 +37,9 @@ impl PostgresConnection {
       canva_accounts
       .filter(canva_accounts_dsl::account_id.eq(account_id))
       .inner_join(canva_designs.on(canva_designs_dsl::canva_uid.eq(canva_accounts_dsl::canva_uid)))
-      .load::<(CanvaAccount, CanvaDesign)>(self.borrow_mut())
+      .select(canva_designs::all_columns())
+      .load::<CanvaDesign>(self.borrow_mut())
       .await?
-      .into_iter()
-      .map(|r| r.1)
-      .collect()
     )
   }
 }

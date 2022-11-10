@@ -5,7 +5,6 @@ use crate::{
   connection::PostgresConnection,
   models::{
     account::Account,
-    canva_account::CanvaAccount,
   },
   schema::{
     accounts::dsl::*,
@@ -35,12 +34,13 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_by_canva_id(&mut self, canva_id: String) -> Result<(Account, CanvaAccount)> {
+  pub async fn read_account_by_canva_id(&mut self, canva_id: String) -> Result<Account> {
     Ok(
       accounts
       .filter(canva_uid.eq(canva_id))
+      .select(accounts::all_columns())
       .inner_join(canva_accounts.on(account_id.eq(uid)))
-      .first::<(Account, CanvaAccount)>(self.borrow_mut())
+      .first::<Account>(self.borrow_mut())
       .await?
     )
   }

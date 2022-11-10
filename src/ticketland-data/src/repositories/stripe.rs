@@ -49,11 +49,11 @@ impl PostgresConnection {
   pub async fn read_stripe_account(&mut self, user_id: String) -> Result<StripeAccount> {
     Ok(
       stripe_accounts
+      .select(stripe_accounts::all_columns())
       .filter(stripe_accounts_dsl::account_id.eq(user_id))
       .inner_join(accounts.on(accounts_dsl::uid.eq(stripe_accounts_dsl::account_id)))
-      .first::<(StripeAccount, Account)>(self.borrow_mut())
+      .first::<StripeAccount>(self.borrow_mut())
       .await?
-      .0
     )
   }
 

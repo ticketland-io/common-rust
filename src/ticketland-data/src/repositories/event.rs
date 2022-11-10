@@ -1,4 +1,5 @@
 use diesel::prelude::*;
+use diesel::dsl::now;
 use diesel_async::RunQueryDsl;
 use eyre::Result;
 use crate::{
@@ -8,18 +9,14 @@ use crate::{
     event::{Event, AccountEvent},
   },
   schema::{
-    events::dsl::{
-      events,
-      event_id,
-      created_at as event_created_at,
-      arweave_tx_id,
-      image_uploaded,
+    events::dsl::{self as event_dsl, *},
+    accounts::dsl::{
+      self as accounts_dsl,
+      accounts,
     },
-    accounts::dsl::*,
     account_events::dsl::{
+      self as acount_events_dsl,
       account_events,
-      event_id as account_event_event_id,
-      account_id as account_events_account_id,
     },
   },
 };
@@ -60,8 +57,8 @@ impl PostgresConnection {
   pub async fn read_event_organizer_account(&mut self, id: String) -> Result<Account> {
     Ok(
       account_events
-      .filter(account_event_event_id.eq(id))
-      .inner_join(accounts.on(uid.eq(account_events_account_id)))
+      .filter(acount_events_dsl::event_id.eq(id))
+      .inner_join(accounts.on(accounts_dsl::uid.eq(acount_events_dsl::account_id)))
       .load::<(AccountEvent, Account)>(self.borrow_mut())
       .await?
       .into_iter()
@@ -74,8 +71,8 @@ impl PostgresConnection {
   pub async fn read_account_events(&mut self, user_id: String) -> Result<Vec<Event>> {
     Ok(
       account_events
-      .filter(account_events_account_id.eq(user_id))
-      .inner_join(events.on(event_id.eq(account_event_event_id)))
+      .filter(acount_events_dsl::account_id.eq(user_id))
+      .inner_join(events.on(event_id.eq(acount_events_dsl::event_id)))
       .load::<(AccountEvent, Event)>(self.borrow_mut())
       .await?
       .into_iter()
@@ -97,7 +94,19 @@ impl PostgresConnection {
     Ok(
       events
       .limit(limit as i64)
-      .order_by(event_created_at.desc())
+      .order_by(event_dsl::created_at.desc())
+      .offset((skip * limit) as i64)
+      .load(self.borrow_mut())
+      .await?
+    )
+  }
+
+  pub async fn read_events_by_category(&mut self, categ: i32, skip: u32, limit: u32) -> Result<Vec<Event>> {
+    Ok(
+      events
+      .filter(category.eq(categ))
+      .filter(end_date.gt(now))
+      .order_by(event_dsl::start_date.desc())
       .offset((skip * limit) as i64)
       .load(self.borrow_mut())
       .await?

@@ -38,7 +38,6 @@ pub struct Event {
   pub image_uploaded: bool
 }
 
-
 #[derive(Serialize, Deserialize, Default)]
 pub struct EventWithSale {
   pub event_id: String,
@@ -62,27 +61,29 @@ pub struct EventWithSale {
 impl EventWithSale {
   pub fn from_tuple(values: Vec<(Event, Sale)>) -> Vec<EventWithSale> {
     values
-    .iter()
-    .fold(HashMap::new(), |acc, (event, sale)| {
-      if acc.contains_key(&event.event_id) {
-        let event: EventWithSale = acc.remove(&event.event_id).unwrap();
-        event.sales.push(*sale);
-        acc.insert(event.event_id, event);
+    .into_iter()
+    .fold(HashMap::new(), |mut acc, (event, sale)| {
+      let key = event.event_id.clone();
+
+      if acc.contains_key(&key) {
+        let mut event: EventWithSale = acc.remove(&key).unwrap();
+        event.sales.push(sale);
+        acc.insert(key, event);
       } else {
-        acc.insert(event.event_id, EventWithSale {
-          event_id: event.event_id,
+        acc.insert(key, EventWithSale {
+          event_id: event.event_id.clone(),
           created_at: event.created_at,
-          name: event.name,
-          description: event.description,
-          location: event.location,
-          venue: event.venue,
+          name: event.name.clone(),
+          description: event.description.clone(),
+          location: event.location.clone(),
+          venue: event.venue.clone(),
           event_type: event.event_type,
           start_date: event.start_date,
           end_date: event.end_date,
           category: event.category,
-          event_capacity: event.event_capacity,
-          file_type: event.file_type,
-          arweave_tx_id: event.arweave_tx_id,
+          event_capacity: event.event_capacity.clone(),
+          file_type: event.file_type.clone(),
+          arweave_tx_id: event.arweave_tx_id.clone(),
           metadata_uploaded: event.metadata_uploaded,
           image_uploaded: event.image_uploaded,
           sales: vec![],

@@ -105,7 +105,7 @@ diesel::table! {
         n_tickets -> Int4,
         sale_start_ts -> Timestamp,
         sale_end_ts -> Timestamp,
-        sale_type -> Nullable<Jsonb>,
+        sale_type -> Jsonb,
     }
 }
 

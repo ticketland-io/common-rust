@@ -36,13 +36,13 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_buy_listings_for_event(&mut self, evt_id: String, skip: u32, limit: u32) -> Result<Vec<BuyListing>> {
+  pub async fn read_buy_listings_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<BuyListing>> {
     Ok(
       buy_listings
       .filter(event_id.eq(evt_id))
-      .limit(limit as i64)
+      .limit(limit)
+      .offset(skip * limit)
       .order_by(created_at.desc())
-      .offset((skip * limit) as i64)
       .load(self.borrow_mut())
       .await?
     )

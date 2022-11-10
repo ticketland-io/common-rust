@@ -89,24 +89,25 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_events(&mut self, skip: u32, limit: u32) -> Result<Vec<Event>> {
+  pub async fn read_events(&mut self, skip: i64, limit: i64) -> Result<Vec<Event>> {
     Ok(
       events
-      .limit(limit as i64)
+      .limit(limit)
+      .offset(skip * limit)
       .order_by(events_dsl::created_at.desc())
-      .offset((skip * limit) as i64)
       .load(self.borrow_mut())
       .await?
     )
   }
 
-  pub async fn read_events_by_category(&mut self, categ: i32, skip: u32, limit: u32) -> Result<Vec<EventWithSale>> {
+  pub async fn read_events_by_category(&mut self, categ: i32, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let records =  events
     .filter(events_dsl::category.eq(categ))
     .filter(events_dsl::end_date.gt(now))
     .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
+    .limit(limit)
+    .offset(skip * limit)
     .order_by(events_dsl::start_date.desc())
-    .offset((skip * limit) as i64)
     .load::<(Event, Sale)>(self.borrow_mut())
     .await?;
 

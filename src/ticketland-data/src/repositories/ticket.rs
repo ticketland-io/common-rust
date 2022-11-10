@@ -29,13 +29,13 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: u32, limit: u32) -> Result<Vec<Ticket>> {
+  pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<Ticket>> {
     Ok(
       tickets
       .filter(event_id.eq(evt_id))
-      .limit(limit as i64)
       .order_by(created_at.desc())
-      .offset((skip * limit) as i64)
+      .limit(limit)
+      .offset(skip * limit)
       .load(self.borrow_mut())
       .await?
     )

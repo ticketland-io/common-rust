@@ -5,3 +5,4 @@ pub mod canva_design;
 pub mod sale;
 pub mod sell_listing;
 pub mod buy_listing;
+pub mod ticket;

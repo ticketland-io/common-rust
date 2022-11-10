@@ -152,8 +152,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    tickets (id) {
-        id -> Int4,
+    tickets (ticket_nft) {
         ticket_nft -> Varchar,
         event_id -> Varchar,
         account_id -> Varchar,

@@ -52,8 +52,7 @@ CREATE TABLE ticket_onchain_accounts (
 );
 
 CREATE TABLE tickets (
-  id SERIAL PRIMARY KEY,
-  ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
+  ticket_nft VARCHAR PRIMARY KEY REFERENCES ticket_onchain_accounts(ticket_nft),
   event_id VARCHAR NOT NULL REFERENCES events(event_id),
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,

@@ -15,6 +15,7 @@ pub struct Ticket {
   pub seat_index: u32,
   pub seat_name: String,
   pub created_at: i64,
+  pub attended: bool,
 }
 
 impl TryFrom<Neo4jResult> for Ticket {
@@ -53,6 +54,9 @@ impl TryFrom<Neo4jResult> for Ticket {
             },
             "created_at" => {
               ticket.created_at = i64::try_from(v).expect("cannot convert created_at");
+            },
+            "attended" => {
+              ticket.attended = bool::try_from(v).expect("cannot convert attended");
             },
             _ => panic!("unknown field"),
           }

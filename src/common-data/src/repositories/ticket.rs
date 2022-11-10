@@ -21,7 +21,8 @@ pub fn upsert_user_ticket(
       ticket_metadata:$ticket_metadata,
       ticket_type_index:$ticket_type_index,
       seat_index:$seat_index,
-      seat_name:$seat_name
+      seat_name:$seat_name,
+      attended: false,
     })-[:FROM]->(evt)
     ON CREATE SET
       ht.created_at = timestamp(),
@@ -72,7 +73,7 @@ pub fn read_user_tickets_for_event(
 pub fn update_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (t:Ticket {ticket_nft:$ticket_nft})
-    SET evt.attended = true
+    SET t.attended = true
     RETURN 1
   "#;
 
@@ -86,7 +87,7 @@ pub fn update_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
 pub fn read_attended(ticket_nft: String) -> (&'static str, Option<Params>) {
   let query = r#"
     MATCH (t:Ticket {ticket_nft:$ticket_nft})
-    RETURN evt.attended
+    RETURN t.attended
   "#;
 
   let params = create_params(vec![

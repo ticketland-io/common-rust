@@ -67,14 +67,18 @@ CREATE TABLE sell_listings (
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
   created_at TIMESTAMP NOT NULL,
-  ask_price BIGINT NOT NULL
+  sol_account VARCHAR NOT NULL,
+  ask_price BIGINT NOT NULL,
+  is_open BOOLEAN DEFAULT true NOT NULL
 );
 
 CREATE TABLE buy_listings (
   id SERIAL PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   created_at TIMESTAMP NOT NULL,
-  bid_price BIGINT NOT NULL
+  sol_account VARCHAR NOT NULL,
+  bid_price BIGINT NOT NULL,
+  is_open BOOLEAN DEFAULT true NOT NULL
 );
 
 CREATE TABLE metadata (

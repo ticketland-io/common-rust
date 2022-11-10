@@ -13,5 +13,7 @@ pub struct BuyListing {
   pub account_id: String,
   #[serde(serialize_with = "to_milli_ts")]
   pub created_at: NaiveDateTime,
+  pub sol_account: String,
   pub bid_price: i64,
+  pub is_open: bool,
 }

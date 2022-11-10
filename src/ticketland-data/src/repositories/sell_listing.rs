@@ -18,4 +18,13 @@ impl PostgresConnection {
 
     Ok(())
   }
+
+  pub async fn read_sell_listing(&mut self, account: String) -> Result<SellListing> {
+    Ok(
+      sell_listings
+      .filter(sol_account.eq(account))
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
 }

@@ -6,7 +6,7 @@ DROP TABLE sell_listings CASCADE;
 DROP TABLE buy_listings CASCADE;
 DROP TABLE metadata_attributes CASCADE;
 DROP TABLE metadata CASCADE;
-DROP TABLE account_designs CASCADE;
+DROP TABLE canva_designs CASCADE;
 DROP TABLE stripe_accounts CASCADE;
 DROP TABLE account_events CASCADE;
 DROP TABLE seat_ranges CASCADE;

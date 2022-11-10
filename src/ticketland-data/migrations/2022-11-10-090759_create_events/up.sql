@@ -91,9 +91,9 @@ CREATE TABLE metadata_attributes (
   value VARCHAR NOT NULL
 );
 
-CREATE TABLE account_designs (
+CREATE TABLE canva_designs (
   design_id VARCHAR PRIMARY KEY,
-  account_id VARCHAR NOT NULL REFERENCES accounts(uid),
+  canva_uid VARCHAR NOT NULL REFERENCES canva_accounts(canva_uid),
   created_at TIMESTAMP NOT NULL,
   url VARCHAR NOT NULL,
   name VARCHAR NOT NULL,

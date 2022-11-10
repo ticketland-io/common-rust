@@ -64,12 +64,9 @@ impl PostgresConnection {
       account_events
       .filter(acount_events_dsl::event_id.eq(id))
       .inner_join(accounts.on(accounts_dsl::uid.eq(acount_events_dsl::account_id)))
-      .load::<(AccountEvent, Account)>(self.borrow_mut())
+      .first::<(AccountEvent, Account)>(self.borrow_mut())
       .await?
-      .into_iter()
-      .map(|r| r.1)
-      .collect::<Vec<_>>()
-      .remove(0)
+      .1
     )
   }
 

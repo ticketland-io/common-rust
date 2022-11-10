@@ -5,9 +5,14 @@ use crate::{
   connection::PostgresConnection,
   models::{
     ticket::Ticket,
+    ticket_onchain_account::TicketOnchainAccount,
   },
   schema::{
     tickets::dsl::*,
+    ticket_onchain_accounts::dsl::{
+      self as ticket_onchain_accounts_dsl,
+      ticket_onchain_accounts,
+    }
   },
 };
 
@@ -53,6 +58,17 @@ impl PostgresConnection {
       .select(attended)
       .first(self.borrow_mut())
       .await?
+    )
+  }
+
+  pub async fn read_ticket_by_ticket_metadata(&mut self, ticket_metadata: String) -> Result<Ticket> {
+    Ok(
+      ticket_onchain_accounts
+      .filter(ticket_onchain_accounts_dsl::ticket_metadata.eq(ticket_metadata))
+      .inner_join(tickets.on(ticket_nft.eq(ticket_onchain_accounts_dsl::ticket_nft)))
+      .first::<(TicketOnchainAccount, Ticket)>(self.borrow_mut())
+      .await?
+      .1
     )
   }
 }

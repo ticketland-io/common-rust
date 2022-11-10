@@ -58,7 +58,8 @@ CREATE TABLE tickets (
   created_at TIMESTAMP NOT NULL,
   ticket_type_index SMALLINT NOT NULL,
   seat_name VARCHAR NOT NULL,
-  seat_index INT NOT NULL
+  seat_index INT NOT NULL,
+  attended BOOLEAN DEFAULT false NOT NULL
 );
 
 CREATE TABLE sell_listings (

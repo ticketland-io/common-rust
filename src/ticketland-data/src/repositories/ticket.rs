@@ -35,4 +35,15 @@ impl PostgresConnection {
       .await?
     )
   }
+
+  pub async fn update_attended(&mut self, ticket_nft_acc: String) -> Result<()> {
+    diesel::update(tickets)
+    .filter(ticket_nft.eq(ticket_nft_acc))
+    .set(attended.eq(true))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
+
 }

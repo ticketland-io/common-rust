@@ -66,6 +66,7 @@ CREATE TABLE sell_listings (
   id SERIAL PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
   ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
   created_at TIMESTAMP NOT NULL,
   sol_account VARCHAR NOT NULL,
   ask_price BIGINT NOT NULL,
@@ -75,6 +76,7 @@ CREATE TABLE sell_listings (
 CREATE TABLE buy_listings (
   id SERIAL PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid),
+  event_id VARCHAR NOT NULL REFERENCES events(event_id),
   created_at TIMESTAMP NOT NULL,
   sol_account VARCHAR NOT NULL,
   bid_price BIGINT NOT NULL,

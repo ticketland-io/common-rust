@@ -32,6 +32,7 @@ diesel::table! {
     buy_listings (id) {
         id -> Int4,
         account_id -> Varchar,
+        event_id -> Varchar,
         created_at -> Timestamp,
         sol_account -> Varchar,
         bid_price -> Int8,
@@ -126,6 +127,7 @@ diesel::table! {
         id -> Int4,
         account_id -> Varchar,
         ticket_nft -> Varchar,
+        event_id -> Varchar,
         created_at -> Timestamp,
         sol_account -> Varchar,
         ask_price -> Int8,
@@ -166,6 +168,7 @@ diesel::joinable!(account_events -> accounts (account_id));
 diesel::joinable!(account_events -> events (event_id));
 diesel::joinable!(api_clients -> accounts (account_id));
 diesel::joinable!(buy_listings -> accounts (account_id));
+diesel::joinable!(buy_listings -> events (event_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
 diesel::joinable!(metadata -> events (event_id));
@@ -173,6 +176,7 @@ diesel::joinable!(metadata_attributes -> metadata (metadata_id));
 diesel::joinable!(sales -> events (event_id));
 diesel::joinable!(seat_ranges -> sales (sale_id));
 diesel::joinable!(sell_listings -> accounts (account_id));
+diesel::joinable!(sell_listings -> events (event_id));
 diesel::joinable!(sell_listings -> ticket_onchain_accounts (ticket_nft));
 diesel::joinable!(stripe_accounts -> accounts (account_id));
 diesel::joinable!(tickets -> accounts (account_id));

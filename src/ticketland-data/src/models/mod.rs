@@ -9,4 +9,4 @@ pub mod sell_listing;
 pub mod buy_listing;
 pub mod ticket;
 pub mod ticket_onchain_account;
-pub mod stripe_stripe;
+pub mod stripe_account;

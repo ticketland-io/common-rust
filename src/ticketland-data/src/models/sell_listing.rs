@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::sell_listings;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = sell_listings)]
 pub struct SellListing {
   pub id: i32,

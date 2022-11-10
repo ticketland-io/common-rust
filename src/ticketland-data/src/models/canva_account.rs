@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::canva_accounts;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = canva_accounts)]
 pub struct CanvaAccount {
   pub canva_uid: String,

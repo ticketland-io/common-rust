@@ -12,7 +12,7 @@ use diesel_as_jsonb::AsJsonb;
 use crate::schema::sales;
 
 #[derive(AsJsonb)]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum SaleType {
   Free {},
@@ -37,7 +37,7 @@ impl Default for SaleType {
   }
 }
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = sales)]
 pub struct Sale {
   pub id: String,

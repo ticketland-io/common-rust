@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::api_clients;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = api_clients)]
 pub struct ApiClient {
   pub client_id: String,

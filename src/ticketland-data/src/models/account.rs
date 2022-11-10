@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::accounts;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = accounts)]
 pub struct Account {
   pub uid: String,

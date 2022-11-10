@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::tickets;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = tickets)]
 pub struct Ticket {
   pub ticket_nft: String,

@@ -6,7 +6,7 @@ use chrono::{
 };
 use crate::schema::stripe_accounts;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Default)]
+#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = stripe_accounts)]
 pub struct StripeAccount {
   pub stripe_uid: String,

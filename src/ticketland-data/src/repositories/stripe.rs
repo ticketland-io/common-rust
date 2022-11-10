@@ -39,4 +39,14 @@ impl PostgresConnection {
       .0
     )
   }
+
+  pub async fn update_stripe_account_status(&mut self, stripe_id: String) -> Result<()> {
+    diesel::update(stripe_accounts)
+    .filter(stripe_uid.eq(stripe_id))
+    .set(status.eq(1))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
 }

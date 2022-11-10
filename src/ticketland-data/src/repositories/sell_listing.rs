@@ -1,12 +1,20 @@
 use diesel::prelude::*;
+use diesel::result::Error;
 use eyre::Result;
-use diesel_async::RunQueryDsl;
+use futures::FutureExt;
+use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
     sell_listing::SellListing,
   },
-  schema::sell_listings::dsl::*,
+  schema::{
+    sell_listings::dsl::*,
+    tickets::dsl::{
+      self as tickets_dsl,
+      tickets,
+    }
+  },
 };
 
 impl PostgresConnection {
@@ -45,6 +53,33 @@ impl PostgresConnection {
     .filter(sol_account.eq(account))
     .set(is_open.eq(true))
     .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
+
+  pub async fn fill_sell_listing(
+    &mut self,
+    sell_listing_account: String,
+    ticket_nft_account: String,
+    new_owner: String,
+  ) -> Result<()> {
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| async move {
+      diesel::update(sell_listings)
+      .filter(sol_account.eq(sell_listing_account))
+      .set(is_open.eq(false))
+      .execute(conn)
+      .await?;
+      
+      diesel::update(tickets)
+      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_account))
+      .set(tickets_dsl::account_id.eq(new_owner))
+      .execute(conn)
+      .await?;
+
+      Ok(())
+    }.boxed())
     .await?;
 
     Ok(())

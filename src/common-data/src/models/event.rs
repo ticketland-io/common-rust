@@ -17,6 +17,7 @@ pub struct Event {
   pub arweave_tx_id: String,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
+  pub draft: bool,
   pub attended: bool,
   pub name: String,
   pub description: String,
@@ -26,6 +27,8 @@ pub struct Event {
   pub start_date: i64,
   pub end_date: i64,
   pub category: String,
+  pub publicity: String,
+  pub payment_type: String,
 }
 
 impl TryFrom<Neo4jResult> for Event {
@@ -95,10 +98,19 @@ impl TryFrom<Neo4jResult> for Event {
             "image_uploaded" => {
               event.image_uploaded = bool::try_from(v).expect("cannot convert image_uploaded");
             },
+            "draft" => {
+              event.draft = bool::try_from(v).expect("cannot convert draft");
+            },
             "attended" => {
               event.attended = bool::try_from(v).expect("cannot convert attended");
             },
-            _ => panic!("unknown field"),
+            "payment_type" => {
+              event.payment_type = String::try_from(v).expect("cannot convert payment_type");
+            },
+            "publicity" => {
+              event.publicity = String::try_from(v).expect("cannot convert publicity");
+            },
+            _ => panic!("unknown field {:?}", k.as_str()),
           }
         }
 

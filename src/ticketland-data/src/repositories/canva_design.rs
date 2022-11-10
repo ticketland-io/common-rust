@@ -5,7 +5,6 @@ use crate::{
   connection::PostgresConnection,
   models::{
     canva_design::CanvaDesign,
-    canva_account::CanvaAccount,
   },
   schema::{
     canva_designs::dsl::{

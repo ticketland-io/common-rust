@@ -3,10 +3,7 @@ use eyre::Result;
 use diesel_async::RunQueryDsl;
 use crate::{
   connection::PostgresConnection,
-  models::{
-    stripe_account::StripeAccount,
-    account::Account,
-  },
+  models::stripe_account::StripeAccount,
   schema::{
     stripe_accounts::dsl::{
       self as stripe_accounts_dsl,
@@ -57,15 +54,15 @@ impl PostgresConnection {
     )
   }
 
-  // pub async fn read_event_organizer_stripe_account(&mut self, event_id: String) -> Result<StripeAccount> {
-  //   Ok(
-  //     events
-  //     .filter(events_dsl::event_id.eq(event_id))
-  //     .inner_join(accounts.on(accounts_dsl::uid.eq(events_dsl::account_id)))
-  //     .inner_join(stripe_accounts.on(stripe_accounts_dsl::account_id.eq(events_dsl::account_id)))
-  //     .first::<(Account, StripeAccount)>(self.borrow_mut())
-  //     .await?
-  //     .0
-  //   )
-  // }
+  pub async fn read_event_organizer_stripe_account(&mut self, event_id: String) -> Result<StripeAccount> {
+    Ok(
+      events
+      .filter(events_dsl::event_id.eq(event_id))
+      .inner_join(accounts.on(accounts_dsl::uid.eq(events_dsl::account_id)))
+      .inner_join(stripe_accounts.on(stripe_accounts_dsl::account_id.eq(events_dsl::account_id)))
+      .select(stripe_accounts::all_columns())
+      .first::<StripeAccount>(self.borrow_mut())
+      .await?
+    )
+  }
 }

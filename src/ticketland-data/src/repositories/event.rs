@@ -1,5 +1,6 @@
-use eyre::Result;
+use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
+use eyre::Result;
 use crate::{
   connection::PostgresConnection,
   models::{
@@ -20,6 +21,16 @@ impl PostgresConnection {
     .execute(self.borrow_mut())
     .await?;
     
+    Ok(())
+  }
+
+  pub async fn update_metadata_uploaded(&mut self, id: String, arweave_tx: String) -> Result<()> {
+    diesel::update(events)
+    .filter(event_id.eq(id))
+    .set(arweave_tx_id.eq(arweave_tx))
+    .execute(self.borrow_mut())
+    .await?;
+
     Ok(())
   }
 }

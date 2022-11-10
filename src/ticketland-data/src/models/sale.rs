@@ -4,10 +4,7 @@ use diesel::{
   FromSqlRow,
   AsExpression,
 };
-use chrono::{
-  NaiveDateTime,
-  naive::serde::ts_milliseconds::serialize as to_milli_ts,
-};
+use chrono::NaiveDateTime;
 use diesel_as_jsonb::AsJsonb;
 use crate::schema::sales;
 
@@ -42,15 +39,12 @@ impl Default for SaleType {
 pub struct Sale {
   pub id: String,
   pub event_id: String,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub created_at: NaiveDateTime,
+  pub created_at: Option<NaiveDateTime>,
   pub account: String,
   pub ticket_type_index: i16,
   pub ticket_type_name: String,
   pub n_tickets: i32,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub sale_start_ts: NaiveDateTime,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub sale_end_ts: NaiveDateTime,
+  pub sale_start_ts: Option<NaiveDateTime>,
+  pub sale_end_ts: Option<NaiveDateTime>,
   pub sale_type: SaleType,
 }

@@ -3,7 +3,7 @@
 diesel::table! {
     accounts (uid) {
         uid -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         mnemonic -> Varchar,
         pubkey -> Varchar,
         name -> Nullable<Varchar>,
@@ -16,7 +16,7 @@ diesel::table! {
     api_clients (client_id) {
         client_id -> Varchar,
         account_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         client_secret -> Varchar,
     }
 }
@@ -26,7 +26,7 @@ diesel::table! {
         id -> Int4,
         account_id -> Varchar,
         event_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         sol_account -> Varchar,
         bid_price -> Int8,
         is_open -> Bool,
@@ -37,7 +37,7 @@ diesel::table! {
     canva_accounts (canva_uid) {
         canva_uid -> Varchar,
         account_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
     }
 }
 
@@ -45,7 +45,7 @@ diesel::table! {
     canva_designs (design_id) {
         design_id -> Varchar,
         canva_uid -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         url -> Varchar,
         name -> Varchar,
         file_type -> Varchar,
@@ -56,14 +56,14 @@ diesel::table! {
     events (event_id) {
         event_id -> Varchar,
         account_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         name -> Varchar,
         description -> Varchar,
         location -> Nullable<Varchar>,
         venue -> Nullable<Varchar>,
         event_type -> Int4,
-        start_date -> Timestamp,
-        end_date -> Timestamp,
+        start_date -> Nullable<Timestamp>,
+        end_date -> Nullable<Timestamp>,
         category -> Int4,
         event_capacity -> Varchar,
         file_type -> Nullable<Varchar>,
@@ -96,13 +96,13 @@ diesel::table! {
     sales (id) {
         id -> Varchar,
         event_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         account -> Varchar,
         ticket_type_index -> Int2,
         ticket_type_name -> Varchar,
         n_tickets -> Int4,
-        sale_start_ts -> Timestamp,
-        sale_end_ts -> Timestamp,
+        sale_start_ts -> Nullable<Timestamp>,
+        sale_end_ts -> Nullable<Timestamp>,
         sale_type -> Jsonb,
     }
 }
@@ -122,7 +122,7 @@ diesel::table! {
         account_id -> Varchar,
         ticket_nft -> Varchar,
         event_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         sol_account -> Varchar,
         ask_price -> Int8,
         is_open -> Bool,
@@ -133,7 +133,7 @@ diesel::table! {
     stripe_accounts (stripe_uid) {
         stripe_uid -> Varchar,
         account_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         account_link -> Nullable<Varchar>,
         status -> Int2,
     }
@@ -151,7 +151,7 @@ diesel::table! {
         ticket_nft -> Varchar,
         event_id -> Varchar,
         account_id -> Varchar,
-        created_at -> Timestamp,
+        created_at -> Nullable<Timestamp>,
         ticket_type_index -> Int2,
         seat_name -> Varchar,
         seat_index -> Int4,

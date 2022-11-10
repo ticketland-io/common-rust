@@ -1,10 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
-use chrono::{
-  NaiveDateTime,
-  naive::serde::ts_milliseconds::serialize as to_milli_ts,
-};
+use chrono::NaiveDateTime;
 use crate::schema::events;
 use super::sale::Sale;
 
@@ -13,17 +10,14 @@ use super::sale::Sale;
 pub struct Event {
   pub event_id: String,
   pub account_id: String,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub created_at: NaiveDateTime,
+  pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
   pub location: Option<String>,
   pub venue: Option<String>,
   pub event_type: i32,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub start_date: NaiveDateTime,
-  #[serde(serialize_with = "to_milli_ts")]
-  pub end_date: NaiveDateTime,
+  pub start_date: Option<NaiveDateTime>,
+  pub end_date: Option<NaiveDateTime>,
   pub category: i32,
   pub event_capacity: String,
   pub file_type: Option<String>,
@@ -35,14 +29,14 @@ pub struct Event {
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct EventWithSale {
   pub event_id: String,
-  pub created_at: NaiveDateTime,
+  pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
   pub location: Option<String>,
   pub venue: Option<String>,
   pub event_type: i32,
-  pub start_date: NaiveDateTime,
-  pub end_date: NaiveDateTime,
+  pub start_date: Option<NaiveDateTime>,
+  pub end_date: Option<NaiveDateTime>,
   pub category: i32,
   pub event_capacity: String,
   pub file_type: Option<String>,

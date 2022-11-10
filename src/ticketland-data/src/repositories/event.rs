@@ -77,4 +77,13 @@ impl PostgresConnection {
       .collect::<Vec<_>>()
     )
   }
+
+  pub async fn read_event(&mut self, id: String) -> Result<Event> {
+    Ok(
+      events
+      .filter(event_id.eq(id))
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
 }

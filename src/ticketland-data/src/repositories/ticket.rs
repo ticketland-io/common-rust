@@ -46,4 +46,13 @@ impl PostgresConnection {
     Ok(())
   }
 
+  pub async fn has_attended(&mut self, ticket_nft_acc: String) -> Result<bool> {
+    Ok(
+      tickets
+      .filter(ticket_nft.eq(ticket_nft_acc))
+      .select(attended)
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
 }

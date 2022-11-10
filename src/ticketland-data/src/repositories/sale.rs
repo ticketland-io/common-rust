@@ -8,16 +8,11 @@ use crate::{
   models::{
     sale::Sale,
     seat_range::SeatRange,
-    event::Event,
   },
   schema::{
     sales::dsl::{
       self as sales_dsl,
       sales,
-    },
-    events::dsl::{
-      self as events_dsl,
-      events,
     },
     seat_ranges::dsl::{
       self as seat_ranges_dsl,
@@ -49,5 +44,14 @@ impl PostgresConnection {
     .await?;
 
     Ok(())
+  }
+
+  pub async fn read_sale_by_account(&mut self, sale_account: String) -> Result<Sale> {
+    Ok(
+      sales
+      .filter(sales_dsl::account.eq(sale_account))
+      .first(self.borrow_mut())
+      .await?
+    )
   }
 }

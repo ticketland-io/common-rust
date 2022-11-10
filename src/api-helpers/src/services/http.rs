@@ -1,8 +1,4 @@
-use std::{
-  error::Error,
-  future::Future,
-  pin::Pin,
-};
+use std::error::Error;
 use eyre::Result;
 use actix_web::{
   HttpRequest,
@@ -60,19 +56,8 @@ macro_rules! QueryString {
   }
 }
 
-pub trait QueryStringTrait {
-	fn skip(&self) -> Option<i64>;
-	fn limit(&self) -> Option<i64>;
-}
-
-pub type QueryExec<T> = Pin<Box<dyn Future<Output = Result<Vec<T>>>>>;
-
-pub async fn exec_basic_db_read_endpoint<T: Serialize + 'static>(qs: Box<dyn QueryStringTrait>, exec: QueryExec<T>) -> HttpResponse {
-  let skip = qs.skip().unwrap_or(0);
-  let limit = qs.limit().unwrap_or(100);
-
-  exec
-  .await
+pub async fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
+  result
   .map(|result| {
     HttpResponse::Ok()
       .json(BaseResponse {
@@ -85,9 +70,8 @@ pub async fn exec_basic_db_read_endpoint<T: Serialize + 'static>(qs: Box<dyn Que
   .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
-pub async fn exec_basic_db_write_endpoint<T: Serialize + 'static>(exec: QueryExec<T>) -> HttpResponse {
-  exec
-  .await
+pub async fn create_write_response<T: Serialize + 'static>(result: Result<()>) -> HttpResponse {
+  result
   .map(|_| HttpResponse::Ok().finish())
   .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }

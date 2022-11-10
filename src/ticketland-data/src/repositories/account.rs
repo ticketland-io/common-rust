@@ -1,13 +1,13 @@
-use diesel::insert_into;
+use diesel::prelude::*;
 use eyre::Result;
 use diesel_async::{RunQueryDsl, AsyncPgConnection};
 use crate::{
   models::account::Account,
-  schema::accounts::{self, name},
+  schema::accounts::dsl::*,
 };
 
 pub async fn upsert_account(conn: &mut AsyncPgConnection, account: Account) -> Result<()> {
-  insert_into(accounts::table)
+  diesel::insert_into(accounts)
   .values(&account)
   .on_conflict(name)
   .do_update()
@@ -16,4 +16,13 @@ pub async fn upsert_account(conn: &mut AsyncPgConnection, account: Account) -> R
   .await?;
   
   Ok(())
+}
+
+pub async fn read_account_by_id(conn: &mut AsyncPgConnection, user_id: String) -> Result<Account> {
+  Ok(
+    accounts
+    .filter(uid.eq(user_id))
+    .first(conn)
+    .await?
+  )
 }

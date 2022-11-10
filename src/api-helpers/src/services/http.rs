@@ -1,4 +1,5 @@
 use std::error::Error;
+use eyre::Result;
 use actix_web::{
   HttpRequest,
   HttpResponse,
@@ -33,8 +34,8 @@ pub fn get_header_value<'b>(req: &'b HttpRequest, key: &'b str) -> Option<&'b st
 #[derive(Serialize)]
 pub struct BaseResponse<T: Serialize> {
   pub count: usize,
-  pub skip: Option<u32>,
-  pub limit: Option<u32>,
+  pub skip: Option<i64>,
+  pub limit: Option<i64>,
   pub result: T,
 }
 
@@ -43,8 +44,8 @@ macro_rules! QueryString {
   ($pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
 		#[derive(Deserialize,Debug, Clone)]
     $pub struct $name {
-      pub skip: Option<u32>,
-      pub limit: Option<u32>,
+      pub skip: Option<i64>,
+      pub limit: Option<i64>,
       $($fpub $field : $type,)*
     }
 
@@ -56,28 +57,25 @@ macro_rules! QueryString {
 }
 
 pub trait QueryStringTrait {
-	fn skip(&self) -> Option<u32>;
-	fn limit(&self) -> Option<u32>;
+	fn skip(&self) -> Option<i64>;
+	fn limit(&self) -> Option<i64>;
 }
 
+pub type QueryExec<T> = Box<dyn FnOnce() -> Result<Vec<T>>>;
 
-pub async fn exec_basic_db_write_endpoint<T: Serialize>(qs: Box<dyn QueryStringTrait>, data: T) -> HttpResponse {
+pub async fn exec_basic_db_write_endpoint<T: Serialize>(qs: Box<dyn QueryStringTrait>, exec: QueryExec<T>) -> HttpResponse {
   let skip = qs.skip().unwrap_or(0);
   let limit = qs.limit().unwrap_or(100);
 
-  send_read(
-    Arc::clone(&neo4j),
-    query,
-    db_query_params,
-  ).await
+  exec()
   .map(|result| {
     HttpResponse::Ok()
       .json(BaseResponse {
-        count: result.0.len(),
+        count: result.len(),
         result,
         skip: Some(skip),
         limit: Some(limit),
       })
   })
-  .unwrap_or_else(|error: Error| internal_server_error(Some(error)))
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }

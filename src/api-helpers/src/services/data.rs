@@ -12,27 +12,11 @@ use common_data::{
   types::{Neo4jResult},
 };
 use super::http::internal_server_error;
-
-#[macro_export]
-macro_rules! QueryString {
-  ($pub:vis struct $name:ident { $($fpub:vis $field:ident : $type:ty,)* }) => {
-		#[derive(Deserialize,Debug, Clone)]
-    $pub struct $name {
-      pub skip: Option<u32>,
-      pub limit: Option<u32>,
-      $($fpub $field : $type,)*
-    }
-
-    impl QueryStringTrait for $name {
-      fn skip(&self) -> Option<u32> { self.skip }
-      fn limit(&self) -> Option<u32> { self.limit }
-    }
-  }
-}
+use crate::QueryString;
 
 pub trait QueryStringTrait {
-	fn skip(&self) -> Option<u32>;
-	fn limit(&self) -> Option<u32>;
+	fn skip(&self) -> Option<i64>;
+	fn limit(&self) -> Option<i64>;
 }
 
 QueryString! {
@@ -42,8 +26,8 @@ QueryString! {
 #[derive(Serialize)]
 pub struct BaseResponse {
   pub count: usize,
-  pub skip: Option<u32>,
-  pub limit: Option<u32>,
+  pub skip: Option<i64>,
+  pub limit: Option<i64>,
   pub result: Neo4jResult,
 }
 

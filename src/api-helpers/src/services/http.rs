@@ -56,7 +56,7 @@ macro_rules! QueryString {
   }
 }
 
-pub async fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
+pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
   result
   .map(|result| {
     HttpResponse::Ok()
@@ -70,7 +70,7 @@ pub async fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i6
   .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
-pub async fn create_write_response<T: Serialize + 'static>(result: Result<()>) -> HttpResponse {
+pub fn create_write_response<T: Serialize + 'static>(result: Result<()>) -> HttpResponse {
   result
   .map(|_| HttpResponse::Ok().finish())
   .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))

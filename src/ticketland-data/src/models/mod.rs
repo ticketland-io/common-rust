@@ -10,3 +10,4 @@ pub mod buy_listing;
 pub mod ticket;
 pub mod ticket_onchain_account;
 pub mod stripe_account;
+pub mod metadata;

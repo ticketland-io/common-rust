@@ -46,6 +46,15 @@ impl PostgresConnection {
     Ok(())
   }
 
+  pub async fn read_sale_by_event(&mut self, evt_id: String) -> Result<Sale> {
+    Ok(
+      sales
+      .filter(sales_dsl::event_id.eq(evt_id))
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
+
   pub async fn read_sale_by_account(&mut self, sale_account: String) -> Result<Sale> {
     Ok(
       sales

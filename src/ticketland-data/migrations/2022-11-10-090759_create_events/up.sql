@@ -24,8 +24,8 @@ CREATE TABLE events (
   location VARCHAR,
   venue VARCHAR,
   event_type INT NOT NULL,
-  start_date TIMESTAMP DEFAULT now(),
-  end_date TIMESTAMP DEFAULT now(),
+  start_date TIMESTAMP NOT NULL,
+  end_date TIMESTAMP NOT NULL,
   category INT NOT NULL,
   event_capacity VARCHAR(64) NOT NULL,
   file_type VARCHAR(10),
@@ -43,8 +43,8 @@ CREATE TABLE sales (
   ticket_type_index SMALLINT NOT NULL,
   ticket_type_name VARCHAR NOT NULL,
   n_tickets INT NOT NULL,
-  sale_start_ts TIMESTAMP DEFAULT now(),
-  sale_end_ts TIMESTAMP DEFAULT now(),
+  sale_start_ts TIMESTAMP NOT NULL,
+  sale_end_ts TIMESTAMP NOT NULL,
   sale_type JSONB NOT NULL
 );
 

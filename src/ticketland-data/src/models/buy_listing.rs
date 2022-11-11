@@ -15,7 +15,7 @@ pub struct BuyListing {
   pub is_open: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = buy_listings)]
 pub struct NewBuyListing<'a> {
   pub account_id: &'a str,

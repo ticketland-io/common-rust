@@ -62,8 +62,8 @@ diesel::table! {
         location -> Nullable<Varchar>,
         venue -> Nullable<Varchar>,
         event_type -> Int4,
-        start_date -> Nullable<Timestamp>,
-        end_date -> Nullable<Timestamp>,
+        start_date -> Timestamp,
+        end_date -> Timestamp,
         category -> Int4,
         event_capacity -> Varchar,
         file_type -> Nullable<Varchar>,
@@ -102,8 +102,8 @@ diesel::table! {
         ticket_type_index -> Int2,
         ticket_type_name -> Varchar,
         n_tickets -> Int4,
-        sale_start_ts -> Nullable<Timestamp>,
-        sale_end_ts -> Nullable<Timestamp>,
+        sale_start_ts -> Timestamp,
+        sale_end_ts -> Timestamp,
         sale_type -> Jsonb,
     }
 }

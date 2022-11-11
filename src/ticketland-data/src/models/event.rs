@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
-use chrono::NaiveDateTime;
+use chrono::{
+  NaiveDateTime,
+  naive::serde::ts_milliseconds::serialize as to_milli_ts,
+};
 use crate::schema::events;
 use super::sale::Sale;
 
@@ -16,8 +19,10 @@ pub struct Event {
   pub location: Option<String>,
   pub venue: Option<String>,
   pub event_type: i32,
-  pub start_date: Option<NaiveDateTime>,
-  pub end_date: Option<NaiveDateTime>,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub start_date: NaiveDateTime,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub end_date: NaiveDateTime,
   pub category: i32,
   pub event_capacity: String,
   pub file_type: Option<String>,
@@ -36,8 +41,10 @@ pub struct EventWithSale {
   pub location: Option<String>,
   pub venue: Option<String>,
   pub event_type: i32,
-  pub start_date: Option<NaiveDateTime>,
-  pub end_date: Option<NaiveDateTime>,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub start_date: NaiveDateTime,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub end_date: NaiveDateTime,
   pub category: i32,
   pub event_capacity: String,
   pub file_type: Option<String>,

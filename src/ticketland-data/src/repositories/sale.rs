@@ -7,7 +7,7 @@ use crate::{
   connection::PostgresConnection,
   models::{
     sale::{NewSale, Sale},
-    seat_range::NewSeatRange,
+    seat_range::SeatRange,
   },
   schema::{
     sales::dsl::{
@@ -22,7 +22,7 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn upsert_sales(&mut self, sales_list: Vec<NewSale>, seat_ranges_list: Vec<NewSeatRange>) -> Result<()> {
+  pub async fn upsert_sales(&mut self, sales_list: Vec<NewSale>, seat_ranges_list: Vec<SeatRange>) -> Result<()> {
     self.borrow_mut()
     .transaction::<_, Error, _>(|conn| async move {
       diesel::insert_into(sales)

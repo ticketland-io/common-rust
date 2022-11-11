@@ -38,10 +38,9 @@ CREATE TABLE events (
 );
 
 CREATE TABLE sales (
-  id VARCHAR PRIMARY KEY,
+  account VARCHAR PRIMARY KEY,
   event_id VARCHAR NOT NULL REFERENCES events(event_id),
   created_at TIMESTAMP DEFAULT now(),
-  account VARCHAR NOT NULL,
   ticket_type_index SMALLINT NOT NULL,
   ticket_type_name VARCHAR NOT NULL,
   n_tickets INT NOT NULL,
@@ -120,10 +119,10 @@ CREATE TABLE stripe_accounts (
 );
 
 CREATE TABLE seat_ranges (
-  id SERIAL PRIMARY KEY,
-  sale_id VARCHAR NOT NULL REFERENCES sales(id),
+  sale_id VARCHAR NOT NULL REFERENCES sales(account),
   l INT NOT NULL,
-  r INT NOT NULL
+  r INT NOT NULL,
+  PRIMARY KEY(sale_id, l, r)
 );
   
 CREATE TABLE api_clients (

@@ -17,7 +17,7 @@ impl PostgresConnection {
   pub async fn upsert_account(&mut self, account: Account) -> Result<()> {
     diesel::insert_into(accounts)
     .values(&account)
-    .on_conflict(name)
+    .on_conflict(uid)
     .do_update()
     .set(&account)
     .execute(self.borrow_mut())

@@ -96,11 +96,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    sales (id) {
-        id -> Varchar,
+    sales (account) {
+        account -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamp>,
-        account -> Varchar,
         ticket_type_index -> Int2,
         ticket_type_name -> Varchar,
         n_tickets -> Int4,
@@ -111,8 +110,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    seat_ranges (id) {
-        id -> Int4,
+    seat_ranges (sale_id, l, r) {
         sale_id -> Varchar,
         l -> Int4,
         r -> Int4,

@@ -56,15 +56,15 @@ macro_rules! QueryString {
   }
 }
 
-pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
+pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: Option<i64>, limit: Option<i64>) -> HttpResponse {
   result
   .map(|result| {
     HttpResponse::Ok()
       .json(BaseResponse {
         count: result.len(),
         result,
-        skip: Some(skip),
-        limit: Some(limit),
+        skip: skip,
+        limit: limit,
       })
   })
   .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))

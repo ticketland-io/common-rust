@@ -43,9 +43,9 @@ impl Default for SaleType {
 #[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = sales)]
 pub struct Sale {
+  pub account: String,
   pub event_id: String,
   pub created_at: Option<NaiveDateTime>,
-  pub account: String,
   pub ticket_type_index: i16,
   pub ticket_type_name: String,
   pub n_tickets: i32,
@@ -60,8 +60,8 @@ pub struct Sale {
 #[derive(Insertable, Deserialize, Clone)]
 #[diesel(table_name = sales)]
 pub struct NewSale {
-  pub event_id: String,
   pub account: String,
+  pub event_id: String,
   pub ticket_type_index: i16,
   pub ticket_type_name: String,
   pub n_tickets: i32,

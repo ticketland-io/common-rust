@@ -119,7 +119,7 @@ CREATE TABLE stripe_accounts (
 );
 
 CREATE TABLE seat_ranges (
-  sale_id VARCHAR NOT NULL REFERENCES sales(account),
+  sale_id VARCHAR NOT NULL REFERENCES sales(id),
   l INT NOT NULL,
   r INT NOT NULL,
   PRIMARY KEY(sale_id, l, r)

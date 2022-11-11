@@ -48,9 +48,10 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn cancel_sell_listing(&mut self, account: String) -> Result<()> {
+  pub async fn cancel_sell_listing(&mut self, uid: String, account: String) -> Result<()> {
     diesel::update(sell_listings)
     .filter(sol_account.eq(account))
+    .filter(account_id.eq(uid))
     .set(is_open.eq(true))
     .execute(self.borrow_mut())
     .await?;

@@ -5,6 +5,7 @@ use crate::{
   connection::PostgresConnection,
   models::{
     account::Account,
+    canva_account::CanvaAccount,
   },
   schema::{
     accounts::dsl::*,
@@ -43,5 +44,17 @@ impl PostgresConnection {
       .first::<Account>(self.borrow_mut())
       .await?
     )
+  }
+
+  pub async fn upsert_canva_account(&mut self, canva_account: CanvaAccount) -> Result<()> {
+    diesel::insert_into(canva_accounts)
+    .values(&canva_account)
+    .on_conflict(canva_uid)
+    .do_update()
+    .set(&canva_account)
+    .execute(self.borrow_mut())
+    .await?;
+    
+    Ok(())
   }
 }

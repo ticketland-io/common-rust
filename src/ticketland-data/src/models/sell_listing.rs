@@ -15,3 +15,14 @@ pub struct SellListing {
   pub ask_price: i64,
   pub is_open: bool,
 }
+
+#[derive(Insertable)]
+#[diesel(table_name = sell_listings)]
+pub struct NewSellListing<'a> {
+  pub account_id: &'a str,
+  pub ticket_nft: &'a str,
+  pub event_id: &'a str,
+  pub sol_account: &'a str,
+  pub ask_price: i64,
+  pub is_open: bool,
+}

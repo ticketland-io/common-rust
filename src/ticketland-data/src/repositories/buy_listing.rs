@@ -18,7 +18,7 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn create_buy_listing<'a>(&mut self, buy_listing: NewBuyListing<'a>) -> Result<()> {
+  pub async fn create_buy_listing(&mut self, buy_listing: NewBuyListing<'_>) -> Result<()> {
     diesel::insert_into(buy_listings)
     .values(&buy_listing)
     .execute(self.borrow_mut())

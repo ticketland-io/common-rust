@@ -6,7 +6,7 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    sell_listing::SellListing,
+    sell_listing::{NewSellListing, SellListing},
   },
   schema::{
     sell_listings::dsl::*,
@@ -18,7 +18,7 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn create_sell_listing(&mut self, sell_listing: SellListing) -> Result<()> {
+  pub async fn create_sell_listing(&mut self, sell_listing: NewSellListing<'_>) -> Result<()> {
     diesel::insert_into(sell_listings)
     .values(&sell_listing)
     .execute(self.borrow_mut())

@@ -58,7 +58,7 @@ pub struct Sale {
 }
 
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, Clone)]
 #[diesel(table_name = sales)]
 pub struct NewSale {
   pub event_id: String,

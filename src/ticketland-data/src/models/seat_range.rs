@@ -11,7 +11,7 @@ pub struct SeatRange {
   pub r: i32,
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, Clone)]
 #[diesel(table_name = seat_ranges)]
 pub struct NewSeatRange {
   pub sale_id: String,

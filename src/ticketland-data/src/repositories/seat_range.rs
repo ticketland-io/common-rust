@@ -12,10 +12,10 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn read_event_seat_ranges(&mut self, s_id: String) -> Result<Vec<SeatRange>> {
+  pub async fn read_event_seat_ranges(&mut self, s_account: String) -> Result<Vec<SeatRange>> {
     Ok(
       seat_ranges
-      .filter(sale_id.eq(s_id))
+      .filter(sale_account.eq(s_account))
       .load(self.borrow_mut())
       .await?
     )

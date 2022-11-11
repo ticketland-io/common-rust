@@ -34,7 +34,7 @@ impl PostgresConnection {
       
       diesel::insert_into(seat_ranges)
       .values(&seat_ranges_list)
-      .on_conflict((seat_ranges_dsl::sale_id, seat_ranges_dsl::l,  seat_ranges_dsl::r))
+      .on_conflict((seat_ranges_dsl::sale_account, seat_ranges_dsl::l,  seat_ranges_dsl::r))
       .do_nothing()
       .execute(conn)
       .await?;

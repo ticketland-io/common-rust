@@ -110,8 +110,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    seat_ranges (sale_id, l, r) {
-        sale_id -> Varchar,
+    seat_ranges (sale_account, l, r) {
+        sale_account -> Varchar,
         l -> Int4,
         r -> Int4,
     }
@@ -169,7 +169,7 @@ diesel::joinable!(events -> accounts (account_id));
 diesel::joinable!(metadata -> events (event_id));
 diesel::joinable!(metadata_attributes -> metadata (metadata_id));
 diesel::joinable!(sales -> events (event_id));
-diesel::joinable!(seat_ranges -> sales (sale_id));
+diesel::joinable!(seat_ranges -> sales (sale_account));
 diesel::joinable!(sell_listings -> accounts (account_id));
 diesel::joinable!(sell_listings -> events (event_id));
 diesel::joinable!(sell_listings -> ticket_onchain_accounts (ticket_nft));

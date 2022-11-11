@@ -31,7 +31,8 @@ CREATE TABLE events (
   file_type VARCHAR(10),
   arweave_tx_id VARCHAR,
   metadata_uploaded BOOL NOT NULL,
-  image_uploaded BOOL NOT NULL
+  image_uploaded BOOL NOT NULL,
+  draft BOOL NOT NULL
 );
 
 CREATE TABLE sales (

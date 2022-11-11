@@ -23,7 +23,8 @@ pub struct Event {
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
   pub metadata_uploaded: bool,
-  pub image_uploaded: bool
+  pub image_uploaded: bool,
+  pub draft: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -43,6 +44,7 @@ pub struct EventWithSale {
   pub arweave_tx_id: Option<String>,
   pub metadata_uploaded: bool,
   pub image_uploaded: bool,
+  pub draft: bool,
   pub sales: Vec<Sale>,
 }
 
@@ -74,6 +76,7 @@ impl EventWithSale {
           arweave_tx_id: event.arweave_tx_id.clone(),
           metadata_uploaded: event.metadata_uploaded,
           image_uploaded: event.image_uploaded,
+          draft: event.draft,
           sales: vec![],
         });
       }

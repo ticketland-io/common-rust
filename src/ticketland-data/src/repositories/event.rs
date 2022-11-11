@@ -80,10 +80,10 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_event(&mut self, id: String) -> Result<Event> {
+  pub async fn read_event(&mut self, evt_id: String) -> Result<Event> {
     Ok(
       events
-      .filter(events_dsl::event_id.eq(id))
+      .filter(events_dsl::event_id.eq(evt_id))
       .first(self.borrow_mut())
       .await?
     )
@@ -112,5 +112,19 @@ impl PostgresConnection {
     .await?;
 
     Ok(EventWithSale::from_tuple(records))
+  }
+
+  pub async fn update_draft(&mut self, evt_id: String) -> Result<()> {
+    diesel::update(events)
+    .filter(events_dsl::event_id.eq(evt_id))
+    .set(events_dsl::draft.eq(true))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
+
+  pub async fn read_event_with_sales(&mut self) -> Result<()> {
+    todo!()
   }
 }

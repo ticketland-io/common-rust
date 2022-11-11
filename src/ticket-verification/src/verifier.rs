@@ -3,7 +3,6 @@ use std::{
   str::FromStr,
 };
 use chrono::Duration;
-use actix::prelude::*;
 use eyre::Result;
 use serde::{Serialize, Deserialize};
 use borsh::{BorshSerialize};
@@ -12,13 +11,14 @@ use solana_sdk::{
   signature::Signature,
   keccak::hashv,
 };
-use common_data::{
-  helpers::{send_read},
-  models::ticket::Ticket,
-  repositories::ticket::{read_ticket_by_ticket_metadata},
-};
+// use common_data::{
+//   helpers::{send_read},
+//   models::ticket::Ticket,
+//   repositories::ticket::{read_ticket_by_ticket_metadata},
+// };
 use ticketland_crypto::asymetric::ed25519;
-use ticketland_core::{actor::neo4j::Neo4jActor, services::{redis::Redis, redlock::RedLock}};
+use ticketland_core::{services::{redis::Redis, redlock::RedLock}};
+use ticketland_data::connection::PostgresConnection;
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
 use crate::error::Error;
@@ -69,7 +69,7 @@ fn redis_ticket_attended_key(event_id: &str, ticket_metadata: &str) -> String {
 
 pub async fn verify_ticket(
   rpc_client: Arc<RpcClient>,
-  neo4j: Arc<Addr<Neo4jActor>>,
+  postgres: Arc<Mutex<PostgresConnection>>,
   redis: Arc<Mutex<Redis>>,
   redlock: Arc<RedLock>,
   ticket_verifier_priv_key: String,
@@ -95,11 +95,9 @@ pub async fn verify_ticket(
 
   if sig.verify(&ticket_owner.to_bytes(), message_hash) {
     // 2. Load the ticket type index for the given ticket
-    let (query, db_query_params) = read_ticket_by_ticket_metadata(ticket_metadata.to_string());
-    let ticket = send_read(neo4j, query, db_query_params)
-    .await
-    .map(TryInto::<Ticket>::try_into)??;
-    let ticket_type_index = ticket.ticket_type_index;
+    let mut postgres = postgres.lock().unwrap();
+    let ticket = postgres.read_ticket_by_ticket_metadata(ticket_metadata.to_string()).await?;
+    let ticket_type_index = ticket.ticket_type_index as u8;
     
 
     // 3. check that signer is the owner of the given ticket_metadata 

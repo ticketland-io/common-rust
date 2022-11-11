@@ -124,7 +124,13 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_event_with_sales(&mut self) -> Result<()> {
-    todo!()
+  pub async fn read_event_with_sales(&mut self, evt_id: String) -> Result<Vec<EventWithSale>> {
+    let records =  events
+    .filter(events_dsl::event_id.eq(evt_id))
+    .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
+    .load::<(Event, Sale)>(self.borrow_mut())
+    .await?;
+
+    Ok(EventWithSale::from_tuple(records))
   }
 }

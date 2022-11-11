@@ -100,7 +100,7 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_events_by_category(&mut self, categ: i32, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_events_by_category(&mut self, categ: i16, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let records =  events
     .filter(events_dsl::category.eq(categ))
     .filter(events_dsl::end_date.gt(now))

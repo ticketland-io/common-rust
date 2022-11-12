@@ -15,13 +15,3 @@ pub struct Ticket {
   pub seat_index: i32,
   pub attended: bool,
 }
-
-#[derive(Deserialize, Clone, Default)]
-pub struct NewTicket {
-  pub ticket_nft: String,
-  pub event_id: String,
-  pub ticket_type_index: i16,
-  pub seat_name: String,
-  pub seat_index: i32,
-  pub attended: bool,
-}

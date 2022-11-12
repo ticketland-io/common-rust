@@ -89,6 +89,17 @@ impl PostgresConnection {
     )
   }
 
+  pub async fn read_event_and_organizer(&mut self, evt_id: String) -> Result<(Event, String)> {
+    Ok(
+      events
+      .filter(events_dsl::event_id.eq(evt_id))
+      .inner_join(accounts.on(accounts_dsl::uid.eq(events_dsl::account_id)))
+      .select((events::all_columns(), accounts_dsl::pubkey))
+      .first(self.borrow_mut())
+      .await?
+    )
+  }
+
   pub async fn read_events(&mut self, skip: i64, limit: i64) -> Result<Vec<Event>> {
     Ok(
       events

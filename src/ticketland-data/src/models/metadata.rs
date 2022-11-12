@@ -4,10 +4,12 @@ use std::{
   ops::Deref,
 };
 use serde::{Serialize, Deserialize};
+use serde_aux::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Attribute {
   pub trait_type: String,
+  #[serde(deserialize_with = "deserialize_string_from_number")]
   pub value: String,
 }
 

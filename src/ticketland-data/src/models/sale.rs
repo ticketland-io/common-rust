@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_aux::prelude::*;
 use diesel::{
   prelude::*,
   FromSqlRow,
@@ -20,13 +21,17 @@ use crate::schema::sales;
 pub enum SaleType {
   Free {},
   FixedPrice {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     price: u64
   },
   Refundable {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     price: u64
   },
   DutchAuction {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     start_price: u64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     end_price: u64,
     curve_length: u16,
     drop_interval: u16,

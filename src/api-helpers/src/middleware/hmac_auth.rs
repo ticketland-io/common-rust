@@ -42,7 +42,7 @@ impl FromRequest for ClientAuth {
 
 pub struct HmacAuthnMiddlewareFactory<F, Fut>
 where
-  F: FnOnce(String) -> Fut + Copy + 'static,
+  F: FnOnce(String) -> Fut + Clone + 'static,
   Fut: Future<Output = Result<String>>,
 {
   pub api_client_reader: F,
@@ -50,7 +50,7 @@ where
 
 impl <F, Fut> HmacAuthnMiddlewareFactory<F, Fut>
 where
-  F: FnOnce(String) -> Fut + Copy + 'static,
+  F: FnOnce(String) -> Fut + Clone + 'static,
   Fut: Future<Output = Result<String>>,
 {
   pub fn new(api_client_reader: F) -> Self {
@@ -63,7 +63,7 @@ where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
-    F: FnOnce(String) -> Fut + Copy + 'static,
+    F: FnOnce(String) -> Fut + Clone + 'static,
     Fut: Future<Output = Result<String>>,
 {
     type Response = ServiceResponse<B>;
@@ -75,14 +75,14 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
       ready(Ok(HmacAuthnMiddleware {
         service: Rc::new(service),
-        api_client_reader: self.api_client_reader,
+        api_client_reader: self.api_client_reader.clone(),
       }))
     }
 }
 
 pub struct HmacAuthnMiddleware<F, Fut, S>
 where
-  F: FnOnce(String) -> Fut + Copy + 'static,
+  F: FnOnce(String) -> Fut + Clone + 'static,
   Fut: Future<Output = Result<String>>,
 {
   service: Rc<S>,
@@ -92,7 +92,7 @@ where
 impl<F, Fut, S, B> HmacAuthnMiddleware<F, Fut, S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    F: FnOnce(String) -> Fut + Copy + 'static,
+    F: FnOnce(String) -> Fut + Clone + 'static,
     Fut: Future<Output = Result<String>>,
 {
   fn is_valid_ts(ts: &str) -> Result<()> {
@@ -129,7 +129,7 @@ where
 impl<F, Fut, S, B> Service<ServiceRequest> for HmacAuthnMiddleware<F, Fut, S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    F: FnOnce(String) -> Fut + Copy + 'static,
+    F: FnOnce(String) -> Fut + Clone + 'static,
     Fut: Future<Output = Result<String>>,
 {
   type Response = ServiceResponse<B>;
@@ -140,7 +140,7 @@ where
 
   fn call(&self, req: ServiceRequest) -> Self::Future {
     let srv = self.service.clone();
-    let api_client_reader = self.api_client_reader;
+    let api_client_reader = self.api_client_reader.clone();
 
     Box::pin(
       async move {

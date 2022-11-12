@@ -25,7 +25,6 @@ CREATE TABLE events (
   venue VARCHAR,
   event_type SMALLINT NOT NULL,
   visibility SMALLINT NOT NULL,
-  payment_type SMALLINT NOT NULL,
   start_date TIMESTAMP NOT NULL,
   end_date TIMESTAMP NOT NULL,
   category SMALLINT NOT NULL,

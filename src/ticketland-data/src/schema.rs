@@ -63,7 +63,6 @@ diesel::table! {
         venue -> Nullable<Varchar>,
         event_type -> Int2,
         visibility -> Int2,
-        payment_type -> Int2,
         start_date -> Timestamp,
         end_date -> Timestamp,
         category -> Int2,

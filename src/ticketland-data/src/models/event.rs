@@ -20,7 +20,6 @@ pub struct Event {
   pub venue: Option<String>,
   pub event_type: i16,
   pub visibility: i16,
-  pub payment_type: i16,
   #[serde(serialize_with = "to_milli_ts")]
   pub start_date: NaiveDateTime,
   #[serde(serialize_with = "to_milli_ts")]
@@ -44,7 +43,6 @@ pub struct EventWithSale {
   pub venue: Option<String>,
   pub event_type: i16,
   pub visibility: i16,
-  pub payment_type: i16,
   #[serde(serialize_with = "to_milli_ts")]
   pub start_date: NaiveDateTime,
   #[serde(serialize_with = "to_milli_ts")]
@@ -80,7 +78,6 @@ impl EventWithSale {
           venue: event.venue.clone(),
           event_type: event.event_type,
           visibility: event.visibility,
-          payment_type: event.payment_type,
           start_date: event.start_date,
           end_date: event.end_date,
           category: event.category,

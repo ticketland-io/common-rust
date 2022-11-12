@@ -3,8 +3,8 @@ use std::{
   sync::Arc,
   rc::Rc,
 };
-use actix::prelude::*;
 use chrono::{Utc, TimeZone};
+use tokio::sync::Mutex;
 use eyre::{Result, Report, ContextCompat};
 use actix_web::{
   HttpMessage,
@@ -15,15 +15,10 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use common_data::{
-  helpers::{send_read},
-  models::api_client::ApiClient,
-  repositories::api_client::read_api_client,
-};
+use ticketland_data::connection::PostgresConnection;
 use ticketland_crypto::{
   symetric::hmac::sign_sha256,
 };
-use ticketland_core::actor::neo4j::Neo4jActor;
 
 const MAX_TOKEN_VALIDITY_SECS: i64 = 60; // 60 secs;
 
@@ -45,12 +40,12 @@ impl FromRequest for ClientAuth {
   }
 }
 pub struct HmacAuthnMiddlewareFactory {
-  neo4j: Arc<Addr<Neo4jActor>>,
+  pub postgres: Arc<Mutex<PostgresConnection>>,
 }
 
 impl HmacAuthnMiddlewareFactory {
-  pub fn new(neo4j: Arc<Addr<Neo4jActor>>) -> Self {
-    Self {neo4j}
+  pub fn new(postgres: Arc<Mutex<PostgresConnection>>) -> Self {
+    Self {postgres}
   }
 }
 
@@ -69,14 +64,14 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
       ready(Ok(HmacAuthnMiddleware {
         service: Rc::new(service),
-        neo4j: self.neo4j.clone(),
+        postgres: Arc::clone(&self.postgres),
       }))
     }
 }
 
 pub struct HmacAuthnMiddleware<S> {
   service: Rc<S>,
-  neo4j: Arc<Addr<Neo4jActor>>,
+  postgres: Arc<Mutex<PostgresConnection>>,
 }
 
 impl<S, B> HmacAuthnMiddleware<S>
@@ -84,6 +79,7 @@ where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
   fn is_valid_ts(ts: &str) -> Result<()> {
+    #[allow(deprecated)]
     let ts = Utc.timestamp(ts.parse()?, 0).time();
     let now = Utc::now().time();
     let diff = now - ts;
@@ -95,18 +91,15 @@ where
     Ok(())
   }
 
-  async fn verify_sig(neo4j: Arc<Addr<Neo4jActor>>, msg: &str, sig: &str) -> Result<String> {
+  async fn verify_sig(postgres: Arc<Mutex<PostgresConnection>>, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
     let ts = parts.get(1).context("Unauthorized")?;
     
     Self::is_valid_ts(ts)?;
     
-    let (query, db_query_params) = read_api_client(client_id.to_string());
-    let api_client = send_read(Arc::clone(&neo4j), query, db_query_params)
-    .await
-    .map(TryInto::<ApiClient>::try_into)??;
-
+    let mut postgres = postgres.lock().await;
+    let api_client = postgres.read_api_client(client_id.to_string()).await?;
     let local_sig = sign_sha256(&api_client.client_secret, msg)?;
 
     if sig != local_sig {
@@ -129,7 +122,7 @@ where
 
   fn call(&self, req: ServiceRequest) -> Self::Future {
     let srv = self.service.clone();
-    let neo4j = Arc::clone(&self.neo4j);
+    let postgres = Arc::clone(&self.postgres);
 
     Box::pin(
       async move {
@@ -156,7 +149,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         };
 
-        let client_id = Self::verify_sig(neo4j, msg, access_token)
+        let client_id = Self::verify_sig(postgres, msg, access_token)
         .await
         .map_err(|_| ErrorUnauthorized("Unauthorized"))?;
 

@@ -67,6 +67,7 @@ where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
   fn is_valid_ts(ts: &str) -> Result<()> {
+    #[allow(deprecated)]
     let ts = Utc.timestamp(ts.parse()?, 0).time();
     let now = Utc::now().time();
     let diff = now - ts;

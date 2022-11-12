@@ -25,7 +25,7 @@ CREATE TABLE events (
   account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   name VARCHAR NOT NULL,
-  description VARCHAR NOT NULL,
+  description TEXT NOT NULL,
   location VARCHAR,
   venue VARCHAR,
   event_type SMALLINT NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE metadata (
   id SERIAL PRIMARY KEY,
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   name VARCHAR NOT NULL,
-  description VARCHAR NOT NULL,
+  description TEXT NOT NULL,
   image VARCHAR NOT NULL
 );
 

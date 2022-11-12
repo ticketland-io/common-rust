@@ -63,6 +63,7 @@ pub struct Sale {
 
 
 #[derive(Insertable, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 #[diesel(table_name = sales)]
 pub struct NewSale {
   pub account: String,

@@ -58,7 +58,7 @@ diesel::table! {
         account_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
         name -> Varchar,
-        description -> Varchar,
+        description -> Text,
         location -> Nullable<Varchar>,
         venue -> Nullable<Varchar>,
         event_type -> Int2,
@@ -80,7 +80,7 @@ diesel::table! {
         id -> Int4,
         event_id -> Varchar,
         name -> Varchar,
-        description -> Varchar,
+        description -> Text,
         image -> Varchar,
     }
 }

@@ -69,7 +69,6 @@ diesel::table! {
         event_capacity -> Varchar,
         file_type -> Nullable<Varchar>,
         arweave_tx_id -> Nullable<Varchar>,
-        metadata_uploaded -> Bool,
         image_uploaded -> Bool,
         draft -> Bool,
     }

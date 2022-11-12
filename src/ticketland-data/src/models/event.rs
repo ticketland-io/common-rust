@@ -28,7 +28,6 @@ pub struct Event {
   pub event_capacity: String,
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
-  pub metadata_uploaded: bool,
   pub image_uploaded: bool,
   pub draft: bool,
 }
@@ -51,7 +50,6 @@ pub struct EventWithSale {
   pub event_capacity: String,
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
-  pub metadata_uploaded: bool,
   pub image_uploaded: bool,
   pub draft: bool,
   pub sales: Vec<Sale>,
@@ -84,7 +82,6 @@ impl EventWithSale {
           event_capacity: event.event_capacity.clone(),
           file_type: event.file_type.clone(),
           arweave_tx_id: event.arweave_tx_id.clone(),
-          metadata_uploaded: event.metadata_uploaded,
           image_uploaded: event.image_uploaded,
           draft: event.draft,
           sales: vec![],

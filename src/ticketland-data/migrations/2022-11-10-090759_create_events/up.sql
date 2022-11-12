@@ -36,7 +36,6 @@ CREATE TABLE events (
   event_capacity VARCHAR(64) NOT NULL,
   file_type VARCHAR(10),
   arweave_tx_id VARCHAR,
-  metadata_uploaded BOOL NOT NULL,
   image_uploaded BOOL NOT NULL,
   draft BOOL NOT NULL
 );

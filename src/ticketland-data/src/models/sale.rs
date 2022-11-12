@@ -17,7 +17,6 @@ use crate::schema::sales;
 
 #[derive(AsJsonb)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
 pub enum SaleType {
   Free {},
   FixedPrice {
@@ -63,7 +62,6 @@ pub struct Sale {
 
 
 #[derive(Insertable, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
 #[diesel(table_name = sales)]
 pub struct NewSale {
   pub account: String,

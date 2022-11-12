@@ -1,10 +1,9 @@
 use std::{
   future::{ready, Ready as StdReady},
-  sync::Arc,
   rc::Rc,
+  future::Future,
 };
 use chrono::{Utc, TimeZone};
-use tokio::sync::Mutex;
 use eyre::{Result, Report, ContextCompat};
 use actix_web::{
   HttpMessage,
@@ -15,7 +14,6 @@ use actix_web::{
   error::ErrorUnauthorized,
 };
 use futures_util::future::{LocalBoxFuture, ok, err, Ready};
-use ticketland_data::connection::PostgresConnection;
 use ticketland_crypto::{
   symetric::hmac::sign_sha256,
 };
@@ -39,44 +37,63 @@ impl FromRequest for ClientAuth {
     .unwrap_or_else(|| err(ErrorUnauthorized("not authorized")))
   }
 }
-pub struct HmacAuthnMiddlewareFactory {
-  pub postgres: Arc<Mutex<PostgresConnection>>,
+
+// pub type ApiClientReader = Arc<Box<dyn FnOnce(String) -> Pin<Box<dyn Future<Output = Result<String>>>>>>;
+
+pub struct HmacAuthnMiddlewareFactory<F, Fut>
+where
+  F: FnOnce(String) -> Fut + Copy + 'static,
+  Fut: Future<Output = Result<String>>,
+{
+  pub api_client_reader: F,
 }
 
-impl HmacAuthnMiddlewareFactory {
-  pub fn new(postgres: Arc<Mutex<PostgresConnection>>) -> Self {
-    Self {postgres}
+impl <F, Fut> HmacAuthnMiddlewareFactory<F, Fut>
+where
+  F: FnOnce(String) -> Fut + Copy + 'static,
+  Fut: Future<Output = Result<String>>,
+{
+  pub fn new(api_client_reader: F) -> Self {
+    Self {api_client_reader}
   }
 }
 
-impl<S, B> Transform<S, ServiceRequest> for HmacAuthnMiddlewareFactory
+impl<F, Fut, S, B> Transform<S, ServiceRequest> for HmacAuthnMiddlewareFactory<F, Fut>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
+    F: FnOnce(String) -> Fut + Copy + 'static,
+    Fut: Future<Output = Result<String>>,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
     type InitError = ();
-    type Transform = HmacAuthnMiddleware<S>;
+    type Transform = HmacAuthnMiddleware<F, Fut, S>;
     type Future = StdReady<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
       ready(Ok(HmacAuthnMiddleware {
         service: Rc::new(service),
-        postgres: Arc::clone(&self.postgres),
+        api_client_reader: self.api_client_reader,
       }))
     }
 }
 
-pub struct HmacAuthnMiddleware<S> {
+pub struct HmacAuthnMiddleware<F, Fut, S>
+where
+  F: FnOnce(String) -> Fut + Copy + 'static,
+  Fut: Future<Output = Result<String>>,
+{
   service: Rc<S>,
-  postgres: Arc<Mutex<PostgresConnection>>,
+  api_client_reader: F,
 }
 
-impl<S, B> HmacAuthnMiddleware<S>
+impl<F, Fut, S, B> HmacAuthnMiddleware<F, Fut, S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+    F: FnOnce(String) -> Fut + Copy + 'static,
+    Fut: Future<Output = Result<String>>,
 {
   fn is_valid_ts(ts: &str) -> Result<()> {
     #[allow(deprecated)]
@@ -91,16 +108,15 @@ where
     Ok(())
   }
 
-  async fn verify_sig(postgres: Arc<Mutex<PostgresConnection>>, msg: &str, sig: &str) -> Result<String> {
+  async fn verify_sig(api_client_reader: F, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
     let ts = parts.get(1).context("Unauthorized")?;
     
     Self::is_valid_ts(ts)?;
     
-    let mut postgres = postgres.lock().await;
-    let api_client = postgres.read_api_client(client_id.to_string()).await?;
-    let local_sig = sign_sha256(&api_client.client_secret, msg)?;
+    let client_secret = api_client_reader(client_id.to_string()).await?;
+    let local_sig = sign_sha256(&client_secret, msg)?;
 
     if sig != local_sig {
       return Err(Report::msg("Unauthorized"));
@@ -110,9 +126,11 @@ where
   }
 }
 
-impl<S, B> Service<ServiceRequest> for HmacAuthnMiddleware<S>
+impl<F, Fut, S, B> Service<ServiceRequest> for HmacAuthnMiddleware<F, Fut, S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+    F: FnOnce(String) -> Fut + Copy + 'static,
+    Fut: Future<Output = Result<String>>,
 {
   type Response = ServiceResponse<B>;
   type Error = Error;
@@ -122,7 +140,7 @@ where
 
   fn call(&self, req: ServiceRequest) -> Self::Future {
     let srv = self.service.clone();
-    let postgres = Arc::clone(&self.postgres);
+    let api_client_reader = self.api_client_reader;
 
     Box::pin(
       async move {
@@ -149,7 +167,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         };
 
-        let client_id = Self::verify_sig(postgres, msg, access_token)
+        let client_id = Self::verify_sig(api_client_reader, msg, access_token)
         .await
         .map_err(|_| ErrorUnauthorized("Unauthorized"))?;
 

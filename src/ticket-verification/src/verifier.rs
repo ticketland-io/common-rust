@@ -117,7 +117,7 @@ pub async fn verify_ticket(
 
       let lock = redlock.lock(
         redis_key.as_bytes(),
-        Duration::seconds(5).num_seconds() as usize,
+        Duration::seconds(5).num_milliseconds() as usize,
       ).await?;
       let mut redis = redis.lock().unwrap();
 

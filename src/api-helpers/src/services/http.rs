@@ -34,8 +34,8 @@ pub fn get_header_value<'b>(req: &'b HttpRequest, key: &'b str) -> Option<&'b st
 #[derive(Serialize)]
 pub struct BaseResponse<T: Serialize> {
   pub count: usize,
-  pub skip: Option<i64>,
-  pub limit: Option<i64>,
+  pub skip: i64,
+  pub limit: i64,
   pub result: T,
 }
 
@@ -56,7 +56,7 @@ macro_rules! QueryString {
   }
 }
 
-pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: Option<i64>, limit: Option<i64>) -> HttpResponse {
+pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
   result
   .map(|result| {
     HttpResponse::Ok()

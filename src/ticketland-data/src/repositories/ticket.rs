@@ -6,7 +6,7 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    ticket::Ticket,
+    ticket::{Ticket, TicketWithMetadata},
     ticket_onchain_account::TicketOnchainAccount,
   },
   schema::{
@@ -45,16 +45,17 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<Ticket>> {
-    Ok(
-      tickets
-      .filter(event_id.eq(evt_id))
-      .order_by(created_at.desc())
-      .limit(limit)
-      .offset(skip * limit)
-      .load(self.borrow_mut())
-      .await?
-    )
+  pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<TicketWithMetadata>> {
+    let records = tickets
+    .filter(event_id.eq(evt_id))
+    .inner_join(ticket_onchain_accounts.on(ticket_onchain_accounts_dsl::ticket_nft.eq(ticket_nft)))
+    .order_by(created_at.desc())
+    .limit(limit)
+    .offset(skip * limit)
+    .load::<(Ticket, TicketOnchainAccount)>(self.borrow_mut())
+    .await?;
+
+    Ok(TicketWithMetadata::from_tuple(records))
   }
 
   pub async fn update_attended(&mut self, ticket_nft_acc: String) -> Result<()> {

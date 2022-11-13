@@ -38,14 +38,12 @@ impl FromRequest for ClientAuth {
   }
 }
 
-// pub type ApiClientReader = Arc<Box<dyn FnOnce(String) -> Pin<Box<dyn Future<Output = Result<String>>>>>>;
-
 pub struct HmacAuthnMiddlewareFactory<F, Fut>
 where
   F: FnOnce(String) -> Fut + Clone + 'static,
   Fut: Future<Output = Result<String>>,
 {
-  pub api_client_reader: F,
+  pub client_secret_reader: F,
 }
 
 impl <F, Fut> HmacAuthnMiddlewareFactory<F, Fut>
@@ -53,8 +51,8 @@ where
   F: FnOnce(String) -> Fut + Clone + 'static,
   Fut: Future<Output = Result<String>>,
 {
-  pub fn new(api_client_reader: F) -> Self {
-    Self {api_client_reader}
+  pub fn new(client_secret_reader: F) -> Self {
+    Self {client_secret_reader}
   }
 }
 
@@ -75,7 +73,7 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
       ready(Ok(HmacAuthnMiddleware {
         service: Rc::new(service),
-        api_client_reader: self.api_client_reader.clone(),
+        client_secret_reader: self.client_secret_reader.clone(),
       }))
     }
 }
@@ -86,7 +84,7 @@ where
   Fut: Future<Output = Result<String>>,
 {
   service: Rc<S>,
-  api_client_reader: F,
+  client_secret_reader: F,
 }
 
 impl<F, Fut, S, B> HmacAuthnMiddleware<F, Fut, S>
@@ -108,14 +106,14 @@ where
     Ok(())
   }
 
-  async fn verify_sig(api_client_reader: F, msg: &str, sig: &str) -> Result<String> {
+  async fn verify_sig(client_secret_reader: F, msg: &str, sig: &str) -> Result<String> {
     let parts = msg.split(":").collect::<Vec<_>>();
     let client_id = parts.get(0).context("Unauthorized")?;
     let ts = parts.get(1).context("Unauthorized")?;
     
     Self::is_valid_ts(ts)?;
     
-    let client_secret = api_client_reader(client_id.to_string()).await?;
+    let client_secret = client_secret_reader(client_id.to_string()).await?;
     let local_sig = sign_sha256(&client_secret, msg)?;
 
     if sig != local_sig {
@@ -140,7 +138,7 @@ where
 
   fn call(&self, req: ServiceRequest) -> Self::Future {
     let srv = self.service.clone();
-    let api_client_reader = self.api_client_reader.clone();
+    let client_secret_reader = self.client_secret_reader.clone();
 
     Box::pin(
       async move {
@@ -167,7 +165,7 @@ where
           return Err(ErrorUnauthorized("Unauthorized"))
         };
 
-        let client_id = Self::verify_sig(api_client_reader, msg, access_token)
+        let client_id = Self::verify_sig(client_secret_reader, msg, access_token)
         .await
         .map_err(|_| ErrorUnauthorized("Unauthorized"))?;
 

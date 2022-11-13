@@ -1,6 +1,8 @@
 use diesel::prelude::*;
 use eyre::Result;
-use diesel_async::RunQueryDsl;
+use diesel::result::Error;
+use futures::FutureExt;
+use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
@@ -17,15 +19,29 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn upsert_user_ticket(&mut self, ticket: Ticket) -> Result<()> {
-    diesel::insert_into(tickets)
-    .values(&ticket)
-    .on_conflict(ticket_nft)
-    .do_update()
-    .set(&ticket)
-    .execute(self.borrow_mut())
+  pub async fn upsert_user_ticket(&mut self, user_ticket: Ticket, ticket: TicketOnchainAccount) -> Result<()> {
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| async move {
+      // ignore if the ticket nft is already stored
+      diesel::insert_into(ticket_onchain_accounts)
+      .values(&ticket)
+      .on_conflict(ticket_onchain_accounts_dsl::ticket_nft)
+      .do_nothing()
+      .execute(conn)
+      .await?;
+      
+      diesel::insert_into(tickets)
+      .values(&user_ticket)
+      .on_conflict(ticket_nft)
+      .do_update()
+      .set(&user_ticket)
+      .execute(conn)
+      .await?;
+
+      Ok(())
+    }.boxed())
     .await?;
-    
+
     Ok(())
   }
 

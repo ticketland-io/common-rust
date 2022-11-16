@@ -44,7 +44,7 @@ impl Default for SaleType {
   }
 }
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
+#[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = sales)]
 pub struct Sale {
   pub account: String,

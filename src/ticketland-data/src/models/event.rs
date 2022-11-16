@@ -84,7 +84,7 @@ impl EventWithSale {
           arweave_tx_id: event.arweave_tx_id.clone(),
           image_uploaded: event.image_uploaded,
           draft: event.draft,
-          sales: vec![],
+          sales: vec![sale],
         });
       }
 

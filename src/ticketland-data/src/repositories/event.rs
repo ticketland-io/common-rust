@@ -105,16 +105,16 @@ impl PostgresConnection {
   pub async fn read_events(&mut self, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let query = sql_query(format!(
       "
-      SELECT * 
+      SELECT *
       FROM (
         SELECT * FROM events 
         WHERE events.start_date > NOW()
-        LIMIT {} 
-        OFFSET {}
-      )as events
-      INNER JOIN sales
+        limit {} 
+        offset {}
+      ) events
+      INNER JOIN sales 
       ON sales.event_id = events.event_id
-      ORDER BY events.start_date ASC 
+      ORDER BY events.start_date
       ", limit, skip * limit
     ));
 

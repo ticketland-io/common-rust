@@ -8,7 +8,7 @@ use chrono::{
 use crate::schema::events;
 use super::sale::Sale;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
+#[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = events)]
 pub struct Event {
   pub event_id: String,

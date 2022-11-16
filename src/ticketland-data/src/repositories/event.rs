@@ -1,5 +1,7 @@
 use diesel::prelude::*;
-use diesel::dsl::now;
+use diesel::{
+  sql_query,
+};
 use diesel_async::RunQueryDsl;
 use eyre::Result;
 use crate::{
@@ -112,15 +114,22 @@ impl PostgresConnection {
   }
 
   pub async fn read_events_by_category(&mut self, categ: i16, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
-    let records =  events
-    .filter(events_dsl::category.eq(categ))
-    .filter(events_dsl::end_date.gt(now))
-    .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
-    .limit(limit)
-    .offset(skip * limit)
-    .order_by(events_dsl::start_date.desc())
-    .load::<(Event, Sale)>(self.borrow_mut())
-    .await?;
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM (
+        SELECT * FROM events 
+        WHERE events.category = {} AND events.start_date > NOW()
+        limit {} 
+        offset {}
+      ) events
+      INNER JOIN sales 
+      ON sales.event_id = events.event_id
+      ORDER BY events.start_date
+      ", categ, limit, skip * limit
+    ));
+
+    let records = query.load::<(Event, Sale)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
   }

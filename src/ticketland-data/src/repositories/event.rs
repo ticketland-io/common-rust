@@ -2,6 +2,7 @@ use diesel::prelude::*;
 use diesel::{
   sql_query,
 };
+use chrono::NaiveDateTime;
 use diesel_async::RunQueryDsl;
 use eyre::Result;
 use crate::{
@@ -123,20 +124,21 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_events_by_category(&mut self, categ: i16, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_filtered_events(&mut self, categ: i16, priceRange: [u32; 2], date: NaiveDateTime, name: String, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let query = sql_query(format!(
+      // TODO: add priceRange filtering
       "
       SELECT *
       FROM (
         SELECT * FROM events 
-        WHERE events.category = {} AND events.start_date > NOW()
+        WHERE events.category = {} AND events.start_date > NOW() AND events.start_date > {} AND events.name LIKE {}
         limit {} 
         offset {}
       ) events
       INNER JOIN sales 
       ON sales.event_id = events.event_id
       ORDER BY events.start_date
-      ", categ, limit, skip * limit
+      ", categ, date, name, limit, skip * limit
     ));
 
     let records = query.load::<(Event, Sale)>(self.borrow_mut()).await?;

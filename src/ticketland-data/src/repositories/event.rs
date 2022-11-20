@@ -131,7 +131,7 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT * FROM events 
-        WHERE events.category = {} AND events.start_date > NOW() AND events.start_date > {} AND events.name LIKE {}
+        WHERE events.category = {} AND events.start_date > NOW() AND events.start_date > {} AND events.name LIKE AND events.description LIKE {}
         limit {} 
         offset {}
       ) events

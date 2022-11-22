@@ -140,6 +140,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    stripe_customers (customer_uid) {
+        customer_uid -> Varchar,
+        stripe_uid -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
     ticket_onchain_accounts (ticket_nft) {
         ticket_nft -> Varchar,
         ticket_metadata -> Varchar,
@@ -174,6 +182,7 @@ diesel::joinable!(sell_listings -> accounts (account_id));
 diesel::joinable!(sell_listings -> events (event_id));
 diesel::joinable!(sell_listings -> ticket_onchain_accounts (ticket_nft));
 diesel::joinable!(stripe_accounts -> accounts (account_id));
+diesel::joinable!(stripe_customers -> stripe_accounts (stripe_uid));
 diesel::joinable!(tickets -> accounts (account_id));
 diesel::joinable!(tickets -> events (event_id));
 diesel::joinable!(tickets -> ticket_onchain_accounts (ticket_nft));
@@ -191,6 +200,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     seat_ranges,
     sell_listings,
     stripe_accounts,
+    stripe_customers,
     ticket_onchain_accounts,
     tickets,
 );

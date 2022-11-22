@@ -85,7 +85,6 @@ impl PostgresConnection {
   pub async fn read_customer_by_account_id(&mut self, account_id: String) -> Result<StripeCustomer> {
     Ok(
       stripe_customers
-      // .filter(events_dsl::event_id.eq(event_id))
       .inner_join(accounts.on(accounts_dsl::uid.eq(account_id)))
       .inner_join(stripe_accounts.on(stripe_accounts_dsl::stripe_uid.eq(stripe_customers_dsl::stripe_uid)))
       .select(stripe_customers::all_columns())

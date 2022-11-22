@@ -40,6 +40,7 @@ impl PostgresConnection {
     Ok(
       sell_listings
       .filter(event_id.eq(evt_id))
+      .filter(is_open.eq(true))
       .limit(limit)
       .offset(skip * limit)
       .order_by(created_at.desc())

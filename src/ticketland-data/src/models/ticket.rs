@@ -17,6 +17,7 @@ pub struct Ticket {
   pub seat_name: String,
   pub seat_index: i32,
   pub attended: bool,
+  pub draft: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -30,6 +31,7 @@ pub struct TicketWithMetadata {
   pub seat_name: String,
   pub seat_index: i32,
   pub attended: bool,
+  pub draft: bool,
 }
 
 impl TicketWithMetadata {
@@ -47,6 +49,7 @@ impl TicketWithMetadata {
         seat_name: ticket.seat_name,
         seat_index: ticket.seat_index,
         attended: ticket.attended,
+        draft: ticket.draft,
       }
     })
     .collect()

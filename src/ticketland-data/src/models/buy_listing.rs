@@ -12,6 +12,7 @@ pub struct BuyListing {
   pub created_at: Option<NaiveDateTime>,
   pub sol_account: String,
   pub bid_price: i64,
+  pub n_listing: i64,
   pub is_open: bool,
 }
 
@@ -22,5 +23,6 @@ pub struct NewBuyListing<'a> {
   pub event_id: &'a str,
   pub sol_account: &'a str,
   pub bid_price: i64,
+  pub n_listing: i64,
   pub is_open: bool,
 }

@@ -15,6 +15,8 @@ use chrono::{
 use diesel_as_jsonb::AsJsonb;
 use crate::schema::sales;
 
+use super::seat_range::SeatRange;
+
 #[derive(AsJsonb)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum SaleType {
@@ -60,6 +62,40 @@ pub struct Sale {
   pub sale_type: SaleType,
 }
 
+#[derive(Serialize, Deserialize, Clone, Default)]
+pub struct SaleWithSeatRange {
+  pub account: String,
+  pub event_id: String,
+  pub created_at: Option<NaiveDateTime>,
+  pub ticket_type_index: i16,
+  pub ticket_type_name: String,
+  pub n_tickets: i32,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub sale_start_ts: NaiveDateTime,
+  #[serde(serialize_with = "to_milli_ts")]
+  pub sale_end_ts: NaiveDateTime,
+  pub sale_type: SaleType,
+  pub seat_range: SeatRange,
+}
+
+
+impl From<Sale> for SaleWithSeatRange {
+  fn from(sale: Sale) -> Self {
+    SaleWithSeatRange {
+      account: sale.account,
+      event_id: sale.event_id,
+      created_at: sale.created_at,
+      ticket_type_index: sale.ticket_type_index,
+      ticket_type_name: sale.ticket_type_name,
+      n_tickets: sale.n_tickets,
+      sale_start_ts: sale.sale_start_ts,
+      sale_end_ts: sale.sale_end_ts,
+      sale_type: sale.sale_type,
+      seat_range: SeatRange::default()
+    }
+  }
+
+}
 
 #[derive(Insertable, Deserialize, Clone)]
 #[diesel(table_name = sales)]

@@ -1,6 +1,6 @@
 [package]
 name = "ticket-verification"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2021"
 license = "BUSL-1.1"
 
@@ -19,3 +19,4 @@ solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", 
 ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15" }
 serde = "1.0"
 chrono = "0.4.21"
+tokio = { version = "1.14.1" }

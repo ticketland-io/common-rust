@@ -156,6 +156,7 @@ diesel::table! {
         seat_name -> Varchar,
         seat_index -> Int4,
         attended -> Bool,
+        draft -> Bool,
     }
 }
 

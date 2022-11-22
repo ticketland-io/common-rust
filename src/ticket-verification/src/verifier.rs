@@ -1,7 +1,8 @@
 use std::{
-  sync::{Arc, Mutex},
+  sync::Arc,
   str::FromStr,
 };
+use tokio::sync::Mutex;
 use chrono::Duration;
 use eyre::Result;
 use serde::{Serialize, Deserialize};
@@ -95,7 +96,7 @@ pub async fn verify_ticket(
 
   if sig.verify(&ticket_owner.to_bytes(), message_hash) {
     // 2. Load the ticket type index for the given ticket
-    let mut postgres = postgres.lock().unwrap();
+    let mut postgres = postgres.lock().await;
     let ticket = postgres.read_ticket_by_ticket_metadata(ticket_metadata.to_string()).await?;
     let ticket_type_index = ticket.ticket_type_index as u8;
     
@@ -119,7 +120,7 @@ pub async fn verify_ticket(
         redis_key.as_bytes(),
         Duration::seconds(5).num_milliseconds() as usize,
       ).await?;
-      let mut redis = redis.lock().unwrap();
+      let mut redis = redis.lock().await;
 
       // If key exists, it means someone has already attended this event
       if let Ok(_) = redis.get(&redis_key).await {

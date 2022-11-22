@@ -6,7 +6,7 @@ use chrono::{
   naive::serde::ts_milliseconds::serialize as to_milli_ts,
 };
 use crate::schema::events;
-use super::sale::Sale;
+use super::{sale::{Sale, SaleWithSeatRange}, seat_range::SeatRange};
 
 #[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = events)]
@@ -52,19 +52,22 @@ pub struct EventWithSale {
   pub arweave_tx_id: Option<String>,
   pub image_uploaded: bool,
   pub draft: bool,
-  pub sales: Vec<Sale>,
+  pub sales: Vec<SaleWithSeatRange>,
 }
 
 impl EventWithSale {
-  pub fn from_tuple(values: Vec<(Event, Sale)>) -> Vec<EventWithSale> {
+  pub fn from_tuple(values: Vec<(Event, Sale, SeatRange)>) -> Vec<EventWithSale> {
     values
     .into_iter()
-    .fold(HashMap::new(), |mut acc, (event, sale)| {
+    .fold(HashMap::new(), |mut acc, (event, sale, seat_range)| {
       let key = event.event_id.clone();
+      let mut sale_with_seat_range = SaleWithSeatRange::from(sale);
+      sale_with_seat_range.seat_range = seat_range;
 
       if acc.contains_key(&key) {
         let mut event: EventWithSale = acc.remove(&key).unwrap();
-        event.sales.push(sale);
+        // TODO: handle case where a Seat maps with multiple SeatRange.
+        event.sales.push(sale_with_seat_range);
         acc.insert(key, event);
       } else {
         acc.insert(key, EventWithSale {
@@ -84,7 +87,7 @@ impl EventWithSale {
           arweave_tx_id: event.arweave_tx_id.clone(),
           image_uploaded: event.image_uploaded,
           draft: event.draft,
-          sales: vec![sale],
+          sales: vec![sale_with_seat_range],
         });
       }
 

@@ -29,8 +29,8 @@ diesel::table! {
         created_at -> Nullable<Timestamptz>,
         sol_account -> Varchar,
         bid_price -> Int8,
-        n_listing -> Int8,
         is_open -> Bool,
+        n_listing -> Int8,
     }
 }
 
@@ -60,7 +60,6 @@ diesel::table! {
         created_at -> Nullable<Timestamptz>,
         name -> Varchar,
         description -> Text,
-        location -> Nullable<Varchar>,
         venue -> Nullable<Varchar>,
         event_type -> Int2,
         visibility -> Int2,
@@ -72,6 +71,7 @@ diesel::table! {
         arweave_tx_id -> Nullable<Varchar>,
         image_uploaded -> Bool,
         draft -> Bool,
+        location -> Nullable<Jsonb>,
     }
 }
 

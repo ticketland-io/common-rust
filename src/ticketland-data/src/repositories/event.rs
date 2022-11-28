@@ -65,6 +65,16 @@ impl PostgresConnection {
     Ok(())
   }
 
+  pub async fn update_webbundle_uploaded(&mut self, id: String, arweave_tx: String) -> Result<()> {
+    diesel::update(events)
+    .filter(events_dsl::event_id.eq(id))
+    .set(events_dsl::webbundle_arweave_tx_id.eq(arweave_tx))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
+
   pub async fn read_event_organizer_account(&mut self, evt_id: String) -> Result<Account> {
     Ok(
       events

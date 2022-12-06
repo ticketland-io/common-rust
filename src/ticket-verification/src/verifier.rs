@@ -12,11 +12,6 @@ use solana_sdk::{
   signature::Signature,
   keccak::hashv,
 };
-// use common_data::{
-//   helpers::{send_read},
-//   models::ticket::Ticket,
-//   repositories::ticket::{read_ticket_by_ticket_metadata},
-// };
 use ticketland_crypto::asymetric::ed25519;
 use ticketland_core::{services::{redis::Redis, redlock::RedLock}};
 use ticketland_data::connection::PostgresConnection;

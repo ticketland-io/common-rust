@@ -45,6 +45,7 @@ pub struct Event {
   pub arweave_tx_id: Option<String>,
   pub image_uploaded: bool,
   pub draft: bool,
+  pub webbundle_arweave_tx_id: Option<String>,
   pub location: Option<Location>,
 }
 
@@ -67,6 +68,7 @@ pub struct EventWithSale {
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
   pub image_uploaded: bool,
+  pub webbundle_arweave_tx_id: Option<String>,
   pub draft: bool,
   pub sales: Vec<SaleWithSeatRange>,
 }
@@ -102,6 +104,7 @@ impl EventWithSale {
           file_type: event.file_type.clone(),
           arweave_tx_id: event.arweave_tx_id.clone(),
           image_uploaded: event.image_uploaded,
+          webbundle_arweave_tx_id: event.webbundle_arweave_tx_id,
           draft: event.draft,
           sales: vec![sale_with_seat_range],
         });

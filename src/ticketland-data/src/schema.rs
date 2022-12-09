@@ -72,6 +72,7 @@ diesel::table! {
         image_uploaded -> Bool,
         draft -> Bool,
         location -> Nullable<Jsonb>,
+        webbundle_arweave_tx_id -> Nullable<Varchar>,
     }
 }
 

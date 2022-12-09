@@ -9,7 +9,7 @@ use arloader::{
   bundle::DataItem,
   status::Status,
   crypto::Provider,
-  transaction::{Tag, Base64, FromUtf8Strs},
+  transaction::{Tag, Base64, FromUtf8Strs, Transaction},
 };
 use ring::{
   rand,
@@ -98,16 +98,39 @@ impl Client {
 
   /// Upload the given binary data to Arweave. This does not handle bundles and the max
   /// size should be MAX_TX_DATA 10mb.
-  /// 
+  ///
   /// # Arguments
-  /// 
+  ///
   /// * `data` - The binary data to upload
   /// * `other_tags` - optional additional tags to upload
   /// * `reward_mult` - used to calculate the price terms
   /// * `last_tx` - That last blockchain tx. If none it will fetch it from the blockchain
   /// * `auto_content_tag` - If true it will set the content-type tag which it will infer from the raw data (`infer::get(&data.0) {`)
-  /// 
+  ///
   /// * returns the transaction id as and the transaction reward
+  async fn create_signed_tx(
+    &self,
+    data: Vec<u8>,
+    other_tags: Option<Vec<(&str, &str)>>,
+    reward_mult: f32,
+    last_tx: Option<Base64>,
+    auto_content_tag: bool,
+  ) -> Result<Transaction> {
+    let price_terms = self.arweave.get_price_terms(reward_mult).await?;
+
+    let tx = self.arweave.create_transaction(
+      data,
+      Self::create_tags(other_tags),
+      last_tx,
+      price_terms,
+      auto_content_tag
+    ).await?;
+
+    let signed_tx = self.arweave.sign_transaction(tx)?;
+
+    Ok(signed_tx)
+  }
+
   pub async fn upload_data(
     &self,
     data: Vec<u8>,
@@ -116,32 +139,37 @@ impl Client {
     last_tx: Option<Base64>,
     auto_content_tag: bool,
   ) -> Result<(Base64, u64)> {
-    let price_terms = self.arweave.get_price_terms(reward_mult).await?;
+    let signed_tx = self.create_signed_tx(data, other_tags, reward_mult, last_tx, auto_content_tag).await?;
 
-    let tx = self.arweave.create_transaction(
-      data,
-      Self::create_tags(other_tags),
-      last_tx,
-      price_terms, 
-      auto_content_tag
-    ).await?;
-
-    let signed_tx = self.arweave.sign_transaction(tx)?;
     self.arweave.post_transaction(&signed_tx).await.map_err(Into::<_>::into)
+  }
+
+  pub async fn upload_data_chunks(
+    &self,
+    data: Vec<u8>,
+    other_tags: Option<Vec<(&str, &str)>>,
+    reward_mult: f32,
+    last_tx: Option<Base64>,
+    auto_content_tag: bool,
+    chunks_buffer: usize
+  ) -> Result<(Base64, u64)> {
+    let signed_tx = self.create_signed_tx(data, other_tags, reward_mult, last_tx, auto_content_tag).await?;
+
+    self.arweave.post_transaction_chunks(signed_tx, chunks_buffer).await.map_err(Into::<_>::into)
   }
 
   /// Upload the given binary data to Arweave but unlike upload_data it will upload it as an Arweave Bundle.
   /// This does not handle bundles and the max
   /// size should be MAX_TX_DATA 10mb.
-  /// 
+  ///
   /// # Arguments
-  /// 
+  ///
   /// * `data` - The binary data to upload
   /// * `other_tags` - optional additional tags to upload
   /// * `reward_mult` - used to calculate the price terms
   /// * `last_tx` - That last blockchain tx. If none it will fetch it from the blockchain
   /// * `auto_content_tag` - If true it will set the content-type tag which it will infer from the raw data (`infer::get(&data.0) {`)
-  /// 
+  ///
   /// * returns the transaction id as and the transaction reward
   pub async fn upload_file_as_bundle(
     &self,
@@ -159,7 +187,7 @@ impl Client {
 
       tags
     });
-    
+
     let price_terms = self.arweave.get_price_terms(reward_mult).await?;
     let tx = self.arweave.create_transaction(
       bundle,
@@ -175,7 +203,7 @@ impl Client {
   }
 
   pub async fn upload_file<IP>(
-    &self, 
+    &self,
     paths_iter: IP,
     tags: Option<Vec<(&str, &str)>>,
     reward_mult: f32,
@@ -185,7 +213,7 @@ impl Client {
     IP: Iterator<Item = PathBuf> + Send + Sync,
   {
       let price_terms = self.arweave.get_price_terms(reward_mult).await?;
-      
+
       let mut stream = upload_files_stream(
         &self.arweave,
         paths_iter,
@@ -195,7 +223,7 @@ impl Client {
         price_terms,
         buffer,
       );
-      
+
     let mut statuses = vec![];
 
     while let Some(result) = stream.next().await {

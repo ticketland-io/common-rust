@@ -1,5 +1,5 @@
-use diesel::prelude::*;
 use diesel::{
+  prelude::*,
   sql_query,
 };
 use chrono::NaiveDateTime;
@@ -11,6 +11,7 @@ use crate::{
     account::Account,
     event::{Event, EventWithSale},
     sale::Sale,
+    seat_range::SeatRange,
   },
   schema::{
     events::dsl::{
@@ -24,6 +25,10 @@ use crate::{
     sales::dsl::{
       self as sales_dsl,
       sales,
+    },
+    seat_ranges::dsl:: {
+      self as seat_ranges_dsl,
+      seat_ranges
     }
   },
 };
@@ -37,7 +42,7 @@ impl PostgresConnection {
     .set(&event)
     .execute(self.borrow_mut())
     .await?;
-    
+
     Ok(())
   }
 
@@ -55,6 +60,16 @@ impl PostgresConnection {
     diesel::update(events)
     .filter(events_dsl::event_id.eq(id))
     .set(events_dsl::image_uploaded.eq(true))
+    .execute(self.borrow_mut())
+    .await?;
+
+    Ok(())
+  }
+
+  pub async fn update_webbundle_uploaded(&mut self, id: String, arweave_tx: String) -> Result<()> {
+    diesel::update(events)
+    .filter(events_dsl::event_id.eq(id))
+    .set(events_dsl::webbundle_arweave_tx_id.eq(arweave_tx))
     .execute(self.borrow_mut())
     .await?;
 
@@ -108,18 +123,19 @@ impl PostgresConnection {
       "
       SELECT *
       FROM (
-        SELECT * FROM events 
-        WHERE events.start_date > NOW()
-        limit {} 
+        SELECT * FROM events
+        limit {}
         offset {}
       ) events
-      INNER JOIN sales 
+      INNER JOIN sales
       ON sales.event_id = events.event_id
+      INNER JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
       ORDER BY events.start_date
       ", limit, skip * limit
     ));
 
-    let records = query.load::<(Event, Sale)>(self.borrow_mut()).await?;
+    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
   }
@@ -135,13 +151,15 @@ impl PostgresConnection {
         limit {} 
         offset {}
       ) events
-      INNER JOIN sales 
+      INNER JOIN sales
       ON sales.event_id = events.event_id
+      INNER JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
       ORDER BY events.start_date
       ", categ, date, name, limit, skip * limit
     ));
 
-    let records = query.load::<(Event, Sale)>(self.borrow_mut()).await?;
+    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
   }
@@ -160,7 +178,8 @@ impl PostgresConnection {
     let records =  events
     .filter(events_dsl::event_id.eq(evt_id))
     .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
-    .load::<(Event, Sale)>(self.borrow_mut())
+    .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
+    .load::<(Event, Sale, SeatRange)>(self.borrow_mut())
     .await?;
 
     Ok(EventWithSale::from_tuple(records))

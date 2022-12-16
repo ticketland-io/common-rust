@@ -140,24 +140,24 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_filtered_events(&mut self, categ: i16, priceRange: [u32; 2], date: NaiveDateTime, name: String, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
-    let query = sql_query(format!(
-      // TODO: add priceRange filtering
-      "
-      SELECT *
-      FROM (
-        SELECT * FROM events 
-        WHERE events.category = {} AND events.start_date > NOW() AND events.start_date > {} AND events.name LIKE AND events.description LIKE {}
-        limit {} 
-        offset {}
-      ) events
-      INNER JOIN sales
-      ON sales.event_id = events.event_id
-      INNER JOIN seat_ranges
-      ON seat_ranges.sale_account = sales.account
-      ORDER BY events.start_date
-      ", categ, date, name, limit, skip * limit
-    ));
+  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: [u32; 2], date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+    let mut query = events.inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
+    .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
+    .into_boxed();
+
+    if category.is_some() {
+      query = query.filter(events_dsl::category.eq(category.unwrap()));
+    }
+
+    if date.is_some() {
+      query = query.filter(events_dsl::start_date.eq(date.unwrap()));
+    }
+
+    if name.is_some() {
+      query = query.filter(events_dsl::name.eq(name.unwrap()));
+    }
+
+    // TODO: add price range and skip limit
 
     let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
 

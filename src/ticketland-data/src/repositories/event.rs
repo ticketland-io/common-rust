@@ -140,23 +140,35 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: [u32; 2], date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: [u32; 2], start_date: Option<NaiveDateTime>, end_date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let mut query = events.inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
     .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
     .into_boxed();
 
-    if category.is_some() {
-      query = query.filter(events_dsl::category.eq(category.unwrap()));
+    if let Some(category) = category {
+      query = query.filter(events_dsl::category.eq(category));
     }
 
-    if date.is_some() {
-      query = query.filter(events_dsl::start_date.eq(date.unwrap()));
+    if let Some(name) = name {
+      query = query.filter(events_dsl::name.ilike(format!("%{}%", name.clone())));
     }
 
-    if name.is_some() {
-      query = query.filter(events_dsl::name.eq(name.unwrap()));
+    if let (Some(start_date), Some(end_date)) = (start_date, end_date) {
+      query = query.filter(events_dsl::start_date.between(start_date, end_date));
     }
 
+    if let (Some(start_date), None) = (start_date, end_date) {
+      query = query.filter(events_dsl::start_date.gt(start_date));
+    }
+
+    if let (None, Some(end_date)) = (start_date, end_date) {
+      query = query.filter(events_dsl::end_date.lt(end_date));
+    }
+
+    query = query.limit(limit).offset(skip);
+
+    // TODO: fix order_by query
+    query = query.order_by(events_dsl::event_id.asc()); 
     // TODO: add price range and skip limit
 
     let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;

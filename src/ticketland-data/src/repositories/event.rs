@@ -140,7 +140,7 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: [u32; 2], start_date: Option<NaiveDateTime>, end_date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: Option<(u32, u32)>, start_date: Option<NaiveDateTime>, end_date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
     let mut query = events.inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
     .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
     .into_boxed();

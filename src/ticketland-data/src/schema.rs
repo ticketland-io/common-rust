@@ -29,8 +29,10 @@ diesel::table! {
         created_at -> Nullable<Timestamptz>,
         sol_account -> Varchar,
         bid_price -> Int8,
-        n_listing -> Int8,
         is_open -> Bool,
+        n_listing -> Int8,
+        draft -> Bool,
+        closed_at -> Nullable<Timestamptz>,
     }
 }
 
@@ -127,6 +129,8 @@ diesel::table! {
         sol_account -> Varchar,
         ask_price -> Int8,
         is_open -> Bool,
+        draft -> Bool,
+        closed_at -> Nullable<Timestamptz>,
     }
 }
 

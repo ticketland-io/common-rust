@@ -1,7 +1,7 @@
 -- Your SQL goes here
--- The reason we use on update cascade on the account_id is 
+-- The reason we use on update cascade on the account_id is
 -- let's say that your primary key is a 10 digit UPC bar code and because of expansion
--- you need to change it to a 13-digit UPC bar code. In that case, ON UPDATE CASCADE would 
+-- you need to change it to a 13-digit UPC bar code. In that case, ON UPDATE CASCADE would
 -- allow you to change the primary key value and any tables that have foreign key references to the value
 -- will be changed accordingly.
 CREATE TABLE accounts (
@@ -36,6 +36,7 @@ CREATE TABLE events (
   event_capacity VARCHAR(64) NOT NULL,
   file_type VARCHAR(10),
   arweave_tx_id VARCHAR,
+  webbundle_arweave_tx_id VARCHAR,
   image_uploaded BOOL NOT NULL,
   draft BOOL NOT NULL
 );
@@ -49,7 +50,8 @@ CREATE TABLE sales (
   n_tickets INT NOT NULL,
   sale_start_ts TIMESTAMP WITH TIME ZONE NOT NULL,
   sale_end_ts TIMESTAMP WITH TIME ZONE NOT NULL,
-  sale_type JSONB NOT NULL
+  sale_type JSONB NOT NULL,
+  draft BOOLEAN NOT NULL
 );
 
 CREATE TABLE ticket_onchain_accounts (
@@ -65,7 +67,8 @@ CREATE TABLE tickets (
   ticket_type_index SMALLINT NOT NULL,
   seat_name VARCHAR NOT NULL,
   seat_index INT NOT NULL,
-  attended BOOLEAN DEFAULT false NOT NULL
+  attended BOOLEAN DEFAULT false NOT NULL,
+  draft BOOLEAN NOT NULL
 );
 
 CREATE TABLE sell_listings (
@@ -76,7 +79,9 @@ CREATE TABLE sell_listings (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   sol_account VARCHAR NOT NULL,
   ask_price BIGINT NOT NULL,
-  is_open BOOLEAN DEFAULT true NOT NULL
+  is_open BOOLEAN DEFAULT true NOT NULL,
+  closed_at TIMESTAMP WITH TIME ZONE,
+  draft BOOLEAN NOT NULL
 );
 
 CREATE TABLE buy_listings (
@@ -86,7 +91,10 @@ CREATE TABLE buy_listings (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   sol_account VARCHAR NOT NULL,
   bid_price BIGINT NOT NULL,
-  is_open BOOLEAN DEFAULT true NOT NULL
+  is_open BOOLEAN DEFAULT true NOT NULL,
+  closed_at TIMESTAMP WITH TIME ZONE,
+  n_listing BIGINT DEFAULT 0 NOT NULL,
+  draft BOOLEAN NOT NULL
 );
 
 CREATE TABLE metadata (
@@ -121,13 +129,20 @@ CREATE TABLE stripe_accounts (
   status SMALLINT NOT NULL
 );
 
+CREATE TABLE stripe_customers (
+  customer_uid VARCHAR PRIMARY KEY,
+  stripe_uid VARCHAR NOT NULL REFERENCES stripe_accounts(stripe_uid) ON DELETE CASCADE ON UPDATE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+
 CREATE TABLE seat_ranges (
   sale_account VARCHAR NOT NULL REFERENCES sales(account) ON DELETE CASCADE,
   l INT NOT NULL,
   r INT NOT NULL,
   PRIMARY KEY(sale_account, l, r)
 );
-  
+
 CREATE TABLE api_clients (
   client_id VARCHAR PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,

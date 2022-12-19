@@ -14,9 +14,11 @@ pub struct SellListing {
   pub sol_account: String,
   pub ask_price: i64,
   pub is_open: bool,
+  pub draft: bool,
+  pub closed_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, AsChangeset, Deserialize)]
 #[diesel(table_name = sell_listings)]
 pub struct NewSellListing<'a> {
   pub account_id: &'a str,
@@ -25,4 +27,5 @@ pub struct NewSellListing<'a> {
   pub sol_account: &'a str,
   pub ask_price: i64,
   pub is_open: bool,
+  pub draft: bool,
 }

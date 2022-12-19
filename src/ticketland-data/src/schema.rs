@@ -22,12 +22,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    buy_listings (id) {
-        id -> Int4,
+    buy_listings (sol_account) {
+        sol_account -> Varchar,
         account_id -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        sol_account -> Varchar,
         bid_price -> Int8,
         is_open -> Bool,
         n_listing -> Int8,
@@ -120,13 +119,12 @@ diesel::table! {
 }
 
 diesel::table! {
-    sell_listings (id) {
-        id -> Int4,
+    sell_listings (sol_account) {
+        sol_account -> Varchar,
         account_id -> Varchar,
         ticket_nft -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        sol_account -> Varchar,
         ask_price -> Int8,
         is_open -> Bool,
         draft -> Bool,

@@ -18,9 +18,12 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn create_sell_listing(&mut self, sell_listing: NewSellListing<'_>) -> Result<()> {
+  pub async fn upsert_sell_listing(&mut self, sell_listing: NewSellListing<'_>) -> Result<()> {
     diesel::insert_into(sell_listings)
     .values(&sell_listing)
+    .on_conflict(sol_account)
+    .do_update()
+    .set(&sell_listing)
     .execute(self.borrow_mut())
     .await?;
 
@@ -82,6 +85,17 @@ impl PostgresConnection {
 
       Ok(())
     }.boxed())
+    .await?;
+
+    Ok(())
+  }
+
+  pub async fn update_sell_listing_draft(&mut self, account: &String, listing_account: &String) -> Result<()> {
+    diesel::update(sell_listings)
+    .filter(sol_account.eq(listing_account))
+    .filter(account_id.eq(account))
+    .set(draft.eq(true))
+    .execute(self.borrow_mut())
     .await?;
 
     Ok(())

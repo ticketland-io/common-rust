@@ -72,12 +72,11 @@ CREATE TABLE tickets (
 );
 
 CREATE TABLE sell_listings (
-  id SERIAL PRIMARY KEY,
+  sol_account VARCHAR PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,
   ticket_nft VARCHAR NOT NULL REFERENCES ticket_onchain_accounts(ticket_nft) ON DELETE CASCADE,
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  sol_account VARCHAR NOT NULL,
   ask_price BIGINT NOT NULL,
   is_open BOOLEAN DEFAULT true NOT NULL,
   closed_at TIMESTAMP WITH TIME ZONE,
@@ -85,11 +84,10 @@ CREATE TABLE sell_listings (
 );
 
 CREATE TABLE buy_listings (
-  id SERIAL PRIMARY KEY,
+  sol_account VARCHAR PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  sol_account VARCHAR NOT NULL,
   bid_price BIGINT NOT NULL,
   is_open BOOLEAN DEFAULT true NOT NULL,
   closed_at TIMESTAMP WITH TIME ZONE,

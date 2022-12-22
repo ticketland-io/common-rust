@@ -2,7 +2,6 @@ use std::{
   sync::Arc,
   str::FromStr,
 };
-use tokio::sync::Mutex;
 use chrono::Duration;
 use eyre::Result;
 use serde::{Serialize, Deserialize};
@@ -13,8 +12,8 @@ use solana_sdk::{
   keccak::hashv,
 };
 use ticketland_crypto::asymetric::ed25519;
-use ticketland_core::{services::{redis::Redis, redlock::RedLock}};
-use ticketland_data::connection::PostgresConnection;
+use ticketland_core::{services::{redis, redlock::RedLock}};
+use ticketland_data::connection_pool::ConnectionPool;
 use program_artifacts::ticket_nft::account_data::TicketMetadata;
 use solana_web3_rust::rpc_client::RpcClient;
 use crate::error::Error;
@@ -65,8 +64,8 @@ fn redis_ticket_attended_key(event_id: &str, ticket_metadata: &str) -> String {
 
 pub async fn verify_ticket(
   rpc_client: Arc<RpcClient>,
-  postgres: Arc<Mutex<PostgresConnection>>,
-  redis: Arc<Mutex<Redis>>,
+  pg_pool: &ConnectionPool,
+  redis_pool: &redis::ConnectionPool,
   redlock: Arc<RedLock>,
   ticket_verifier_priv_key: String,
   event_id: &str,
@@ -91,7 +90,7 @@ pub async fn verify_ticket(
 
   if sig.verify(&ticket_owner.to_bytes(), message_hash) {
     // 2. Load the ticket type index for the given ticket
-    let mut postgres = postgres.lock().await;
+    let mut postgres = pg_pool.connection().await?;
     let ticket = postgres.read_ticket_by_ticket_metadata(ticket_metadata.to_string()).await?;
     let ticket_type_index = ticket.ticket_type_index as u8;
     
@@ -115,7 +114,7 @@ pub async fn verify_ticket(
         redis_key.as_bytes(),
         Duration::seconds(5).num_milliseconds() as usize,
       ).await?;
-      let mut redis = redis.lock().await;
+      let mut redis = redis_pool.connection().await?;
 
       // If key exists, it means someone has already attended this event
       if let Ok(_) = redis.get(&redis_key).await {

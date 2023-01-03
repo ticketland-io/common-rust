@@ -176,7 +176,7 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn update_draft(&mut self, evt_id: String) -> Result<()> {
+  pub async fn update_event_draft(&mut self, evt_id: String) -> Result<()> {
     diesel::update(events)
     .filter(events_dsl::event_id.eq(evt_id))
     .set(events_dsl::draft.eq(true))

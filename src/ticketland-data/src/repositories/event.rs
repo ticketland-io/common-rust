@@ -161,11 +161,11 @@ impl PostgresConnection {
     };
 
     if let Some(start_date_from) = start_date_from {
-      filters.push(format!("events.start_date >= {0}", start_date_from));
+      filters.push(format!("events.start_date >= '{0}'::date", start_date_from));
     };
 
     if let Some(start_date_to) = start_date_to {
-      filters.push(format!("events.start_date <= {0}", start_date_to));
+      filters.push(format!("events.start_date <= '{0}'::date", start_date_to));
     };
 
     if let Some(price_range) = price_range {

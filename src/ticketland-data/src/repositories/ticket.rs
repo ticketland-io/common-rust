@@ -2,7 +2,6 @@ use diesel::{prelude::*, sql_query};
 use eyre::Result;
 use diesel::result::Error;
 use diesel_async::{AsyncConnection, RunQueryDsl};
-use futures::FutureExt;
 use crate::{
   connection::PostgresConnection,
   models::{

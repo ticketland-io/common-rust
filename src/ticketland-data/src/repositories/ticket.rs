@@ -21,7 +21,7 @@ use crate::{
 impl PostgresConnection {
   pub async fn upsert_user_ticket(&mut self, user_ticket: Ticket, ticket: TicketOnchainAccount) -> Result<()> {
     self.borrow_mut()
-    .transaction::<_, Error, _>(|conn| async move {
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
       // ignore if the ticket nft is already stored
       diesel::insert_into(ticket_onchain_accounts)
       .values(&ticket)
@@ -39,7 +39,7 @@ impl PostgresConnection {
       .await?;
 
       Ok(())
-    }.boxed())
+    }))
     .await?;
 
     Ok(())

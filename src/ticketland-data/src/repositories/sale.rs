@@ -1,7 +1,6 @@
 use diesel::prelude::*;
 use diesel::result::Error;
 use eyre::Result;
-use futures::FutureExt;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
@@ -24,7 +23,7 @@ use crate::{
 impl PostgresConnection {
   pub async fn upsert_sales(&mut self, sales_list: Vec<NewSale>, seat_ranges_list: Vec<SeatRange>) -> Result<()> {
     self.borrow_mut()
-    .transaction::<_, Error, _>(|conn| async move {
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
       diesel::insert_into(sales)
       .values(&sales_list)
       .on_conflict(sales_dsl::account)
@@ -40,7 +39,7 @@ impl PostgresConnection {
       .await?;
 
       Ok(())
-    }.boxed())
+    }))
     .await?;
 
     Ok(())

@@ -1,7 +1,6 @@
 use diesel::prelude::*;
 use diesel::result::Error;
 use eyre::Result;
-use futures::FutureExt;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
@@ -70,7 +69,7 @@ impl PostgresConnection {
     new_owner: String,
   ) -> Result<()> {
     self.borrow_mut()
-    .transaction::<_, Error, _>(|conn| async move {
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
       diesel::update(buy_listings)
       .filter(sol_account.eq(buy_listing_account))
       .set(is_open.eq(false))
@@ -84,7 +83,7 @@ impl PostgresConnection {
       .await?;
 
       Ok(())
-    }.boxed())
+    }))
     .await?;
 
     Ok(())

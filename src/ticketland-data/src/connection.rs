@@ -1,10 +1,13 @@
-use diesel_async::{AsyncConnection, AsyncPgConnection};
+use diesel_async::{
+  AsyncPgConnection,
+  pooled_connection::deadpool::Object,
+};
 
-pub struct PostgresConnection(AsyncPgConnection);
+pub struct PostgresConnection(Object<AsyncPgConnection>);
 
 impl PostgresConnection {
-  pub async fn new(db_uri: &str) -> Self {
-    Self(AsyncPgConnection::establish(&db_uri).await.unwrap())
+  pub fn new(conn: Object<AsyncPgConnection>) -> Self {
+    Self(conn)
   }
 
   pub fn borrow(&mut self) -> &AsyncPgConnection {

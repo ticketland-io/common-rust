@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use serde_aux::prelude::*;
 use diesel::prelude::*;
 use chrono::{
   NaiveDateTime,
@@ -7,6 +8,21 @@ use chrono::{
 };
 use crate::schema::events;
 use super::{sale::{Sale, SaleWithSeatRange}, seat_range::SeatRange};
+use diesel::{
+  FromSqlRow,
+  AsExpression,
+};
+use diesel_as_jsonb::AsJsonb;
+
+#[derive(AsJsonb)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Location {
+    pub name: String,
+     #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub latitude: f64,
+     #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub longitude: f64,
+}
 
 #[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = events)]
@@ -16,7 +32,7 @@ pub struct Event {
   pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
-  pub location: Option<String>,
+  pub location: Option<Location>,
   pub venue: Option<String>,
   pub event_type: i16,
   pub visibility: i16,
@@ -39,7 +55,7 @@ pub struct EventWithSale {
   pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
-  pub location: Option<String>,
+  pub location: Option<Location>,
   pub venue: Option<String>,
   pub event_type: i16,
   pub visibility: i16,

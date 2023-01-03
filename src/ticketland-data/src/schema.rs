@@ -22,17 +22,16 @@ diesel::table! {
 }
 
 diesel::table! {
-    buy_listings (id) {
-        id -> Int4,
+    buy_listings (sol_account) {
+        sol_account -> Varchar,
         account_id -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        sol_account -> Varchar,
         bid_price -> Int8,
         is_open -> Bool,
+        closed_at -> Nullable<Timestamptz>,
         n_listing -> Int8,
         draft -> Bool,
-        closed_at -> Nullable<Timestamptz>,
     }
 }
 
@@ -72,10 +71,9 @@ diesel::table! {
         event_capacity -> Varchar,
         file_type -> Nullable<Varchar>,
         arweave_tx_id -> Nullable<Varchar>,
+        webbundle_arweave_tx_id -> Nullable<Varchar>,
         image_uploaded -> Bool,
         draft -> Bool,
-        webbundle_arweave_tx_id -> Nullable<Varchar>,
-        location -> Nullable<Jsonb>,
     }
 }
 
@@ -109,6 +107,7 @@ diesel::table! {
         sale_start_ts -> Timestamptz,
         sale_end_ts -> Timestamptz,
         sale_type -> Jsonb,
+        draft -> Bool,
     }
 }
 
@@ -121,18 +120,16 @@ diesel::table! {
 }
 
 diesel::table! {
-    sell_listings (id) {
-        id -> Int4,
+    sell_listings (sol_account) {
+        sol_account -> Varchar,
         account_id -> Varchar,
         ticket_nft -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        sol_account -> Varchar,
         ask_price -> Int8,
         is_open -> Bool,
-        draft -> Bool,
         closed_at -> Nullable<Timestamptz>,
-        closed_at2 -> Nullable<Timestamptz>,
+        draft -> Bool,
     }
 }
 

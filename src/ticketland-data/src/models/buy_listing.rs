@@ -12,9 +12,9 @@ pub struct BuyListing {
   pub created_at: Option<NaiveDateTime>,
   pub bid_price: i64,
   pub is_open: bool,
+  pub closed_at: Option<NaiveDateTime>,
   pub n_listing: i64,
   pub draft: bool,
-  pub closed_at: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable, AsChangeset, Deserialize)]

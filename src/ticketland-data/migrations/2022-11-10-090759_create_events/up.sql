@@ -26,7 +26,7 @@ CREATE TABLE events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   name VARCHAR NOT NULL,
   description TEXT NOT NULL,
-  location VARCHAR,
+  location JSONB,
   venue VARCHAR,
   event_type SMALLINT NOT NULL,
   visibility SMALLINT NOT NULL,

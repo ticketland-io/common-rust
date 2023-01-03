@@ -60,6 +60,7 @@ diesel::table! {
         created_at -> Nullable<Timestamptz>,
         name -> Varchar,
         description -> Text,
+        location -> Nullable<Jsonb>,
         venue -> Nullable<Varchar>,
         event_type -> Int2,
         visibility -> Int2,
@@ -71,7 +72,6 @@ diesel::table! {
         arweave_tx_id -> Nullable<Varchar>,
         image_uploaded -> Bool,
         draft -> Bool,
-        location -> Nullable<Jsonb>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
     }
 }

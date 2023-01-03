@@ -32,6 +32,7 @@ pub struct Event {
   pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
+  pub location: Option<Location>,
   pub venue: Option<String>,
   pub event_type: i16,
   pub visibility: i16,
@@ -45,7 +46,6 @@ pub struct Event {
   pub arweave_tx_id: Option<String>,
   pub image_uploaded: bool,
   pub draft: bool,
-  pub location: Option<Location>,
   pub webbundle_arweave_tx_id: Option<String>,
 }
 

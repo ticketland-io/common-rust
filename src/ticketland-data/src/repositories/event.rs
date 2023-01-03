@@ -140,7 +140,16 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_filtered_events(&mut self, category: Option<i16>, price_range: Option<(u32, u32)>, start_date: Option<NaiveDateTime>, end_date: Option<NaiveDateTime>, name: Option<String>, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_filtered_events(
+    &mut self, category: Option<i16>,
+    price_range: Option<(u32,
+    u32)>,
+    start_date_from: Option<NaiveDateTime>,
+    start_date_to: Option<NaiveDateTime>,
+    name: Option<String>,
+    skip: i64,
+    limit: i64,
+  ) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
 
     if let Some(category) = category {
@@ -151,12 +160,12 @@ impl PostgresConnection {
       filters.push(format!("events.name ILIKE '%{}%'", name));
     };
 
-    if let Some(start_date) = start_date {
-      filters.push(format!("events.start_date >= {0}", start_date));
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= {0}", start_date_from));
     };
 
-    if let Some(end_date) = end_date {
-      filters.push(format!("events.start_date <= {0}", end_date));
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.start_date <= {0}", start_date_to));
     };
 
     if let Some(price_range) = price_range {

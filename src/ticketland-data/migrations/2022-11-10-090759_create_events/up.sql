@@ -51,7 +51,7 @@ CREATE TABLE sales (
   sale_start_ts TIMESTAMP WITH TIME ZONE NOT NULL,
   sale_end_ts TIMESTAMP WITH TIME ZONE NOT NULL,
   sale_type JSONB NOT NULL,
-  draft BOOLEAN NOT NULL
+  draft BOOL NOT NULL
 );
 
 CREATE TABLE ticket_onchain_accounts (
@@ -67,8 +67,8 @@ CREATE TABLE tickets (
   ticket_type_index SMALLINT NOT NULL,
   seat_name VARCHAR NOT NULL,
   seat_index INT NOT NULL,
-  attended BOOLEAN DEFAULT false NOT NULL,
-  draft BOOLEAN NOT NULL
+  attended BOOL DEFAULT false NOT NULL,
+  draft BOOL NOT NULL
 );
 
 CREATE TABLE sell_listings (
@@ -78,9 +78,9 @@ CREATE TABLE sell_listings (
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   ask_price BIGINT NOT NULL,
-  is_open BOOLEAN DEFAULT true NOT NULL,
+  is_open BOOL DEFAULT true NOT NULL,
   closed_at TIMESTAMP WITH TIME ZONE,
-  draft BOOLEAN NOT NULL
+  draft BOOL NOT NULL
 );
 
 CREATE TABLE buy_listings (
@@ -89,10 +89,10 @@ CREATE TABLE buy_listings (
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   bid_price BIGINT NOT NULL,
-  is_open BOOLEAN DEFAULT true NOT NULL,
+  is_open BOOL DEFAULT true NOT NULL,
   closed_at TIMESTAMP WITH TIME ZONE,
   n_listing BIGINT DEFAULT 0 NOT NULL,
-  draft BOOLEAN NOT NULL
+  draft BOOL NOT NULL
 );
 
 CREATE TABLE metadata (

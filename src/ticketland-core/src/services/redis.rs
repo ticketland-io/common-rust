@@ -1,26 +1,37 @@
+use deadpool_redis::{Pool, Config, Connection, Runtime};
 use eyre::Result;
 use redis::{
-  aio::Connection,
   cmd,
 };
 
-pub struct Redis {
-  conn: Connection,
+pub struct ConnectionPool(Pool);
+
+impl ConnectionPool {
+  pub fn new(redis_host: &str, password: &str, port: u16) -> Self {
+    let conn_string = format!("redis://:{}@{}:{}", password, redis_host, port);
+    let config = Config::from_url(conn_string);
+    let pool = config.create_pool(Some(Runtime::Tokio1)).unwrap();
+
+    Self(pool)
+  }
+
+  pub async fn connection(&self) -> Result<Redis> {
+    let conn = self.0.get().await?;
+    Ok(Redis::new(conn))
+  }
 }
 
-impl Redis {
-  pub async fn new(redis_host: &str, password: &str) -> Result<Self> {
-    let conn_string = format!("redis://:{}@{}:6379", password, redis_host);
-    let client = redis::Client::open(conn_string)?;
-    let conn = client.get_async_connection().await?;
+pub struct Redis(Connection);
 
-    Ok(Redis {conn})
+impl Redis {
+  fn new(connection: Connection) -> Self {
+    Redis(connection)
   }
 
   pub async fn set(&mut self, key: &str, value: &str) -> Result<()> {
     cmd("SET")
     .arg(&[key, value])
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
@@ -28,42 +39,42 @@ impl Redis {
     cmd("SETEX")
     .arg(&[key, value])
     .arg(secs)
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
   pub async fn get(&mut self, key: &str) -> Result<String> {
     cmd("GET")
     .arg(&[key])
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
   pub async fn get_mult(&mut self, key: &str) -> Result<Vec<String>> {
     cmd("GET")
     .arg(&[key])
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
   pub async fn mget(&mut self, keys: &[&str]) -> Result<Vec<String>> {
     cmd("MGET")
     .arg(keys)
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
   pub async fn delete(&mut self, key: &str) -> Result<()> {
     cmd("DEL")
     .arg(key)
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 
   pub async fn keys(&mut self, key_pattern: &str) -> Result<()> {
     cmd("keys")
     .arg(key_pattern)
-    .query_async(&mut self.conn).await
+    .query_async(&mut self.0).await
     .map_err(Into::<_>::into)
   }
 }

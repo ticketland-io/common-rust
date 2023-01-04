@@ -44,9 +44,9 @@ pub struct Event {
   pub event_capacity: String,
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
+  pub webbundle_arweave_tx_id: Option<String>,
   pub image_uploaded: bool,
   pub draft: bool,
-  pub webbundle_arweave_tx_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -67,8 +67,8 @@ pub struct EventWithSale {
   pub event_capacity: String,
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
-  pub image_uploaded: bool,
   pub webbundle_arweave_tx_id: Option<String>,
+  pub image_uploaded: bool,
   pub draft: bool,
   pub sales: Vec<SaleWithSeatRange>,
 }

@@ -60,6 +60,7 @@ pub struct Sale {
   #[serde(serialize_with = "to_milli_ts")]
   pub sale_end_ts: NaiveDateTime,
   pub sale_type: SaleType,
+  pub draft: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -75,6 +76,7 @@ pub struct SaleWithSeatRange {
   #[serde(serialize_with = "to_milli_ts")]
   pub sale_end_ts: NaiveDateTime,
   pub sale_type: SaleType,
+  pub draft: bool,
   pub seat_range: SeatRange,
 }
 
@@ -91,7 +93,8 @@ impl From<Sale> for SaleWithSeatRange {
       sale_start_ts: sale.sale_start_ts,
       sale_end_ts: sale.sale_end_ts,
       sale_type: sale.sale_type,
-      seat_range: SeatRange::default()
+      seat_range: SeatRange::default(),
+      draft: sale.draft,
     }
   }
 

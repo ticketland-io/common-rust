@@ -6,17 +6,18 @@ use crate::schema::buy_listings;
 #[derive(Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = buy_listings)]
 pub struct BuyListing {
-  pub id: i32,
+  pub sol_account: String,
   pub account_id: String,
   pub event_id: String,
   pub created_at: Option<NaiveDateTime>,
-  pub sol_account: String,
   pub bid_price: i64,
   pub is_open: bool,
+  pub closed_at: Option<NaiveDateTime>,
   pub n_listing: i64,
+  pub draft: bool,
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, AsChangeset, Deserialize)]
 #[diesel(table_name = buy_listings)]
 pub struct NewBuyListing<'a> {
   pub account_id: &'a str,
@@ -25,4 +26,5 @@ pub struct NewBuyListing<'a> {
   pub bid_price: i64,
   pub n_listing: i64,
   pub is_open: bool,
+  pub draft: bool,
 }

@@ -1,11 +1,11 @@
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_query};
 use eyre::Result;
 use diesel::result::Error;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    ticket::{Ticket, TicketWithMetadata},
+    ticket::{Ticket, TicketWithMetadata, PartialSellListing},
     ticket_onchain_account::TicketOnchainAccount,
   },
   schema::{
@@ -28,7 +28,7 @@ impl PostgresConnection {
       .do_nothing()
       .execute(conn)
       .await?;
-      
+
       diesel::insert_into(tickets)
       .values(&user_ticket)
       .on_conflict(ticket_nft)
@@ -45,14 +45,26 @@ impl PostgresConnection {
   }
 
   pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<TicketWithMetadata>> {
-    let records = tickets
-    .filter(event_id.eq(evt_id))
-    .inner_join(ticket_onchain_accounts.on(ticket_onchain_accounts_dsl::ticket_nft.eq(ticket_nft)))
-    .order_by(created_at.desc())
-    .limit(limit)
-    .offset(skip * limit)
-    .load::<(Ticket, TicketOnchainAccount)>(self.borrow_mut())
-    .await?;
+    let query = sql_query(format!(
+      "
+      SELECT DISTINCT tickets.*, sell_listings.sol_account, ticket_onchain_accounts.ticket_metadata
+      FROM (
+        SELECT * FROM tickets
+        WHERE tickets.event_id = '{}'
+        limit {}
+        offset {}
+      ) tickets
+      INNER JOIN ticket_onchain_accounts
+      ON ticket_onchain_accounts.ticket_nft = tickets.ticket_nft
+      LEFT JOIN sell_listings ON (
+        sell_listings.ticket_nft = tickets.ticket_nft
+        AND sell_listings.is_open = TRUE
+      )
+      ORDER BY tickets.created_at
+      ", evt_id, limit, skip * limit
+    ));
+
+    let records = query.load::<(Ticket, TicketOnchainAccount, Option<PartialSellListing>)>(self.borrow_mut()).await?;
 
     Ok(TicketWithMetadata::from_tuple(records))
   }

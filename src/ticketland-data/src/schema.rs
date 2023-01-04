@@ -107,7 +107,6 @@ diesel::table! {
         sale_start_ts -> Timestamptz,
         sale_end_ts -> Timestamptz,
         sale_type -> Jsonb,
-        draft -> Bool,
     }
 }
 

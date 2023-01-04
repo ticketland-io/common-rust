@@ -50,8 +50,7 @@ CREATE TABLE sales (
   n_tickets INT NOT NULL,
   sale_start_ts TIMESTAMP WITH TIME ZONE NOT NULL,
   sale_end_ts TIMESTAMP WITH TIME ZONE NOT NULL,
-  sale_type JSONB NOT NULL,
-  draft BOOL NOT NULL
+  sale_type JSONB NOT NULL
 );
 
 CREATE TABLE ticket_onchain_accounts (

@@ -113,4 +113,5 @@ pub struct NewSale {
   #[serde(deserialize_with = "from_milli_ts")]
   pub sale_end_ts: NaiveDateTime,
   pub sale_type: SaleType,
+  pub draft: bool,
 }

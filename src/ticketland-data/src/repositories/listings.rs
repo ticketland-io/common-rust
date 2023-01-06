@@ -19,11 +19,11 @@ impl PostgresConnection {
       (
         SELECT closed_at, is_open
         FROM buy_listings
-        WHERE is_open = true AND EXTRACT(epoch from closed_at) > {1}
+        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
         UNION ALL
         SELECT closed_at, is_open
         FROM sell_listings
-        WHERE is_open = true AND EXTRACT(epoch from closed_at) > {1}
+        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
       ) t
       GROUP BY 1
       ORDER BY timestamp desc;
@@ -45,11 +45,11 @@ impl PostgresConnection {
       (
         SELECT bid_price as price, closed_at
         FROM buy_listings
-        WHERE is_open = true AND EXTRACT(epoch from closed_at) > {1}
+        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
         UNION ALL
         SELECT ask_price as price, closed_at
         FROM sell_listings
-        WHERE is_open = true AND EXTRACT(epoch from closed_at) > {1}
+        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
       ) t
       GROUP BY 1
       ORDER BY timestamp desc;

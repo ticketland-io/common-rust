@@ -58,7 +58,7 @@ impl PostgresConnection {
       ON ticket_onchain_accounts.ticket_nft = tickets.ticket_nft
       LEFT JOIN sell_listings ON (
         sell_listings.ticket_nft = tickets.ticket_nft
-        AND sell_listings.is_open = TRUE
+        AND sell_listings.is_open = TRUE AND sell_listings.draft = FALSE
       )
       ORDER BY tickets.created_at
       ", evt_id, limit, skip * limit

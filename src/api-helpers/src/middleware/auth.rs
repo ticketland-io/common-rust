@@ -110,7 +110,7 @@ where
         
         match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
-            if !user.email_verified {
+            if user.provider_user_info[0].provider_id.eq("google.com") && !user.email_verified {
               return Err(ErrorUnauthorized("Unauthorized"))
             }
 

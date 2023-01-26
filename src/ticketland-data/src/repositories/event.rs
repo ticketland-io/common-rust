@@ -2,6 +2,7 @@ use diesel::{
   prelude::*,
   sql_query,
 };
+use chrono::NaiveDateTime;
 use diesel_async::RunQueryDsl;
 use eyre::Result;
 use crate::{
@@ -139,25 +140,70 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_events_by_category(&mut self, categ: i16, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
-    let query = sql_query(format!(
-      "
-      SELECT *
-      FROM (
-        SELECT * FROM events
-        WHERE events.category = {}
-        limit {}
-        offset {}
-      ) events
-      INNER JOIN sales
-      ON sales.event_id = events.event_id
-      INNER JOIN seat_ranges
-      ON seat_ranges.sale_account = sales.account
-      ORDER BY events.start_date
-      ", categ, limit, skip * limit
-    ));
+  pub async fn read_filtered_events(
+    &mut self, category: Option<i16>,
+    price_range: Option<(u32,
+    u32)>,
+    start_date_from: Option<NaiveDateTime>,
+    start_date_to: Option<NaiveDateTime>,
+    name: Option<String>,
+    skip: i64,
+    limit: i64,
+  ) -> Result<Vec<EventWithSale>> {
+    let mut filters = vec![];
 
-    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+    if let Some(category) = category {
+      filters.push(format!("events.category = {}", category));
+    };
+
+    if let Some(name) = name {
+      filters.push(format!("events.name ILIKE '%{}%'", name));
+    };
+
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= '{0}'::date", start_date_from));
+    };
+
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.start_date <= '{0}'::date", start_date_to));
+    };
+
+    if let Some(price_range) = price_range {
+      // There are 2 possible cases for (x, y) with the precondition that x <= y
+      // 1. (x > 0, y > 0) -> We include only FixedPrice sale type
+      // 2. (x >= 0, y >= 0) -> We include Free and FixedPrice sale types
+      if price_range.0 > 0 {
+        filters.push(format!("
+          (sale_type->'FixedPrice'->'price')::numeric >= {0}
+          AND (sale_type->'FixedPrice'->'price')::numeric <= {1}
+        ", price_range.0, price_range.1));
+      } else {
+        filters.push(format!("
+          (sale_type->'FixedPrice'->'price')::numeric <= {0}
+          OR (sale_type->'Free') = '{{}}'
+        ", price_range.1));
+      }
+    };
+
+    let filters_query = if filters.len() > 0 {
+      filters.join(" AND ")
+    } else {
+      "true = true".to_string()
+    };
+
+    let query = sql_query(format!("
+      select events.*, sales.*, seat_ranges.*
+      from (select * from events limit {0} offset {1}) events
+      inner join sales on events.event_id = sales.event_id
+      inner join seat_ranges on seat_ranges.sale_account = sales.account
+      WHERE {2}
+      order by events.event_id
+    ", limit, skip * limit, filters_query)
+    );
+
+    let records = query
+    .load::<(Event, Sale, SeatRange)>(self.borrow_mut())
+    .await?;
 
     Ok(EventWithSale::from_tuple(records))
   }

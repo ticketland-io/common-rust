@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_types};
 use chrono::{
   NaiveDateTime,
 };
 use crate::schema::tickets;
 use super::ticket_onchain_account::TicketOnchainAccount;
 
-#[derive(Insertable, Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
+#[derive( Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = tickets)]
 pub struct Ticket {
   pub ticket_nft: String,
@@ -18,6 +18,12 @@ pub struct Ticket {
   pub seat_index: i32,
   pub attended: bool,
   pub draft: bool,
+}
+
+#[derive(QueryableByName, Serialize, Deserialize, Clone, Default)]
+pub struct PartialSellListing {
+  #[diesel(sql_type = sql_types::VarChar)]
+  sol_account: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -32,13 +38,14 @@ pub struct TicketWithMetadata {
   pub seat_index: i32,
   pub attended: bool,
   pub draft: bool,
+  pub sell_listing: Option<PartialSellListing>,
 }
 
 impl TicketWithMetadata {
-  pub fn from_tuple(values: Vec<(Ticket, TicketOnchainAccount)>) -> Vec<Self> {
+  pub fn from_tuple(values: Vec<(Ticket, TicketOnchainAccount, Option<PartialSellListing>)>) -> Vec<Self> {
     values
     .into_iter()
-    .map(|(ticket, ticket_onchain_account)| {
+    .map(|(ticket, ticket_onchain_account, sell_listing)| {
       TicketWithMetadata {
         ticket_nft: ticket.ticket_nft,
         ticket_metadata: ticket_onchain_account.ticket_metadata,
@@ -50,6 +57,7 @@ impl TicketWithMetadata {
         seat_index: ticket.seat_index,
         attended: ticket.attended,
         draft: ticket.draft,
+        sell_listing
       }
     })
     .collect()

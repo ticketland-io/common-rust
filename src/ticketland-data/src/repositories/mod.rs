@@ -9,3 +9,4 @@ pub mod ticket;
 pub mod stripe;
 pub mod ticket_onchain_accounts;
 pub mod seat_range;
+pub mod listings;

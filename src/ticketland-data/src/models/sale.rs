@@ -91,7 +91,7 @@ impl From<Sale> for SaleWithSeatRange {
       sale_start_ts: sale.sale_start_ts,
       sale_end_ts: sale.sale_end_ts,
       sale_type: sale.sale_type,
-      seat_range: SeatRange::default()
+      seat_range: SeatRange::default(),
     }
   }
 

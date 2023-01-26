@@ -46,4 +46,13 @@ docker run -d --hostname local-rabbit \
 -e RABBITMQ_DEFAULT_PASS=password \
 rabbitmq:3-management
 ```
+
+Redis
+===
+
+```bash
+docker run \
+-p 6379:6379 \
+--name redis \
+-d redis:7.0.8 redis-server --appendonly yes  --requirepass "Lma5LVU8lMcDRAFwKMLmcUuiIQ+uXaEZIm2eahgr"
 ```

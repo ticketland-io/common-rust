@@ -1,5 +1,8 @@
-use diesel::prelude::*;
-use diesel::result::Error;
+use diesel::{
+  prelude::*,
+  result::Error,
+  dsl,
+};
 use eyre::Result;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
@@ -72,10 +75,10 @@ impl PostgresConnection {
     .transaction::<_, Error, _>(|conn| Box::pin(async move {
       diesel::update(sell_listings)
       .filter(sol_account.eq(sell_listing_account))
-      .set(is_open.eq(false))
+      .set((closed_at.eq(dsl::now), is_open.eq(false)))
       .execute(conn)
       .await?;
-      
+
       diesel::update(tickets)
       .filter(tickets_dsl::ticket_nft.eq(ticket_nft_account))
       .set(tickets_dsl::account_id.eq(new_owner))

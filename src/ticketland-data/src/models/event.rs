@@ -78,7 +78,7 @@ pub struct AttendedTicketTypesCount {
   #[diesel(sql_type = sql_types::SmallInt)]
   ticket_type_index: i16,
   #[diesel(sql_type = sql_types::BigInt)]
-  count: i64,
+  total_count: i64,
   #[diesel(sql_type = sql_types::BigInt)]
   attended_count: i64,
 }

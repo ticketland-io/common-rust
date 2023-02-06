@@ -244,7 +244,7 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_attended_tickets(&mut self, evt_id: String) -> Result<Vec<AttendedTicketTypesCount>> {
+  pub async fn read_attended_tickets_count(&mut self, evt_id: String) -> Result<Vec<AttendedTicketTypesCount>> {
     let query = sql_query(format!(
       "
       SELECT sales.ticket_type_index,

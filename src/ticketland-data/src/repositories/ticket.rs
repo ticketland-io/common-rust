@@ -5,8 +5,8 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    ticket::{Ticket, TicketWithMetadata, PartialSellListing},
-    ticket_onchain_account::TicketOnchainAccount,
+    ticket::{Ticket, TicketWithMetadata, PartialSellListing, TicketWithEvent},
+    ticket_onchain_account::TicketOnchainAccount, sale::Sale, event::Event,
   },
   schema::{
     tickets::dsl::*,
@@ -44,7 +44,7 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_user_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<TicketWithMetadata>> {
+  pub async fn read_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<TicketWithMetadata>> {
     let query = sql_query(format!(
       "
       SELECT DISTINCT tickets.*, sell_listings.sol_account, ticket_onchain_accounts.ticket_metadata
@@ -67,6 +67,33 @@ impl PostgresConnection {
     let records = query.load::<(Ticket, TicketOnchainAccount, Option<PartialSellListing>)>(self.borrow_mut()).await?;
 
     Ok(TicketWithMetadata::from_tuple(records))
+  }
+
+  pub async fn read_user_tickets(&mut self, uid: String, skip: i64, limit: i64) -> Result<Vec<TicketWithEvent>> {
+    let query = sql_query(format!(
+      "
+      SELECT DISTINCT tickets.*, events.*, sales.*, sell_listings.sol_account
+      FROM (
+        SELECT * FROM tickets
+        WHERE tickets.account_id = '{}'
+        limit {}
+        offset {}
+      ) tickets
+      INNER JOIN ticket_onchain_accounts
+      ON ticket_onchain_accounts.ticket_nft = tickets.ticket_nft
+      INNER JOIN events on tickets.event_id = events.event_id
+      INNER JOIN sales on tickets.event_id = sales.event_id AND tickets.ticket_type_index = sales.ticket_type_index
+      LEFT JOIN sell_listings ON (
+        sell_listings.ticket_nft = tickets.ticket_nft
+        AND sell_listings.is_open = TRUE AND sell_listings.draft = FALSE
+      )
+      ORDER BY tickets.created_at
+      ", uid, limit, skip * limit
+    ));
+
+    let records = query.load::<(Ticket, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
+
+    Ok(TicketWithEvent::from_tuple(records))
   }
 
   pub async fn update_attended(&mut self, ticket_nft_acc: String) -> Result<()> {

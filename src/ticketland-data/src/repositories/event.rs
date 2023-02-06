@@ -11,7 +11,8 @@ use crate::{
     account::Account,
     event::{Event, EventWithSale},
     sale::Sale,
-    seat_range::SeatRange,
+    seat_range::SeatRange, 
+    ticket::AttendedTicketTypesCount
   },
   schema::{
     events::dsl::{
@@ -242,4 +243,21 @@ impl PostgresConnection {
 
     Ok(EventWithSale::from_tuple(records))
   }
+
+  pub async fn read_attended_tickets(&mut self, evt_id: String) -> Result<Vec<AttendedTicketTypesCount>> {
+    let query = sql_query(format!(
+      "
+      SELECT sales.ticket_type_index,
+      COUNT (*),
+      COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
+      FROM tickets
+      INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id 
+      WHERE tickets.event_id = '{}' 
+      GROUP BY sales.ticket_type_index;
+      ", evt_id
+    ));
+
+    Ok(query.load::<AttendedTicketTypesCount>(self.borrow_mut()).await?)
+  }
+
 }

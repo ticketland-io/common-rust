@@ -5,7 +5,7 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    ticket::{Ticket, TicketWithMetadata, PartialSellListing, TicketWithEvent, AttendedTicketTypesCount},
+    ticket::{Ticket, TicketWithMetadata, PartialSellListing, TicketWithEvent},
     ticket_onchain_account::TicketOnchainAccount, sale::Sale, event::Event,
   },
   schema::{
@@ -126,21 +126,4 @@ impl PostgresConnection {
       .1
     )
   }
-
-  pub async fn read_attended_tickets(&mut self, evt_id: String) -> Result<Vec<AttendedTicketTypesCount>> {
-    let query = sql_query(format!(
-      "
-      SELECT sales.ticket_type_index,
-      COUNT (*),
-      COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
-      FROM tickets
-      INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id 
-      WHERE tickets.event_id = '{}' 
-      GROUP BY sales.ticket_type_index;
-      ", evt_id
-    ));
-
-    Ok(query.load::<AttendedTicketTypesCount>(self.borrow_mut()).await?)
-  }
-
 }

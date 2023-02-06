@@ -26,16 +26,6 @@ pub struct PartialSellListing {
   sol_account: String,
 }
 
-#[derive(QueryableByName, Serialize)]
-pub struct AttendedTicketTypesCount {
-  #[diesel(sql_type = sql_types::SmallInt)]
-  ticket_type_index: i16,
-  #[diesel(sql_type = sql_types::BigInt)]
-  count: i64,
-  #[diesel(sql_type = sql_types::BigInt)]
-  attended_count: i64,
-}
-
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct TicketWithMetadata {
   pub ticket_nft: String,

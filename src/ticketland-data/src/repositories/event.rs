@@ -12,7 +12,7 @@ use crate::{
     event::{Event, EventWithSale},
     sale::Sale,
     seat_range::SeatRange, 
-    ticket::AttendedTicketTypesCount
+    event::AttendedTicketTypesCount
   },
   schema::{
     events::dsl::{

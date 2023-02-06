@@ -248,7 +248,7 @@ impl PostgresConnection {
     let query = sql_query(format!(
       "
       SELECT sales.ticket_type_index,
-      COUNT (*),
+      COUNT (*) AS total_count,
       COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
       FROM tickets
       INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id 

@@ -12,10 +12,8 @@ bs58 = "0.4.0"
 eyre = "0.6.8"
 solana-sdk = "1.11.10"
 thiserror = "1.0.33"
-# ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.34" }
+ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.34" }
 program-artifacts = { git = "https://github.com/ticketland-io/program-artifacts", version = "0.1.32" }
-ticketland-data = { path = "../ticketland-data" }
-# ticketland-core = { path = "../ticketland-core"  }
 ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.17"  }
 solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", version = "0.1.10" }
 ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15" }

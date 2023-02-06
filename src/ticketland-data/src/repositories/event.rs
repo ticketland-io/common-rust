@@ -12,7 +12,7 @@ use crate::{
     event::{Event, EventWithSale},
     sale::Sale,
     seat_range::SeatRange, 
-    event::AttendedTicketTypesCount
+    event::AttendedTicketCount
   },
   schema::{
     events::dsl::{
@@ -244,7 +244,7 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
-  pub async fn read_attended_tickets_count(&mut self, evt_id: String) -> Result<Vec<AttendedTicketTypesCount>> {
+  pub async fn read_attended_tickets_count(&mut self, evt_id: String) -> Result<Vec<AttendedTicketCount>> {
     let query = sql_query(format!(
       "
       SELECT sales.ticket_type_index,
@@ -257,7 +257,7 @@ impl PostgresConnection {
       ", evt_id
     ));
 
-    Ok(query.load::<AttendedTicketTypesCount>(self.borrow_mut()).await?)
+    Ok(query.load::<AttendedTicketCount>(self.borrow_mut()).await?)
   }
 
 }

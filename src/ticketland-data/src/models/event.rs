@@ -74,7 +74,7 @@ pub struct EventWithSale {
 }
 
 #[derive(QueryableByName, Serialize)]
-pub struct AttendedTicketTypesCount {
+pub struct AttendedTicketCount {
   #[diesel(sql_type = sql_types::SmallInt)]
   ticket_type_index: i16,
   #[diesel(sql_type = sql_types::BigInt)]

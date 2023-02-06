@@ -87,15 +87,30 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_events(&mut self, user_id: String) -> Result<Vec<Event>> {
-    Ok(
-      accounts
-      .filter(accounts_dsl::uid.eq(user_id))
-      .inner_join(events.on(events_dsl::account_id.eq(accounts_dsl::uid)))
-      .select(events::all_columns())
-      .load::<Event>(self.borrow_mut())
-      .await?
-    )
+  pub async fn read_account_events(&mut self, user_id: String, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM (
+        SELECT * FROM events
+        WHERE events.account_id = '{}'
+        limit {}
+        offset {}
+      ) events
+      INNER JOIN sales
+      ON sales.event_id = events.event_id
+      INNER JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
+      ORDER BY events.start_date
+      ",
+      user_id,
+      limit,
+      skip * limit,
+    ));
+
+    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+
+    Ok(EventWithSale::from_tuple(records))
   }
 
   pub async fn read_event(&mut self, evt_id: String) -> Result<Event> {
@@ -142,8 +157,7 @@ impl PostgresConnection {
 
   pub async fn read_filtered_events(
     &mut self, category: Option<i16>,
-    price_range: Option<(u32,
-    u32)>,
+    price_range: Option<(u32, u32)>,
     start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
     name: Option<String>,

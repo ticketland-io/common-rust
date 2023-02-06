@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_types};
 use chrono::{
   NaiveDateTime,
   naive::serde::ts_milliseconds::serialize as to_milli_ts,
@@ -72,6 +72,17 @@ pub struct EventWithSale {
   pub draft: bool,
   pub sales: Vec<SaleWithSeatRange>,
 }
+
+#[derive(QueryableByName, Serialize)]
+pub struct AttendedTicketCount {
+  #[diesel(sql_type = sql_types::SmallInt)]
+  ticket_type_index: i16,
+  #[diesel(sql_type = sql_types::BigInt)]
+  total_count: i64,
+  #[diesel(sql_type = sql_types::BigInt)]
+  attended_count: i64,
+}
+
 
 impl EventWithSale {
   pub fn from_tuple(values: Vec<(Event, Sale, SeatRange)>) -> Vec<EventWithSale> {

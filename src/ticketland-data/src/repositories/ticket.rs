@@ -126,4 +126,13 @@ impl PostgresConnection {
       .1
     )
   }
+
+  pub async fn read_ticket_info(&mut self, ticket: String) -> Result<Vec<Ticket> >{
+    Ok(
+      tickets
+      .filter(ticket_nft.eq(ticket))
+      .load::<Ticket>(self.borrow_mut())
+      .await?
+    )
+  }
 }

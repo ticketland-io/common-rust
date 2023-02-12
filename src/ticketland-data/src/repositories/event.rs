@@ -88,15 +88,37 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_events(&mut self, user_id: String, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_account_events (
+    &mut self,
+    user_id: String,
+    start_date_from: Option<NaiveDateTime>, 
+    start_date_to: Option<NaiveDateTime>,
+    skip: i64, limit: i64
+    ) -> Result<Vec<EventWithSale>> {
+    let mut filters = vec![];
+
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= '{0}'::date", start_date_from));
+    };
+
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.start_date <= '{0}'::date", start_date_to));
+    };
+
+    let filters_query = if filters.len() > 0 {
+      filters.join(" AND ")
+    } else {
+      "true = true".to_string()
+    };
+
     let query = sql_query(format!(
       "
       SELECT *
       FROM (
         SELECT * FROM events
-        WHERE events.account_id = '{}'
-        limit {}
-        offset {}
+        WHERE events.account_id = '{0}' AND {1}
+        limit {2}
+        offset {3}
       ) events
       INNER JOIN sales
       ON sales.event_id = events.event_id
@@ -105,6 +127,7 @@ impl PostgresConnection {
       ORDER BY events.start_date
       ",
       user_id,
+      filters_query,
       limit,
       skip * limit,
     ));

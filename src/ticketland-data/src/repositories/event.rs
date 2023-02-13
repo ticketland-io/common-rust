@@ -283,4 +283,52 @@ impl PostgresConnection {
     Ok(query.load::<AttendedTicketCount>(self.borrow_mut()).await?)
   }
 
+  pub async fn read_account_ticket_events (
+    &mut self,
+    user_id: String,
+    start_date_from: Option<NaiveDateTime>, 
+    start_date_to: Option<NaiveDateTime>,
+    skip: i64, limit: i64
+    ) -> Result<Vec<EventWithSale>> {
+    let mut filters = vec![];
+
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= '{0}'", start_date_from));
+    };
+
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.end_date <= '{0}'", start_date_to));
+    };
+
+    let filters_query = if filters.len() > 0 {
+      filters.join(" AND ")
+    } else {
+      "true = true".to_string()
+    };
+
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM events
+      inner join sales on events.event_id = sales.event_id
+      inner join seat_ranges on seat_ranges.sale_account = sales.account
+      WHERE events.event_id IN (
+        SELECT event_id FROM tickets
+      	WHERE tickets.account_id = '{0}' AND {1}
+        limit {2}
+        offset {3}
+      )
+      ORDER BY events.start_date
+      ",
+      user_id,
+      filters_query,
+      limit,
+      skip * limit,
+    ));
+
+    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+
+    Ok(EventWithSale::from_tuple(records))
+  }
+
 }

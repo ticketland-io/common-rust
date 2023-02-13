@@ -98,11 +98,11 @@ impl PostgresConnection {
     let mut filters = vec![];
 
     if let Some(start_date_from) = start_date_from {
-      filters.push(format!("events.start_date >= '{0}'::date", start_date_from));
+      filters.push(format!("events.start_date >= '{0}'", start_date_from));
     };
 
     if let Some(start_date_to) = start_date_to {
-      filters.push(format!("events.start_date <= '{0}'::date", start_date_to));
+      filters.push(format!("events.end_date <= '{0}'", start_date_to));
     };
 
     let filters_query = if filters.len() > 0 {

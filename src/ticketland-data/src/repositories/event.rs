@@ -93,9 +93,15 @@ impl PostgresConnection {
     user_id: String,
     start_date_from: Option<NaiveDateTime>, 
     start_date_to: Option<NaiveDateTime>,
-    skip: i64, limit: i64
+    name: Option<String>,
+    skip: i64, 
+    limit: i64
     ) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
+
+    if let Some(name) = name {
+      filters.push(format!("events.name ILIKE '%{}%'", name));
+    };
 
     if let Some(start_date_from) = start_date_from {
       filters.push(format!("events.start_date >= '{0}'", start_date_from));
@@ -288,9 +294,15 @@ impl PostgresConnection {
     user_id: String,
     start_date_from: Option<NaiveDateTime>, 
     start_date_to: Option<NaiveDateTime>,
-    skip: i64, limit: i64
+    name: Option<String>,
+    skip: i64,
+    limit: i64
     ) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
+
+    if let Some(name) = name {
+      filters.push(format!("events.name ILIKE '%{}%'", name));
+    };
 
     if let Some(start_date_from) = start_date_from {
       filters.push(format!("events.start_date >= '{0}'", start_date_from));

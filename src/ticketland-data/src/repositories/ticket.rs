@@ -127,7 +127,7 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_ticket(&mut self, ticket_nft_acc: String) -> Result<Vec<Ticket> >{
+  pub async fn read_ticket(&mut self, ticket_nft_acc: String) -> Result<Vec<Ticket>> {
     Ok(
       tickets
       .filter(ticket_nft.eq(ticket_nft_acc))

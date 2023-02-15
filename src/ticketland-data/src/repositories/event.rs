@@ -88,15 +88,43 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_events(&mut self, user_id: String, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
+  pub async fn read_account_events (
+    &mut self,
+    user_id: String,
+    start_date_from: Option<NaiveDateTime>, 
+    start_date_to: Option<NaiveDateTime>,
+    name: Option<String>,
+    skip: i64, 
+    limit: i64
+  ) -> Result<Vec<EventWithSale>> {
+    let mut filters = vec![];
+
+    if let Some(name) = name {
+      filters.push(format!("events.name ILIKE '%{}%'", name));
+    };
+
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= '{0}'", start_date_from));
+    };
+
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.end_date <= '{0}'", start_date_to));
+    };
+
+    let filters_query = if filters.len() > 0 {
+      filters.join(" AND ")
+    } else {
+      "true = true".to_string()
+    };
+
     let query = sql_query(format!(
       "
       SELECT *
       FROM (
         SELECT * FROM events
-        WHERE events.account_id = '{}'
-        limit {}
-        offset {}
+        WHERE events.account_id = '{0}' AND {1}
+        LIMIT {2}
+        OFFSET {3}
       ) events
       INNER JOIN sales
       ON sales.event_id = events.event_id
@@ -105,6 +133,7 @@ impl PostgresConnection {
       ORDER BY events.start_date
       ",
       user_id,
+      filters_query,
       limit,
       skip * limit,
     ));
@@ -140,8 +169,8 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT * FROM events
-        limit {}
-        offset {}
+        LIMIT {}
+        OFFSET {}
       ) events
       INNER JOIN sales
       ON sales.event_id = events.event_id
@@ -207,12 +236,12 @@ impl PostgresConnection {
     };
 
     let query = sql_query(format!("
-      select events.*, sales.*, seat_ranges.*
-      from (select * from events limit {0} offset {1}) events
-      inner join sales on events.event_id = sales.event_id
-      inner join seat_ranges on seat_ranges.sale_account = sales.account
+      SELECT events.*, sales.*, seat_ranges.*
+      FROM (SELECT * FROM events limit {0} offset {1}) events
+      INNER JOIN sales ON events.event_id = sales.event_id
+      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
       WHERE {2}
-      order by events.event_id
+      ORDER BY events.event_id
     ", limit, skip * limit, filters_query)
     );
 
@@ -258,6 +287,60 @@ impl PostgresConnection {
     ));
 
     Ok(query.load::<AttendedTicketCount>(self.borrow_mut()).await?)
+  }
+
+  pub async fn read_account_ticket_events (
+    &mut self,
+    user_id: String,
+    start_date_from: Option<NaiveDateTime>, 
+    start_date_to: Option<NaiveDateTime>,
+    name: Option<String>,
+    skip: i64,
+    limit: i64
+  ) -> Result<Vec<EventWithSale>> {
+    let mut filters = vec![];
+
+    if let Some(name) = name {
+      filters.push(format!("events.name ILIKE '%{}%'", name));
+    };
+
+    if let Some(start_date_from) = start_date_from {
+      filters.push(format!("events.start_date >= '{0}'", start_date_from));
+    };
+
+    if let Some(start_date_to) = start_date_to {
+      filters.push(format!("events.end_date <= '{0}'", start_date_to));
+    };
+
+    let filters_query = if filters.len() > 0 {
+      filters.join(" AND ")
+    } else {
+      "true = true".to_string()
+    };
+
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM events
+      INNER JOIN sales ON events.event_id = sales.event_id
+      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
+      WHERE events.event_id IN (
+        SELECT event_id FROM tickets
+      	WHERE tickets.account_id = '{0}' AND {1}
+        LIMIT {2}
+        OFFSET {3}
+      )
+      ORDER BY events.start_date
+      ",
+      user_id,
+      filters_query,
+      limit,
+      skip * limit,
+    ));
+
+    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+
+    Ok(EventWithSale::from_tuple(records))
   }
 
 }

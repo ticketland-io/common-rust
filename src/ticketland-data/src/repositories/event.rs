@@ -96,7 +96,7 @@ impl PostgresConnection {
     name: Option<String>,
     skip: i64, 
     limit: i64
-    ) -> Result<Vec<EventWithSale>> {
+) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
 
     if let Some(name) = name {

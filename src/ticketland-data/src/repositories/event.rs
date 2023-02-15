@@ -236,12 +236,12 @@ impl PostgresConnection {
     };
 
     let query = sql_query(format!("
-      select events.*, sales.*, seat_ranges.*
-      from (select * from events limit {0} offset {1}) events
-      inner join sales on events.event_id = sales.event_id
-      inner join seat_ranges on seat_ranges.sale_account = sales.account
+      SELECT events.*, sales.*, seat_ranges.*
+      FROM (SELECT * FROM events limit {0} offset {1}) events
+      INNER JOIN sales ON events.event_id = sales.event_id
+      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
       WHERE {2}
-      order by events.event_id
+      ORDER BY events.event_id
     ", limit, skip * limit, filters_query)
     );
 
@@ -322,8 +322,8 @@ impl PostgresConnection {
       "
       SELECT *
       FROM events
-      inner join sales on events.event_id = sales.event_id
-      inner join seat_ranges on seat_ranges.sale_account = sales.account
+      INNER JOIN sales on events.event_id = sales.event_id
+      INNER JOIN seat_ranges on seat_ranges.sale_account = sales.account
       WHERE events.event_id IN (
         SELECT event_id FROM tickets
       	WHERE tickets.account_id = '{0}' AND {1}

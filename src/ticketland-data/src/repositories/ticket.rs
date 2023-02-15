@@ -51,8 +51,8 @@ impl PostgresConnection {
       FROM (
         SELECT * FROM tickets
         WHERE tickets.event_id = '{}'
-        limit {}
-        offset {}
+        LIMIT {}
+        OFFSET {}
       ) tickets
       INNER JOIN ticket_onchain_accounts
       ON ticket_onchain_accounts.ticket_nft = tickets.ticket_nft
@@ -76,13 +76,13 @@ impl PostgresConnection {
       FROM (
         SELECT * FROM tickets
         WHERE tickets.account_id = '{}'
-        limit {}
-        offset {}
+        LIMIT {}
+        OFFSET {}
       ) tickets
       INNER JOIN ticket_onchain_accounts
       ON ticket_onchain_accounts.ticket_nft = tickets.ticket_nft
-      INNER JOIN events on tickets.event_id = events.event_id
-      INNER JOIN sales on tickets.event_id = sales.event_id AND tickets.ticket_type_index = sales.ticket_type_index
+      INNER JOIN events ON tickets.event_id = events.event_id
+      INNER JOIN sales ON tickets.event_id = sales.event_id AND tickets.ticket_type_index = sales.ticket_type_index
       LEFT JOIN sell_listings ON (
         sell_listings.ticket_nft = tickets.ticket_nft
         AND sell_listings.is_open = TRUE AND sell_listings.draft = FALSE

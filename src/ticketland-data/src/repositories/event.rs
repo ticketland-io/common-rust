@@ -96,7 +96,7 @@ impl PostgresConnection {
     name: Option<String>,
     skip: i64, 
     limit: i64
-) -> Result<Vec<EventWithSale>> {
+  ) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
 
     if let Some(name) = name {
@@ -123,8 +123,8 @@ impl PostgresConnection {
       FROM (
         SELECT * FROM events
         WHERE events.account_id = '{0}' AND {1}
-        limit {2}
-        offset {3}
+        LIMIT {2}
+        OFFSET {3}
       ) events
       INNER JOIN sales
       ON sales.event_id = events.event_id
@@ -169,8 +169,8 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT * FROM events
-        limit {}
-        offset {}
+        LIMIT {}
+        OFFSET {}
       ) events
       INNER JOIN sales
       ON sales.event_id = events.event_id
@@ -322,13 +322,13 @@ impl PostgresConnection {
       "
       SELECT *
       FROM events
-      INNER JOIN sales on events.event_id = sales.event_id
-      INNER JOIN seat_ranges on seat_ranges.sale_account = sales.account
+      INNER JOIN sales ON events.event_id = sales.event_id
+      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
       WHERE events.event_id IN (
         SELECT event_id FROM tickets
       	WHERE tickets.account_id = '{0}' AND {1}
-        limit {2}
-        offset {3}
+        LIMIT {2}
+        OFFSET {3}
       )
       ORDER BY events.start_date
       ",

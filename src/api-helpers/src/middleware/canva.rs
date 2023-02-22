@@ -70,26 +70,33 @@ impl<S, B> CanvaMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
+  fn is_valid_timestamp(ts: &str) -> Result<(), Error> {
+    if Utc::now().timestamp() - ts.parse::<i64>().unwrap() > LENIENCY_IN_SECS {
+      return Err(ErrorUnauthorized("Unauthorized"))
+    }
+
+    Ok(())
+  }
 
   async fn create_get_message(req: &mut ServiceRequest) -> Result<(Vec<String>, String), Error> {
     let qs = QString::from(req.query_string());
     let result = qs.get("extensions")
-      .and_then(|extensions| {
-        qs.get("user").map(|user| (extensions, user))
-      })
-      .and_then(|(extensions, user)| {
-        qs.get("time").map(|time| (extensions, user, time))
-      })
-      .and_then(|(extensions, user, time)| {
-        qs.get("brand").map(|brand| (extensions, user, time, brand))
-      })
-      .and_then(|(extensions, user, time, brand)| {
-        qs.get("state").map(|state| (extensions, user, time, brand, state))
-      })
-      .and_then(|(extensions, user, time, brand, state)| {
-        qs.get("signatures").map(|signatures| (extensions, user, time, brand, state, signatures))
-      });
-
+    .and_then(|extensions| {
+      qs.get("user").map(|user| (extensions, user))
+    })
+    .and_then(|(extensions, user)| {
+      qs.get("time").map(|time| (extensions, user, time))
+    })
+    .and_then(|(extensions, user, time)| {
+      qs.get("brand").map(|brand| (extensions, user, time, brand))
+    })
+    .and_then(|(extensions, user, time, brand)| {
+      qs.get("state").map(|state| (extensions, user, time, brand, state))
+    })
+    .and_then(|(extensions, user, time, brand, state)| {
+      qs.get("signatures").map(|signatures| (extensions, user, time, brand, state, signatures))
+    });
+  
     if result.is_none() {
       return Err(ErrorUnauthorized("Unauthorized"))
     }
@@ -97,14 +104,15 @@ where
     let (
       extensions,
       user,
-      time,
+      ts,
       brand,
       state,
       signatures
     ) = result.unwrap();
 
+    Self::is_valid_timestamp(&ts)?;
     let signatures: Vec<String> = signatures.split(",").map(|s| s.to_owned()).collect();
-    let message = format!("{}:{}:{}:{}:{}:{}", VERSION, time, user, brand, extensions, state);
+    let message = format!("{}:{}:{}:{}:{}:{}", VERSION, ts, user, brand, extensions, state);
     
     Ok((signatures, message))
   }
@@ -112,15 +120,15 @@ where
   async fn create_post_message(req: &mut ServiceRequest, path: &str) -> Result<(Vec<String>, String), Error> {
     let headers = req.headers();
     let result = headers.get("X-Canva-Timestamp")
-      .and_then(|ts| {
-        ts.to_str().ok().map(|ts| ts)
-      })
-      .and_then(|ts| {
-        headers.get("X-Canva-Signatures").map(|signatures| (ts, signatures))
-      })
-      .and_then(|(ts, signatures)| {
-        signatures.to_str().ok().map(|signatures| (ts, signatures))
-      });
+    .and_then(|ts| {
+      ts.to_str().ok().map(|ts| ts)
+    })
+    .and_then(|ts| {
+      headers.get("X-Canva-Signatures").map(|signatures| (ts, signatures))
+    })
+    .and_then(|(ts, signatures)| {
+      signatures.to_str().ok().map(|signatures| (ts, signatures))
+    });
 
     if result.is_none() {
       return Err(ErrorUnauthorized("Unauthorized"))
@@ -130,9 +138,7 @@ where
     let ts = ts.to_owned();
     let signatures: Vec<String> = signatures.split(",").map(|s| s.to_owned()).collect();
 
-    if Utc::now().timestamp() - ts.parse::<i64>().unwrap() > LENIENCY_IN_SECS {
-      return Err(ErrorUnauthorized("Unauthorized"))
-    }
+    Self::is_valid_timestamp(&ts)?;
 
     let mut body = req.take_payload();
     let mut raw_body = web::BytesMut::new();

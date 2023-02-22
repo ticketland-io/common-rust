@@ -110,7 +110,8 @@ where
         
         match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
-            if !user.email_verified {
+            // If None the we simply treat it as it's verified
+            if !user.email_verified.unwrap_or(true) {
               return Err(ErrorUnauthorized("Unauthorized"))
             }
 

@@ -68,7 +68,7 @@ where
 
 impl<S, B> CanvaMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
+  S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static 
 {
   fn is_valid_timestamp(ts: &str) -> Result<(), Error> {
     if Utc::now().timestamp() - ts.parse::<i64>().unwrap() > LENIENCY_IN_SECS {
@@ -155,14 +155,13 @@ where
     payload.unread_data(raw_body.into());
     req.set_payload(payload.into());
 
-    Ok((signatures, message))
-    
+    Ok((signatures, message)) 
   }
 }
 
 impl<S, B> Service<ServiceRequest> for CanvaMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static
+  S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static
 {
   type Response = ServiceResponse<B>;
   type Error = Error;
@@ -191,9 +190,9 @@ where
           // The middleware support only GET and POST requests
           return Err(ErrorUnauthorized("Unauthorized"))
         }
-
+        
         let sig = sign_sha256(&canva_key, &message).map_err(|_| ErrorUnauthorized("Unauthorized"))?;
-      
+
         if !signatures.iter().any(|v| *v == sig) {
           return Err(ErrorUnauthorized("Unauthorized"))
         }

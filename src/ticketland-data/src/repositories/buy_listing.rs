@@ -58,7 +58,7 @@ impl PostgresConnection {
     diesel::update(buy_listings)
     .filter(sol_account.eq(account))
     .filter(account_id.eq(uid))
-    .set(is_open.eq(true))
+    .set(is_open.eq(false))
     .execute(self.borrow_mut())
     .await?;
 

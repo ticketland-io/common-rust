@@ -9,7 +9,7 @@ use crate::{
     ticket_onchain_account::TicketOnchainAccount, sale::Sale, event::Event,
   },
   schema::{
-    tickets::dsl::*,
+    tickets::dsl::{self as tickets_dsl},
     ticket_onchain_accounts::dsl::{
       self as ticket_onchain_accounts_dsl,
       ticket_onchain_accounts,
@@ -29,9 +29,9 @@ impl PostgresConnection {
       .execute(conn)
       .await?;
 
-      diesel::insert_into(tickets)
+      diesel::insert_into(tickets_dsl::tickets)
       .values(&user_ticket)
-      .on_conflict(ticket_nft)
+      .on_conflict(tickets_dsl::ticket_nft)
       .do_update()
       .set(&user_ticket)
       .execute(conn)
@@ -69,13 +69,23 @@ impl PostgresConnection {
     Ok(TicketWithMetadata::from_tuple(records))
   }
 
-  pub async fn read_user_tickets(&mut self, uid: String, skip: i64, limit: i64) -> Result<Vec<TicketWithEvent>> {
+  pub async fn read_user_tickets(
+    &mut self,
+    uid: String,
+    event_id: Option<String>,
+    skip: i64,
+    limit: i64,
+  ) -> Result<Vec<TicketWithEvent>> {
+    let event_id_filter = event_id.map_or("".to_string(), |event_id| {
+      format!("AND tickets.event_id = '{}'", event_id)
+    });
+
     let query = sql_query(format!(
       "
       SELECT DISTINCT tickets.*, events.*, sales.*, sell_listings.sol_account
       FROM (
         SELECT * FROM tickets
-        WHERE tickets.account_id = '{}'
+        WHERE tickets.account_id = '{}' {}
         LIMIT {}
         OFFSET {}
       ) tickets
@@ -88,7 +98,11 @@ impl PostgresConnection {
         AND sell_listings.is_open = TRUE AND sell_listings.draft = FALSE
       )
       ORDER BY tickets.created_at
-      ", uid, limit, skip * limit
+      ",
+      uid,
+      event_id_filter,
+      limit,
+      skip * limit,
     ));
 
     let records = query.load::<(Ticket, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
@@ -97,9 +111,9 @@ impl PostgresConnection {
   }
 
   pub async fn update_attended(&mut self, ticket_nft_acc: String) -> Result<()> {
-    diesel::update(tickets)
-    .filter(ticket_nft.eq(ticket_nft_acc))
-    .set(attended.eq(true))
+    diesel::update(tickets_dsl::tickets)
+    .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
+    .set(tickets_dsl::attended.eq(true))
     .execute(self.borrow_mut())
     .await?;
 
@@ -108,9 +122,9 @@ impl PostgresConnection {
 
   pub async fn has_attended(&mut self, ticket_nft_acc: String) -> Result<bool> {
     Ok(
-      tickets
-      .filter(ticket_nft.eq(ticket_nft_acc))
-      .select(attended)
+      tickets_dsl::tickets
+      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
+      .select(tickets_dsl::attended)
       .first(self.borrow_mut())
       .await?
     )
@@ -120,7 +134,7 @@ impl PostgresConnection {
     Ok(
       ticket_onchain_accounts
       .filter(ticket_onchain_accounts_dsl::ticket_metadata.eq(ticket_metadata))
-      .inner_join(tickets.on(ticket_nft.eq(ticket_onchain_accounts_dsl::ticket_nft)))
+      .inner_join(tickets_dsl::tickets.on(tickets_dsl::ticket_nft.eq(ticket_onchain_accounts_dsl::ticket_nft)))
       .first::<(TicketOnchainAccount, Ticket)>(self.borrow_mut())
       .await?
       .1
@@ -129,8 +143,8 @@ impl PostgresConnection {
 
   pub async fn read_ticket(&mut self, ticket_nft_acc: String) -> Result<Vec<Ticket>> {
     Ok(
-      tickets
-      .filter(ticket_nft.eq(ticket_nft_acc))
+      tickets_dsl::tickets
+      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
       .load::<Ticket>(self.borrow_mut())
       .await?
     )

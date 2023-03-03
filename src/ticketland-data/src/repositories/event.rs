@@ -11,7 +11,7 @@ use crate::{
     account::Account,
     event::{Event, EventWithSale},
     sale::Sale,
-    seat_range::SeatRange, 
+    seat_range::SeatRange,
     event::AttendedTicketCount
   },
   schema::{
@@ -88,13 +88,13 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_account_events (
+  pub async fn read_account_events(
     &mut self,
     user_id: String,
-    start_date_from: Option<NaiveDateTime>, 
+    start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
     name: Option<String>,
-    skip: i64, 
+    skip: i64,
     limit: i64
   ) -> Result<Vec<EventWithSale>> {
     let mut filters = vec![];
@@ -186,7 +186,8 @@ impl PostgresConnection {
   }
 
   pub async fn read_filtered_events(
-    &mut self, category: Option<i16>,
+    &mut self,
+    category: Option<i16>,
     price_range: Option<(u32, u32)>,
     start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
@@ -280,8 +281,8 @@ impl PostgresConnection {
       COUNT (*) AS total_count,
       COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
       FROM tickets
-      INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id 
-      WHERE tickets.event_id = '{}' 
+      INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id
+      WHERE tickets.event_id = '{}'
       GROUP BY sales.ticket_type_index;
       ", evt_id
     ));
@@ -292,7 +293,7 @@ impl PostgresConnection {
   pub async fn read_account_ticket_events (
     &mut self,
     user_id: String,
-    start_date_from: Option<NaiveDateTime>, 
+    start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
     name: Option<String>,
     skip: i64,

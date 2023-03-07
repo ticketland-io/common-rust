@@ -128,7 +128,7 @@ CREATE TABLE stripe_accounts (
 
 CREATE TABLE stripe_customers (
   customer_uid VARCHAR PRIMARY KEY,
-  stripe_uid VARCHAR NOT NULL REFERENCES stripe_accounts(stripe_uid) ON DELETE CASCADE ON UPDATE CASCADE,
+  account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 

@@ -51,6 +51,12 @@ impl Minio {
     Ok(())
   }
 
+  pub async fn upload_with_content_type(&self, path: &str, content: &[u8], content_type: &str) -> Result<()> {
+    self.bucket.put_object_with_content_type(path, content, content_type).await?;
+    
+    Ok(())
+  }
+
   pub async fn delete(&self, path: &str) -> Result<()> {
     self.bucket.delete_object(path).await?;
     

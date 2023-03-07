@@ -69,7 +69,6 @@ diesel::table! {
         end_date -> Timestamptz,
         category -> Int2,
         event_capacity -> Varchar,
-        file_type -> Nullable<Varchar>,
         arweave_tx_id -> Nullable<Varchar>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
         draft -> Bool,

@@ -34,7 +34,6 @@ CREATE TABLE events (
   end_date TIMESTAMP WITH TIME ZONE NOT NULL,
   category SMALLINT NOT NULL,
   event_capacity VARCHAR(64) NOT NULL,
-  file_type VARCHAR(10),
   arweave_tx_id VARCHAR,
   webbundle_arweave_tx_id VARCHAR,
   draft BOOL NOT NULL

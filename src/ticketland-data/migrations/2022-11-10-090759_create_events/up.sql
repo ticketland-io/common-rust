@@ -37,8 +37,16 @@ CREATE TABLE events (
   file_type VARCHAR(10),
   arweave_tx_id VARCHAR,
   webbundle_arweave_tx_id VARCHAR,
-  image_uploaded BOOL NOT NULL,
   draft BOOL NOT NULL
+);
+
+CREATE TABLE ticket_images (
+  event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  ticket_image_type SMALLINT NOT NULL,
+  content_type VARCHAR NOT NULL,
+  arweave_tx_id VARCHAR,
+  uploaded BOOL NOT NULL,
+  PRIMARY KEY(event_id, ticket_image_type)
 );
 
 CREATE TABLE sales (

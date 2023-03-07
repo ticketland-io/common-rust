@@ -6,7 +6,7 @@ use chrono::{
   NaiveDateTime,
   naive::serde::ts_milliseconds::serialize as to_milli_ts,
 };
-use crate::schema::events;
+use crate::schema::{events, ticket_images};
 use super::{sale::{Sale, SaleWithSeatRange}, seat_range::SeatRange};
 use diesel::{
   FromSqlRow,
@@ -45,8 +45,25 @@ pub struct Event {
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
   pub webbundle_arweave_tx_id: Option<String>,
-  pub image_uploaded: bool,
   pub draft: bool,
+}
+
+#[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
+#[diesel(table_name = ticket_images)]
+pub struct TicketImage {
+  pub event_id: String,
+  pub ticket_image_type: i16,
+  pub content_type: String,
+  pub arweave_tx_id: Option<String>,
+  pub uploaded: bool,
+}
+
+#[derive(Insertable, Serialize, Deserialize, Clone)]
+#[diesel(table_name = ticket_images)]
+pub struct TicketImageUpdate {
+  pub event_id: String,
+  pub ticket_image_type: i16,
+  pub arweave_tx_id: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
@@ -68,9 +85,9 @@ pub struct EventWithSale {
   pub file_type: Option<String>,
   pub arweave_tx_id: Option<String>,
   pub webbundle_arweave_tx_id: Option<String>,
-  pub image_uploaded: bool,
   pub draft: bool,
   pub sales: Vec<SaleWithSeatRange>,
+  pub ticket_images: Vec<TicketImage>,
 }
 
 #[derive(QueryableByName, Serialize)]
@@ -85,18 +102,32 @@ pub struct AttendedTicketCount {
 
 
 impl EventWithSale {
-  pub fn from_tuple(values: Vec<(Event, Sale, SeatRange)>) -> Vec<EventWithSale> {
+  pub fn from_tuple(values: Vec<(Event, TicketImage, Sale, SeatRange)>) -> Vec<EventWithSale> {
     values
     .into_iter()
-    .fold(HashMap::new(), |mut acc, (event, sale, seat_range)| {
+    .fold(HashMap::new(), |mut acc, (event, ticket_image, sale, seat_range)| {
       let key = event.event_id.clone();
       let mut sale_with_seat_range = SaleWithSeatRange::from(sale);
       sale_with_seat_range.seat_range = seat_range;
 
       if acc.contains_key(&key) {
         let mut event: EventWithSale = acc.remove(&key).unwrap();
-        // TODO: handle case where a Seat maps with multiple SeatRange.
-        event.sales.push(sale_with_seat_range);
+
+        let existing_ticket_image_type = event.ticket_images
+        .iter()
+        .position(|item| item.ticket_image_type == ticket_image.ticket_image_type);
+        if existing_ticket_image_type == None {
+          event.ticket_images.push(ticket_image);
+        }
+
+        let existing_sale_index = event.sales
+        .iter()
+        .position(|item| item.account == sale_with_seat_range.account);
+        if existing_sale_index == None {
+          // TODO: handle case where a Seat maps with multiple SeatRange.
+          event.sales.push(sale_with_seat_range);
+        }
+
         acc.insert(key, event);
       } else {
         acc.insert(key, EventWithSale {
@@ -114,10 +145,10 @@ impl EventWithSale {
           event_capacity: event.event_capacity.clone(),
           file_type: event.file_type.clone(),
           arweave_tx_id: event.arweave_tx_id.clone(),
-          image_uploaded: event.image_uploaded,
           webbundle_arweave_tx_id: event.webbundle_arweave_tx_id,
           draft: event.draft,
           sales: vec![sale_with_seat_range],
+          ticket_images: vec![ticket_image],
         });
       }
 

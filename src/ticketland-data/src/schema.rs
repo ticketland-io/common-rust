@@ -72,8 +72,17 @@ diesel::table! {
         file_type -> Nullable<Varchar>,
         arweave_tx_id -> Nullable<Varchar>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
-        image_uploaded -> Bool,
         draft -> Bool,
+    }
+}
+
+diesel::table! {
+    ticket_images (event_id, ticket_image_type) {
+        event_id -> Varchar,
+        ticket_image_type -> Int2,
+        content_type -> VarChar,
+        arweave_tx_id -> Nullable<Varchar>,
+        uploaded -> Bool,
     }
 }
 
@@ -177,6 +186,7 @@ diesel::joinable!(buy_listings -> events (event_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
 diesel::joinable!(events -> accounts (account_id));
+diesel::joinable!(ticket_images -> events (event_id));
 diesel::joinable!(metadata -> events (event_id));
 diesel::joinable!(metadata_attributes -> metadata (metadata_id));
 diesel::joinable!(sales -> events (event_id));
@@ -197,6 +207,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     canva_accounts,
     canva_designs,
     events,
+    ticket_images,
     metadata,
     metadata_attributes,
     sales,

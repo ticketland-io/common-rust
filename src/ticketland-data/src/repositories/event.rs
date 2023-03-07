@@ -1,15 +1,16 @@
 use diesel::{
   prelude::*,
+  result::Error,
   sql_query,
 };
 use chrono::NaiveDateTime;
-use diesel_async::RunQueryDsl;
+use diesel_async::{AsyncConnection, RunQueryDsl};
 use eyre::Result;
 use crate::{
   connection::PostgresConnection,
   models::{
     account::Account,
-    event::{Event, EventWithSale},
+    event::{Event, EventWithSale, TicketImage, TicketImageUpdate},
     sale::Sale,
     seat_range::SeatRange,
     event::AttendedTicketCount
@@ -19,29 +20,46 @@ use crate::{
       self as events_dsl,
       events,
     },
+    ticket_images::dsl::{
+      self as ticket_images_dsl,
+      ticket_images,
+    },
     accounts::dsl::{
       self as accounts_dsl,
       accounts,
     },
-    sales::dsl::{
-      self as sales_dsl,
-      sales,
-    },
-    seat_ranges::dsl:: {
-      self as seat_ranges_dsl,
-      seat_ranges
-    }
+    // sales::dsl::{
+    //   self as sales_dsl,
+    //   sales,
+    // },
+    // seat_ranges::dsl:: {
+    //   self as seat_ranges_dsl,
+    //   seat_ranges
+    // }
   },
 };
 
 impl PostgresConnection {
-  pub async fn upsert_event(&mut self, event: Event) -> Result<()> {
-    diesel::insert_into(events)
-    .values(&event)
-    .on_conflict(events_dsl::event_id)
-    .do_update()
-    .set(&event)
-    .execute(self.borrow_mut())
+  pub async fn upsert_event(&mut self, event: Event, ticket_images_list: Vec<TicketImage>) -> Result<()> {
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
+      diesel::insert_into(events)
+      .values(&event)
+      .on_conflict(events_dsl::event_id)
+      .do_update()
+      .set(&event)
+      .execute(conn)
+      .await?;
+
+      diesel::insert_into(ticket_images)
+      .values(&ticket_images_list)
+      .on_conflict(ticket_images_dsl::event_id)
+      .do_nothing()
+      .execute(conn)
+      .await?;
+
+      Ok(())
+    }))
     .await?;
 
     Ok(())
@@ -51,16 +69,6 @@ impl PostgresConnection {
     diesel::update(events)
     .filter(events_dsl::event_id.eq(id))
     .set(events_dsl::arweave_tx_id.eq(arweave_tx))
-    .execute(self.borrow_mut())
-    .await?;
-
-    Ok(())
-  }
-
-  pub async fn update_image_uploaded(&mut self, id: String) -> Result<()> {
-    diesel::update(events)
-    .filter(events_dsl::event_id.eq(id))
-    .set(events_dsl::image_uploaded.eq(true))
     .execute(self.borrow_mut())
     .await?;
 
@@ -126,6 +134,8 @@ impl PostgresConnection {
         LIMIT {2}
         OFFSET {3}
       ) events
+      INNER JOIN ticket_images
+      ON ticket_images.event_id = events.event_id
       INNER JOIN sales
       ON sales.event_id = events.event_id
       INNER JOIN seat_ranges
@@ -138,7 +148,7 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
   }
@@ -172,6 +182,8 @@ impl PostgresConnection {
         LIMIT {}
         OFFSET {}
       ) events
+      INNER JOIN ticket_images
+      ON ticket_images.event_id = events.event_id
       INNER JOIN sales
       ON sales.event_id = events.event_id
       INNER JOIN seat_ranges
@@ -180,7 +192,7 @@ impl PostgresConnection {
       ", limit, skip * limit
     ));
 
-    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
   }
@@ -239,6 +251,7 @@ impl PostgresConnection {
     let query = sql_query(format!("
       SELECT events.*, sales.*, seat_ranges.*
       FROM (SELECT * FROM events limit {0} offset {1}) events
+      INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
       INNER JOIN sales ON events.event_id = sales.event_id
       INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
       WHERE {2}
@@ -247,7 +260,7 @@ impl PostgresConnection {
     );
 
     let records = query
-    .load::<(Event, Sale, SeatRange)>(self.borrow_mut())
+    .load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut())
     .await?;
 
     Ok(EventWithSale::from_tuple(records))
@@ -264,12 +277,31 @@ impl PostgresConnection {
   }
 
   pub async fn read_event_with_sales(&mut self, evt_id: String) -> Result<Vec<EventWithSale>> {
-    let records =  events
-    .filter(events_dsl::event_id.eq(evt_id))
-    .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
-    .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
-    .load::<(Event, Sale, SeatRange)>(self.borrow_mut())
-    .await?;
+let query = sql_query(format!(
+      "
+      SELECT *
+      FROM (
+        SELECT * FROM events
+        WHERE events.event_id = '{}'
+      ) events
+      INNER JOIN ticket_images
+      ON ticket_images.event_id = events.event_id
+      INNER JOIN sales
+      ON sales.event_id = events.event_id
+      INNER JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
+      ", evt_id
+    ));
+
+    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
+
+    // let records =  events
+    // .filter(events_dsl::event_id.eq(evt_id))
+    // .inner_join(ticket_images.on(ticket_images_dsl::event_id.eq(events_dsl::event_id)))
+    // .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
+    // .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
+    // .load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut())
+    // .await?;
 
     Ok(EventWithSale::from_tuple(records))
   }
@@ -323,6 +355,7 @@ impl PostgresConnection {
       "
       SELECT *
       FROM events
+      INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
       INNER JOIN sales ON events.event_id = sales.event_id
       INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
       WHERE events.event_id IN (
@@ -339,9 +372,35 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Event, Sale, SeatRange)>(self.borrow_mut()).await?;
+    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
 
     Ok(EventWithSale::from_tuple(records))
+  }
+
+  pub async fn update_ticket_images_uploaded(
+    &mut self,
+    ticket_image_updates: Vec<TicketImageUpdate>,
+  ) -> Result<()> {
+    let update_queries = ticket_image_updates
+    .iter()
+    .map(|ticket_image_update| {
+      format!(
+        "
+        UPDATE ticket_images
+        SET uploaded = true, arweave_tx_id = '{}'
+        WHERE event_id = '{}' AND ticket_image_type = {};
+        ",
+        ticket_image_update.arweave_tx_id,
+        ticket_image_update.event_id,
+        ticket_image_update.ticket_image_type,
+      )
+    })
+    .collect::<Vec<String>>();
+
+    let query = sql_query(update_queries.join(""));
+    query.execute(self.borrow_mut()).await?;
+
+    Ok(())
   }
 
 }

@@ -7,6 +7,12 @@ use serde::{Serialize, Deserialize};
 use serde_aux::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TicketImage {
+  pub ticket_image_type: i16,
+  pub path: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Attribute {
   pub trait_type: String,
   #[serde(deserialize_with = "deserialize_string_from_number")]
@@ -17,7 +23,7 @@ pub struct Attribute {
 pub struct Metadata {
   pub name: String,
   pub description: String,
-  pub image: String,
+  pub images: Vec<TicketImage>,
   pub attributes: Vec<Attribute>,
 }
 
@@ -31,8 +37,12 @@ impl Metadata {
 
     map.insert("name".to_string(), self.name.clone());
     map.insert("description".to_string(), self.description.clone());
-    map.insert("image".to_string(), self.image.clone());
-    
+    // map.insert("image".to_string(), self.image.clone());
+
+    for image in &self.images {
+      map.insert(image.ticket_image_type.to_string(), image.path.clone());
+    }
+
     for attr in &self.attributes {
       map.insert(attr.trait_type.clone(), attr.value.clone());
     }

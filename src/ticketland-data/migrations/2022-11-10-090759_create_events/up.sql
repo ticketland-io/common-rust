@@ -61,7 +61,7 @@ CREATE TABLE sales (
 );
 
 CREATE TABLE ticket_onchain_accounts (
-  ticket_nft VARCHAR PRIMARY KEY,
+  ticket_nft VARCHAR PRIMARY KEY REFERENCES tickets(ticket_nft) ON DELETE CASCADE ON UPDATE CASCADE,
   ticket_metadata VARCHAR UNIQUE NOT NULL
 );
 

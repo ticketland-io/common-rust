@@ -111,7 +111,8 @@ where
         match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
             // If None the we simply treat it as it's verified
-            if !user.email_verified.unwrap_or(true) {
+            let is_google_provider = user.provider_user_info.iter().any(|provider| provider.provider_id == "google.com");
+            if is_google_provider && !user.email_verified.unwrap_or(true) {
               return Err(ErrorUnauthorized("Unauthorized"))
             }
 

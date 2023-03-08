@@ -249,7 +249,7 @@ impl PostgresConnection {
     };
 
     let query = sql_query(format!("
-      SELECT events.*, sales.*, seat_ranges.*
+      SELECT events.*, sales.*, seat_ranges.*, ticket_images.*
       FROM (SELECT * FROM events limit {0} offset {1}) events
       INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
       INNER JOIN sales ON events.event_id = sales.event_id
@@ -277,7 +277,7 @@ impl PostgresConnection {
   }
 
   pub async fn read_event_with_sales(&mut self, evt_id: String) -> Result<Vec<EventWithSale>> {
-let query = sql_query(format!(
+    let query = sql_query(format!(
       "
       SELECT *
       FROM (
@@ -294,14 +294,6 @@ let query = sql_query(format!(
     ));
 
     let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
-
-    // let records =  events
-    // .filter(events_dsl::event_id.eq(evt_id))
-    // .inner_join(ticket_images.on(ticket_images_dsl::event_id.eq(events_dsl::event_id)))
-    // .inner_join(sales.on(sales_dsl::event_id.eq(events_dsl::event_id)))
-    // .inner_join(seat_ranges.on(seat_ranges_dsl::sale_account.eq(sales_dsl::account)))
-    // .load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut())
-    // .await?;
 
     Ok(EventWithSale::from_tuple(records))
   }

@@ -110,10 +110,13 @@ where
         
         match firebase_auth.get_user_info(&access_token).await {
           Ok(user) => {
+            // TODO: Enable this when we allow for a way for users with
+            // facebook and twitter providers to verify their emails
+
             // If None the we simply treat it as it's verified
-            if !user.email_verified.unwrap_or(true) {
-              return Err(ErrorUnauthorized("Unauthorized"))
-            }
+            // if !user.email_verified.unwrap_or(true) {
+            //   return Err(ErrorUnauthorized("Unauthorized"))
+            // }
 
             // make the user available to the downstream handlers
             req.extensions_mut().insert(AuthData {user});

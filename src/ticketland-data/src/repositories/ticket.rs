@@ -82,7 +82,7 @@ impl PostgresConnection {
 
     let query = sql_query(format!(
       "
-      SELECT DISTINCT tickets.*, events.*, sales.*, sell_listings.sol_account
+      SELECT DISTINCT tickets.*, events.*, sales.*, sell_listings.sol_account, ticket_onchain_accounts.ticket_metadata
       FROM (
         SELECT * FROM tickets
         WHERE tickets.account_id = '{}' {}
@@ -105,7 +105,7 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Ticket, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
+    let records = query.load::<(Ticket, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
 
     Ok(TicketWithEvent::from_tuple(records))
   }

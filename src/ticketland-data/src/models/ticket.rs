@@ -67,6 +67,7 @@ impl TicketWithMetadata {
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct TicketWithEvent {
   pub ticket_nft: String,
+  pub ticket_metadata: String,
   pub event_id: String,
   pub account_id: String,
   pub created_at: Option<NaiveDateTime>,
@@ -81,12 +82,13 @@ pub struct TicketWithEvent {
 }
 
 impl TicketWithEvent {
-  pub fn from_tuple(values: Vec<(Ticket, Event, Sale, Option<PartialSellListing>)>) -> Vec<Self> {
+  pub fn from_tuple(values: Vec<(Ticket, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>) -> Vec<Self> {
     values
     .into_iter()
-    .map(|(ticket, event, sale, sell_listing)| {
+    .map(|(ticket, ticket_onchain_account, event, sale, sell_listing)| {
       TicketWithEvent {
         ticket_nft: ticket.ticket_nft,
+        ticket_metadata: ticket_onchain_account.ticket_metadata,
         event_id: ticket.event_id,
         account_id: ticket.account_id,
         created_at: ticket.created_at,

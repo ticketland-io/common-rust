@@ -28,14 +28,6 @@ use crate::{
       self as accounts_dsl,
       accounts,
     },
-    // sales::dsl::{
-    //   self as sales_dsl,
-    //   sales,
-    // },
-    // seat_ranges::dsl:: {
-    //   self as seat_ranges_dsl,
-    //   seat_ranges
-    // }
   },
 };
 
@@ -373,24 +365,19 @@ impl PostgresConnection {
     &mut self,
     ticket_image_updates: Vec<TicketImageUpdate>,
   ) -> Result<()> {
-    let update_queries = ticket_image_updates
-    .iter()
-    .map(|ticket_image_update| {
-      format!(
-        "
-        UPDATE ticket_images
-        SET uploaded = true, arweave_tx_id = '{}'
-        WHERE event_id = '{}' AND ticket_image_type = {};
-        ",
-        ticket_image_update.arweave_tx_id,
-        ticket_image_update.event_id,
-        ticket_image_update.ticket_image_type,
-      )
-    })
-    .collect::<Vec<String>>();
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
+      for ticket_image_update in ticket_image_updates {
+        diesel::update(ticket_images)
+        .filter(ticket_images_dsl::event_id.eq(ticket_image_update.event_id.clone()))
+        .set((ticket_images_dsl::uploaded.eq(true), ticket_images_dsl::arweave_tx_id.eq(ticket_image_update.arweave_tx_id.clone())))
+        .execute(conn)
+        .await?;
+      };
 
-    let query = sql_query(update_queries.join(""));
-    query.execute(self.borrow_mut()).await?;
+      Ok(())
+    }))
+    .await?;
 
     Ok(())
   }

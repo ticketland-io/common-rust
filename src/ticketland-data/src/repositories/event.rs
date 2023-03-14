@@ -299,14 +299,14 @@ impl PostgresConnection {
       FROM tickets
       INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id
       WHERE tickets.event_id = '{}'
-      GROUP BY sales.ticket_type_index;
+      GROUP BY sales.ticket_type_index
       ", evt_id
     ));
 
     Ok(query.load::<AttendedTicketCount>(self.borrow_mut()).await?)
   }
 
-  pub async fn read_account_ticket_events (
+  pub async fn read_account_ticket_events(
     &mut self,
     user_id: String,
     start_date_from: Option<NaiveDateTime>,

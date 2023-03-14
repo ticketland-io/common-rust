@@ -7,53 +7,63 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn read_closed_listings_count(&mut self, interval: u64, start_ts: u64) -> Result<Vec<ClosedListingsData>> {
+  pub async fn read_closed_listings_count(
+    &mut self,
+    event_id: String,
+    interval: u64,
+    start_ts: u64
+  ) -> Result<Vec<ClosedListingsData>> {
     let query = sql_query(format!(
       "
       SELECT date_bin(
-        INTERVAL '{0} seconds',
+        INTERVAL '{1} seconds',
         closed_at,
-        TO_TIMESTAMP({1})::date
+        TO_TIMESTAMP({2})::date
       ) as timestamp, COUNT(t)
       FROM
       (
         SELECT closed_at, is_open
         FROM buy_listings
-        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
+        WHERE event_id = '{0}' AND is_open = false AND EXTRACT(epoch from closed_at) > {2}
         UNION ALL
         SELECT closed_at, is_open
         FROM sell_listings
-        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
+        WHERE event_id = '{0}' AND is_open = false AND EXTRACT(epoch from closed_at) > {2}
       ) t
       GROUP BY 1
       ORDER BY timestamp desc;
-      ", interval, start_ts
+      ", event_id, interval, start_ts
     ));
 
     Ok(query.load::<ClosedListingsData>(self.borrow_mut()).await?)
   }
 
-  pub async fn read_average_listings_price(&mut self, interval: u64, start_ts: u64) -> Result<Vec<AverageListingsPrice>> {
+  pub async fn read_average_listings_price(
+    &mut self,
+    event_id: String,
+    interval: u64,
+    start_ts: u64
+  ) -> Result<Vec<AverageListingsPrice>> {
     let query = sql_query(format!(
       "
       SELECT date_bin(
-        INTERVAL '{0} seconds',
+        INTERVAL '{1} seconds',
         closed_at,
-        TO_TIMESTAMP({1})::date
+        TO_TIMESTAMP({2})::date
       ) as timestamp, AVG(price), COUNT(t)
       FROM
       (
         SELECT bid_price as price, closed_at
         FROM buy_listings
-        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
+        WHERE event_id = '{0}' AND is_open = false AND EXTRACT(epoch from closed_at) > {2}
         UNION ALL
         SELECT ask_price as price, closed_at
         FROM sell_listings
-        WHERE is_open = false AND EXTRACT(epoch from closed_at) > {1}
+        WHERE event_id = '{0}' AND is_open = false AND EXTRACT(epoch from closed_at) > {2}
       ) t
       GROUP BY 1
       ORDER BY timestamp desc;
-      ", interval, start_ts
+      ", event_id, interval, start_ts
     ));
 
     Ok(query.load::<AverageListingsPrice>(self.borrow_mut()).await?)

@@ -338,16 +338,15 @@ impl PostgresConnection {
     let query = sql_query(format!(
       "
       SELECT *
-      FROM events
+      FROM (
+        SELECT events.* FROM events
+        WHERE EXISTS (SELECT * FROM tickets WHERE events.event_id = tickets.event_id AND tickets.account_id = '{}' AND {})
+        LIMIT {}
+        OFFSET {}
+      ) events
       INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
       INNER JOIN sales ON events.event_id = sales.event_id
       INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
-      WHERE events.event_id IN (
-        SELECT event_id FROM tickets
-      	WHERE tickets.account_id = '{0}' AND {1}
-        LIMIT {2}
-        OFFSET {3}
-      )
       ORDER BY events.start_date
       ",
       user_id,

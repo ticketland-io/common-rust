@@ -299,14 +299,14 @@ impl PostgresConnection {
       FROM tickets
       INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id
       WHERE tickets.event_id = '{}'
-      GROUP BY sales.ticket_type_index;
+      GROUP BY sales.ticket_type_index
       ", evt_id
     ));
 
     Ok(query.load::<AttendedTicketCount>(self.borrow_mut()).await?)
   }
 
-  pub async fn read_account_ticket_events (
+  pub async fn read_account_ticket_events(
     &mut self,
     user_id: String,
     start_date_from: Option<NaiveDateTime>,
@@ -338,16 +338,15 @@ impl PostgresConnection {
     let query = sql_query(format!(
       "
       SELECT *
-      FROM events
+      FROM (
+        SELECT events.* FROM events
+        WHERE EXISTS (SELECT * FROM tickets WHERE events.event_id = tickets.event_id AND tickets.account_id = '{}' AND {})
+        LIMIT {}
+        OFFSET {}
+      ) events
       INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
       INNER JOIN sales ON events.event_id = sales.event_id
       INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
-      WHERE events.event_id IN (
-        SELECT event_id FROM tickets
-      	WHERE tickets.account_id = '{0}' AND {1}
-        LIMIT {2}
-        OFFSET {3}
-      )
       ORDER BY events.start_date
       ",
       user_id,

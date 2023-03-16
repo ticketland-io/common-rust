@@ -210,11 +210,11 @@ impl PostgresConnection {
     };
 
     if let Some(start_date_from) = start_date_from {
-      filters.push(format!("events.start_date >= '{0}'::date", start_date_from));
+      filters.push(format!("events.start_date >= '{0}'", start_date_from));
     };
 
     if let Some(start_date_to) = start_date_to {
-      filters.push(format!("events.start_date <= '{0}'::date", start_date_to));
+      filters.push(format!("events.start_date <= '{0}'", start_date_to));
     };
 
     if let Some(price_range) = price_range {
@@ -228,8 +228,8 @@ impl PostgresConnection {
         ", price_range.0, price_range.1));
       } else {
         filters.push(format!("
-          (sale_type->'FixedPrice'->'price')::numeric <= {0}
-          OR (sale_type->'Free') = '{{}}'
+          ((sale_type->'FixedPrice'->'price')::numeric <= {0}
+          OR (sale_type->'Free') = '{{}}')
         ", price_range.1));
       }
     };
@@ -241,14 +241,21 @@ impl PostgresConnection {
     };
 
     let query = sql_query(format!("
-      SELECT events.*, sales.*, seat_ranges.*, ticket_images.*
-      FROM (SELECT * FROM events limit {0} offset {1}) events
-      INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
-      INNER JOIN sales ON events.event_id = sales.event_id
-      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
-      WHERE {2}
-      ORDER BY events.event_id
-    ", limit, skip * limit, filters_query)
+      WITH filtered_events AS (
+        SELECT *
+        FROM events
+        INNER JOIN ticket_images using(event_id)
+        INNER JOIN sales using(event_id)
+        INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
+        WHERE {}
+      )
+      SELECT * FROM filtered_events
+      INNER JOIN (
+        SELECT DISTINCT event_id FROM filtered_events
+        ORDER BY event_id
+        LIMIT {} OFFSET {}
+      ) limited_events ON limited_events.event_id = filtered_events.event_id
+    ", filters_query, limit, skip * limit)
     );
 
     let records = query

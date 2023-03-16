@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
 use diesel::{prelude::*, sql_types};
@@ -103,32 +102,34 @@ impl EventWithSale {
   pub fn from_tuple(values: Vec<(Event, TicketImage, Sale, SeatRange)>) -> Vec<EventWithSale> {
     values
     .into_iter()
-    .fold(HashMap::new(), |mut acc, (event, ticket_image, sale, seat_range)| {
+    .fold(Vec::new(), |mut acc: Vec<EventWithSale>, (event, ticket_image, sale, seat_range)| {
       let key = event.event_id.clone();
+      // TODO: handle case where a Seat maps with multiple SeatRange.
       let mut sale_with_seat_range = SaleWithSeatRange::from(sale);
       sale_with_seat_range.seat_range = seat_range;
 
-      if acc.contains_key(&key) {
-        let mut event: EventWithSale = acc.remove(&key).unwrap();
+      let existing_index = acc
+      .iter()
+      .position(|item| item.event_id == key);
 
-        let existing_ticket_image_type = event.ticket_images
+
+      if let Some(index) = existing_index {
+        let existing_ticket_image_type = acc[index].ticket_images
         .iter()
         .position(|item| item.ticket_image_type == ticket_image.ticket_image_type);
+
         if existing_ticket_image_type == None {
-          event.ticket_images.push(ticket_image);
+          acc[index].ticket_images.push(ticket_image);
         }
 
-        let existing_sale_index = event.sales
+        let existing_sale_index = acc[index].sales
         .iter()
         .position(|item| item.account == sale_with_seat_range.account);
         if existing_sale_index == None {
-          // TODO: handle case where a Seat maps with multiple SeatRange.
-          event.sales.push(sale_with_seat_range);
+          acc[index].sales.push(sale_with_seat_range);
         }
-
-        acc.insert(key, event);
       } else {
-        acc.insert(key, EventWithSale {
+        acc.push(EventWithSale {
           event_id: event.event_id.clone(),
           created_at: event.created_at,
           name: event.name.clone(),
@@ -151,7 +152,5 @@ impl EventWithSale {
 
       acc
     })
-    .into_values()
-    .collect()
   }
 }

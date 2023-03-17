@@ -268,7 +268,7 @@ impl PostgresConnection {
   pub async fn update_event_draft(&mut self, evt_id: String) -> Result<()> {
     diesel::update(events)
     .filter(events_dsl::event_id.eq(evt_id))
-    .set(events_dsl::draft.eq(true))
+    .set(events_dsl::draft.eq(false))
     .execute(self.borrow_mut())
     .await?;
 

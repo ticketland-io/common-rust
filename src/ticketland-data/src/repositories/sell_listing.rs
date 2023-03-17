@@ -96,7 +96,7 @@ impl PostgresConnection {
     diesel::update(sell_listings)
     .filter(sol_account.eq(listing_account))
     .filter(account_id.eq(account))
-    .set(draft.eq(true))
+    .set(draft.eq(false))
     .execute(self.borrow_mut())
     .await?;
 

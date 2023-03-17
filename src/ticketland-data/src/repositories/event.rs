@@ -122,7 +122,7 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT * FROM events
-        WHERE events.account_id = '{0}' AND {1}
+        WHERE events.account_id = '{0}' AND events.draft = false AND {1}
         LIMIT {2}
         OFFSET {3}
       ) events
@@ -170,7 +170,7 @@ impl PostgresConnection {
       "
       SELECT *
       FROM (
-        SELECT * FROM events
+        SELECT * FROM (SELECT * FROM events WHERE events.draft = false) events
         LIMIT {}
         OFFSET {}
       ) events
@@ -243,7 +243,7 @@ impl PostgresConnection {
     let query = sql_query(format!("
       WITH filtered_events AS (
         SELECT *
-        FROM events
+        FROM (SELECT * FROM events WHERE events.draft = false) events
         INNER JOIN ticket_images using(event_id)
         INNER JOIN sales using(event_id)
         INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
@@ -281,7 +281,7 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT * FROM events
-        WHERE events.event_id = '{}'
+        WHERE events.event_id = '{}' AND events.draft = false
       ) events
       INNER JOIN ticket_images
       ON ticket_images.event_id = events.event_id
@@ -347,7 +347,8 @@ impl PostgresConnection {
       SELECT *
       FROM (
         SELECT events.* FROM events
-        WHERE EXISTS (SELECT * FROM tickets WHERE events.event_id = tickets.event_id AND tickets.account_id = '{}' AND {})
+        WHERE events.draft = false AND
+              EXISTS (SELECT * FROM tickets WHERE events.event_id = tickets.event_id AND tickets.account_id = '{}' AND {})
         LIMIT {}
         OFFSET {}
       ) events

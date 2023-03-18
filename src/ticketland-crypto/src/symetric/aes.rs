@@ -29,8 +29,8 @@ pub fn encrypt(key: &[u8], nonce: &[u8], plaintext: &[u8]) -> Result<String> {
 pub fn decrypt(key: &[u8], nonce: &[u8], ciphertext: &[u8]) -> Result<String> {
   let cipher = Aes256GcmSiv::new(key.into());
   let nonce = Nonce::from_slice(nonce);
-  let plaintext = cipher.decrypt(nonce, ciphertext).map_err(|error| ErrReport::msg(error.to_string()))?;
-  let plaintext = hex::decode(plaintext)?;
+  let ciphertext = hex::decode(ciphertext)?;
+  let plaintext = cipher.decrypt(nonce, ciphertext.as_slice()).map_err(|error| ErrReport::msg(error.to_string()))?;
 
   Ok(String::from_utf8(plaintext)?)
 }

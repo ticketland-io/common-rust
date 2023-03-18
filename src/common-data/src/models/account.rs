@@ -10,7 +10,7 @@ use crate::types::Neo4jResult;
 #[derive(Serialize, Deserialize, Default)]
 pub struct Account {
   pub uid: String,
-  pub mnemonic: String,
+  pub dappShare: String,
   pub pubkey: String,
   pub email: Option<String>,
   pub name: Option<String>,
@@ -39,8 +39,8 @@ impl TryFrom<Neo4jResult> for Account {
             "uid" => {
               account.uid = String::try_from(v).expect("cannot convert uid");
             },
-            "mnemonic" => {
-              account.mnemonic = String::try_from(v).expect("cannot convert mnemonic");
+            "dappShare" => {
+              account.dappShare = String::try_from(v).expect("cannot convert dappShare");
             },
             "pubkey" => {
               account.pubkey = String::try_from(v).expect("cannot convert pubkey");

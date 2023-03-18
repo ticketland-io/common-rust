@@ -4,7 +4,7 @@ diesel::table! {
     accounts (uid) {
         uid -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        mnemonic -> Varchar,
+        dappshare -> Varchar,
         pubkey -> Varchar,
         name -> Nullable<Varchar>,
         email -> Nullable<Varchar>,
@@ -72,16 +72,6 @@ diesel::table! {
         arweave_tx_id -> Nullable<Varchar>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
         draft -> Bool,
-    }
-}
-
-diesel::table! {
-    ticket_images (event_id, ticket_image_type) {
-        event_id -> Varchar,
-        ticket_image_type -> Int2,
-        content_type -> VarChar,
-        arweave_tx_id -> Nullable<Varchar>,
-        uploaded -> Bool,
     }
 }
 
@@ -159,6 +149,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    ticket_images (event_id, ticket_image_type) {
+        event_id -> Varchar,
+        ticket_image_type -> Int2,
+        content_type -> Varchar,
+        arweave_tx_id -> Nullable<Varchar>,
+        uploaded -> Bool,
+    }
+}
+
+diesel::table! {
     ticket_onchain_accounts (ticket_nft) {
         ticket_nft -> Varchar,
         ticket_metadata -> Varchar,
@@ -185,7 +185,6 @@ diesel::joinable!(buy_listings -> events (event_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
 diesel::joinable!(events -> accounts (account_id));
-diesel::joinable!(ticket_images -> events (event_id));
 diesel::joinable!(metadata -> events (event_id));
 diesel::joinable!(metadata_attributes -> metadata (metadata_id));
 diesel::joinable!(sales -> events (event_id));
@@ -195,6 +194,7 @@ diesel::joinable!(sell_listings -> events (event_id));
 diesel::joinable!(sell_listings -> ticket_onchain_accounts (ticket_nft));
 diesel::joinable!(stripe_accounts -> accounts (account_id));
 diesel::joinable!(stripe_customers -> accounts (account_id));
+diesel::joinable!(ticket_images -> events (event_id));
 diesel::joinable!(tickets -> accounts (account_id));
 diesel::joinable!(tickets -> events (event_id));
 diesel::joinable!(tickets -> ticket_onchain_accounts (ticket_nft));
@@ -206,7 +206,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     canva_accounts,
     canva_designs,
     events,
-    ticket_images,
     metadata,
     metadata_attributes,
     sales,
@@ -214,6 +213,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     sell_listings,
     stripe_accounts,
     stripe_customers,
+    ticket_images,
     ticket_onchain_accounts,
     tickets,
 );

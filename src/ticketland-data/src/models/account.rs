@@ -8,7 +8,7 @@ use crate::schema::accounts;
 pub struct Account {
   pub uid: String,
   pub created_at: Option<NaiveDateTime>,
-  pub dappShare: String,
+  pub dapp_share: String,
   pub pubkey: String,
   pub name: Option<String>,
   pub email: Option<String>,

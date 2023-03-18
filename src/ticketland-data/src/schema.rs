@@ -4,7 +4,7 @@ diesel::table! {
     accounts (uid) {
         uid -> Varchar,
         created_at -> Nullable<Timestamptz>,
-        dappshare -> Varchar,
+        dapp_share -> Varchar,
         pubkey -> Varchar,
         name -> Nullable<Varchar>,
         email -> Nullable<Varchar>,

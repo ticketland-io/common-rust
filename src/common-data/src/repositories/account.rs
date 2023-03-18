@@ -22,7 +22,7 @@ pub fn upsert_account(
   email: String,
   name: String,
   photo_url: String,
-  dappShare: String,
+  dapp_share: String,
   pubkey: String
 ) -> (&'static str, Option<Params>) {
   let query = r#"
@@ -31,7 +31,7 @@ pub fn upsert_account(
       email:$email,
       name:$name,
       photo_url:$photo_url,
-      dappShare:$dappShare,
+      dapp_share:$dapp_share,
       pubkey:$pubkey
     }
     RETURN acc{.*}
@@ -42,7 +42,7 @@ pub fn upsert_account(
     ("email", Value::String(email)),
     ("name", Value::String(name)),
     ("photo_url", Value::String(photo_url)),
-    ("dappShare", Value::String(dappShare)),
+    ("dapp_share", Value::String(dapp_share)),
     ("pubkey", Value::String(pubkey)),
   ]);
 

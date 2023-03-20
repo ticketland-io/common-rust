@@ -275,13 +275,13 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_event_with_sales(&mut self, evt_id: String) -> Result<Vec<EventWithSale>> {
+  pub async fn read_event_with_sales(&mut self, evt_id: String, draft: bool) -> Result<Vec<EventWithSale>> {
     let query = sql_query(format!(
       "
       SELECT *
       FROM (
         SELECT * FROM events
-        WHERE events.event_id = '{}' AND events.draft = false
+        WHERE events.event_id = '{}' AND events.draft = {}
       ) events
       INNER JOIN ticket_images
       ON ticket_images.event_id = events.event_id
@@ -289,7 +289,7 @@ impl PostgresConnection {
       ON sales.event_id = events.event_id
       INNER JOIN seat_ranges
       ON seat_ranges.sale_account = sales.account
-      ", evt_id
+      ", evt_id, draft
     ));
 
     let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;

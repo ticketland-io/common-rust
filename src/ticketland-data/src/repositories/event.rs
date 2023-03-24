@@ -301,12 +301,12 @@ impl PostgresConnection {
     let query = sql_query(format!(
       "
       SELECT sales.ticket_type_index,
-      COUNT (*) AS total_count,
+      COUNT(tickets.ticket_type_index) AS total_count,
       COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
-      FROM tickets
-      INNER JOIN sales ON tickets.ticket_type_index = sales.ticket_type_index AND tickets.event_id=sales.event_id
-      WHERE tickets.event_id = '{}'
-      GROUP BY sales.ticket_type_index
+      FROM sales 
+      LEFT OUTER JOIN tickets ON sales.ticket_type_index = tickets.ticket_type_index AND sales.event_id = tickets.event_id
+      WHERE sales.event_id = '{}'
+      GROUP BY sales.ticket_type_index;
       ", evt_id
     ));
 

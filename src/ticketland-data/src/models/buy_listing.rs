@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use crate::schema::buy_listings;
 
-#[derive(Queryable, AsChangeset, Serialize, Deserialize, Clone, Default)]
+#[derive(Queryable, QueryableByName, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = buy_listings)]
 pub struct BuyListing {
   pub sol_account: String,

@@ -2,6 +2,7 @@ use diesel::{
   prelude::*,
   result::Error,
   dsl,
+  sql_query,
 };
 use eyre::Result;
 use diesel_async::{AsyncConnection, RunQueryDsl};
@@ -52,6 +53,35 @@ impl PostgresConnection {
       .load(self.borrow_mut())
       .await?
     )
+  }
+
+  pub async fn read_sell_listings_for_account(
+    &mut self,
+    evt_id: Option<String>,
+    uid: String,
+    skip: i64,
+    limit: i64
+  ) -> Result<Vec<SellListing>> {
+    let evt_id_filter = if let Some(evt_id) = evt_id {
+      format!("AND event_id = '{}'", evt_id)
+    } else {
+      "".to_string()
+    };
+
+    let query = sql_query(format!(
+      "
+      SELECT * FROM sell_listings
+      WHERE account_id = '{}' AND is_open = true {}
+      ORDER BY created_at DESC
+      LIMIT {} OFFSET {}
+      ",
+      uid,
+      evt_id_filter,
+      limit,
+      skip * limit
+    ));
+
+    Ok(query.load::<SellListing>(self.borrow_mut()).await?)
   }
 
   pub async fn cancel_sell_listing(&mut self, uid: String, account: String) -> Result<()> {

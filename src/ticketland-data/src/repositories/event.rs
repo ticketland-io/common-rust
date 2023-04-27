@@ -108,7 +108,7 @@ impl PostgresConnection {
     };
 
     if let Some(start_date_to) = start_date_to {
-      filters.push(format!("events.end_date <= '{0}'", start_date_to));
+      filters.push(format!("events.start_date <= '{0}'", start_date_to));
     };
 
     let filters_query = if filters.len() > 0 {
@@ -333,7 +333,7 @@ impl PostgresConnection {
     };
 
     if let Some(start_date_to) = start_date_to {
-      filters.push(format!("events.end_date <= '{0}'", start_date_to));
+      filters.push(format!("events.start_date <= '{0}'", start_date_to));
     };
 
     let filters_query = if filters.len() > 0 {

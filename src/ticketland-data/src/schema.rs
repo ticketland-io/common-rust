@@ -72,6 +72,8 @@ diesel::table! {
         arweave_tx_id -> Nullable<Varchar>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
         draft -> Bool,
+        resale_cap -> Int2,
+        organizer_resale_fee -> Int2,
     }
 }
 

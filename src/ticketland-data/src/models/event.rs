@@ -44,6 +44,8 @@ pub struct Event {
   pub arweave_tx_id: Option<String>,
   pub webbundle_arweave_tx_id: Option<String>,
   pub draft: bool,
+  pub resale_cap: i16,
+  pub organizer_resale_fee: i16,
 }
 
 #[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
@@ -83,6 +85,8 @@ pub struct EventWithSale {
   pub arweave_tx_id: Option<String>,
   pub webbundle_arweave_tx_id: Option<String>,
   pub draft: bool,
+  pub resale_cap: i16,
+  pub organizer_resale_fee: i16,
   pub sales: Vec<SaleWithSeatRange>,
   pub ticket_images: Vec<TicketImage>,
 }
@@ -100,13 +104,30 @@ pub struct AttendedTicketCount {
 
 impl EventWithSale {
   pub fn from_tuple(values: Vec<(Event, TicketImage, Sale, SeatRange)>) -> Vec<EventWithSale> {
+    Self::from_tuple_opt(
+      values
+      .into_iter()
+      .map(|(event, ticket_image, sale, seat_range)|
+        { (event, Some(ticket_image), Some(sale), Some(seat_range)) }
+      )
+      .collect()
+    )
+  }
+
+  pub fn from_tuple_opt(values: Vec<(Event, Option<TicketImage>, Option<Sale>, Option<SeatRange>)>) -> Vec<EventWithSale> {
     values
     .into_iter()
     .fold(Vec::new(), |mut acc: Vec<EventWithSale>, (event, ticket_image, sale, seat_range)| {
       let key = event.event_id.clone();
       // TODO: handle case where a Seat maps with multiple SeatRange.
-      let mut sale_with_seat_range = SaleWithSeatRange::from(sale);
-      sale_with_seat_range.seat_range = seat_range;
+      let sale_with_seat_range = if let (Some(sale), Some(seat_range)) = (sale, seat_range) {
+        let mut sale_with_seat_range = SaleWithSeatRange::from(sale);
+        sale_with_seat_range.seat_range = seat_range;
+
+        Some(sale_with_seat_range)
+      } else {
+        None
+      };
 
       let existing_index = acc
       .iter()
@@ -114,19 +135,23 @@ impl EventWithSale {
 
 
       if let Some(index) = existing_index {
-        let existing_ticket_image_type = acc[index].ticket_images
-        .iter()
-        .position(|item| item.ticket_image_type == ticket_image.ticket_image_type);
+        if let Some(ticket_image) = ticket_image {
+          let existing_ticket_image_type = acc[index].ticket_images
+          .iter()
+          .position(|item| item.ticket_image_type == ticket_image.ticket_image_type);
 
-        if existing_ticket_image_type == None {
-          acc[index].ticket_images.push(ticket_image);
+          if existing_ticket_image_type == None {
+            acc[index].ticket_images.push(ticket_image);
+          }
         }
 
-        let existing_sale_index = acc[index].sales
-        .iter()
-        .position(|item| item.account == sale_with_seat_range.account);
-        if existing_sale_index == None {
-          acc[index].sales.push(sale_with_seat_range);
+        if let Some(sale_with_seat_range) = sale_with_seat_range {
+          let existing_sale_index = acc[index].sales
+          .iter()
+          .position(|item| item.account == sale_with_seat_range.account);
+          if existing_sale_index == None {
+            acc[index].sales.push(sale_with_seat_range);
+          }
         }
       } else {
         acc.push(EventWithSale {
@@ -145,8 +170,10 @@ impl EventWithSale {
           arweave_tx_id: event.arweave_tx_id.clone(),
           webbundle_arweave_tx_id: event.webbundle_arweave_tx_id,
           draft: event.draft,
-          sales: vec![sale_with_seat_range],
-          ticket_images: vec![ticket_image],
+          resale_cap: event.resale_cap,
+          organizer_resale_fee: event.organizer_resale_fee,
+          sales: sale_with_seat_range.map_or(vec![], |value| vec![value]),
+          ticket_images: ticket_image.map_or(vec![], |value| vec![value]),
         });
       }
 

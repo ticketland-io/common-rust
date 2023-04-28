@@ -145,6 +145,64 @@ impl PostgresConnection {
     Ok(EventWithSale::from_tuple(records))
   }
 
+  pub async fn read_account_draft_events(
+    &mut self,
+    user_id: String,
+    skip: i64,
+    limit: i64
+  ) -> Result<Vec<EventWithSale>> {
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM (
+        SELECT * FROM events
+        WHERE events.account_id = '{}' AND events.draft = true
+        LIMIT {}
+        OFFSET {}
+      ) events
+      INNER JOIN ticket_images
+      ON ticket_images.event_id = events.event_id
+      LEFT JOIN sales
+      ON sales.event_id = events.event_id
+      LEFT JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
+      ORDER BY events.start_date
+      ",
+      user_id,
+      limit,
+      skip * limit,
+    ));
+
+    let records = query.load::<(Event, Option<TicketImage>, Option<Sale>, Option<SeatRange>)>(self.borrow_mut()).await?;
+
+    Ok(EventWithSale::from_tuple_opt(records))
+  }
+
+  pub async fn read_account_draft_event(&mut self, user_id: String, evt_id: String) -> Result<Vec<EventWithSale>> {
+    let query = sql_query(format!(
+      "
+      SELECT *
+      FROM (
+        SELECT * FROM events
+        WHERE events.account_id = '{0}' AND events.event_id = '{1}' AND events.draft = true
+      ) events
+      INNER JOIN ticket_images
+      ON ticket_images.event_id = events.event_id
+      INNER JOIN sales
+      ON sales.event_id = events.event_id
+      INNER JOIN seat_ranges
+      ON seat_ranges.sale_account = sales.account
+      ORDER BY events.start_date
+      ",
+      user_id,
+      evt_id,
+    ));
+
+    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
+
+    Ok(EventWithSale::from_tuple(records))
+  }
+
   pub async fn read_event(&mut self, evt_id: String) -> Result<Event> {
     Ok(
       events

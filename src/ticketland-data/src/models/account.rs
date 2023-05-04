@@ -13,4 +13,5 @@ pub struct Account {
   pub name: Option<String>,
   pub email: Option<String>,
   pub photo_url: Option<String>,
+  pub delete_request_at: Option<NaiveDateTime>,
 }

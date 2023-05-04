@@ -9,6 +9,7 @@ diesel::table! {
         name -> Nullable<Varchar>,
         email -> Nullable<Varchar>,
         photo_url -> Nullable<Varchar>,
+        delete_request_at -> Nullable<Timestamptz>,
     }
 }
 

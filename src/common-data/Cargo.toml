@@ -8,7 +8,7 @@ license = "BUSL-1.1"
 
 [dependencies]
 actix = "0.13.0"
-ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.14" }
+ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.14", rev="0ba21c1" }
 bolt-client = "0.10.1"
 bolt-proto = "0.11.0"
 serde = { version = "1.0", features = ["derive"] }

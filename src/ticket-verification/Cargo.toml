@@ -12,11 +12,11 @@ bs58 = "0.4.0"
 eyre = "0.6.8"
 solana-sdk = "1.11.10"
 thiserror = "1.0.33"
-ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.50" }
-program-artifacts = { git = "https://github.com/ticketland-io/program-artifacts", version = "0.1.32" }
-ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.17"  }
-solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", version = "0.1.10" }
-ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15" }
+ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.50", rev="0ba21c1" }
+program-artifacts = { git = "https://github.com/ticketland-io/program-artifacts", version = "0.1.32", rev="67db0ed" }
+ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.17", rev="0ba21c1"  }
+ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15", rev="0ba21c1" }
+solana-web3-rust = { git = "https://github.com/ticketland-io/solana-web3-rust", version = "0.1.10", rev="e9cae9c" }
 serde = "1.0"
 chrono = "0.4.21"
 tokio = { version = "1.14.1" }

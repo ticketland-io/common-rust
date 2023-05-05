@@ -93,6 +93,8 @@ impl PostgresConnection {
     user_id: String,
     start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
+    end_date_from: Option<NaiveDateTime>,
+    end_date_to: Option<NaiveDateTime>,
     name: Option<String>,
     skip: i64,
     limit: i64
@@ -109,6 +111,14 @@ impl PostgresConnection {
 
     if let Some(start_date_to) = start_date_to {
       filters.push(format!("events.start_date <= '{0}'", start_date_to));
+    };
+
+    if let Some(end_date_from) = end_date_from {
+      filters.push(format!("events.end_date >= '{0}'", end_date_from));
+    };
+
+    if let Some(end_date_to) = end_date_to {
+      filters.push(format!("events.end_date <= '{0}'", end_date_to));
     };
 
     let filters_query = if filters.len() > 0 {
@@ -318,6 +328,8 @@ impl PostgresConnection {
     user_id: String,
     start_date_from: Option<NaiveDateTime>,
     start_date_to: Option<NaiveDateTime>,
+    end_date_from: Option<NaiveDateTime>,
+    end_date_to: Option<NaiveDateTime>,
     name: Option<String>,
     skip: i64,
     limit: i64
@@ -334,6 +346,14 @@ impl PostgresConnection {
 
     if let Some(start_date_to) = start_date_to {
       filters.push(format!("events.start_date <= '{0}'", start_date_to));
+    };
+
+    if let Some(end_date_from) = end_date_from {
+      filters.push(format!("events.end_date >= '{0}'", end_date_from));
+    };
+
+    if let Some(end_date_to) = end_date_to {
+      filters.push(format!("events.end_date <= '{0}'", end_date_to));
     };
 
     let filters_query = if filters.len() > 0 {

@@ -1,4 +1,5 @@
-use diesel::prelude::*;
+use chrono::NaiveDateTime;
+use diesel::{prelude::*, sql_query};
 use eyre::Result;
 use diesel_async::RunQueryDsl;
 use crate::{
@@ -55,6 +56,47 @@ impl PostgresConnection {
     .execute(self.borrow_mut())
     .await?;
     
+    Ok(())
+  }
+
+  pub async fn update_delete_request_at(
+    &mut self,
+    user_id: String,
+    delete_request_ts: Option<NaiveDateTime>,
+  ) -> Result<()> {
+    let query = sql_query(format!(
+      "
+      UPDATE accounts
+      SET delete_request_at = {}
+      WHERE uid = '{}';
+      ",
+      delete_request_ts.map_or("NULL".to_string(), |ts| format!("'{}'", ts.to_string())),
+      user_id,
+    ));
+
+    query.execute(self.borrow_mut()).await?;
+
+    Ok(())
+  }
+
+  pub async fn delete_account(
+    &mut self,
+    user_id: String,
+  ) -> Result<()> {
+    let query = sql_query(format!(
+      "
+      UPDATE accounts
+      SET deleted_at = now()
+      SET name = ''
+      SET email = ''
+      SET photo_url = ''
+      WHERE uid = '{}';
+      ",
+      user_id,
+    ));
+
+    query.execute(self.borrow_mut()).await?;
+
     Ok(())
   }
 }

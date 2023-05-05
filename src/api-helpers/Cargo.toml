@@ -14,10 +14,10 @@ bolt-client = "0.10.1"
 chrono = "0.4.21"
 eyre = "0.6.8"
 futures-util = "0.3.21"
-fireauth =  { git = "https://github.com/Apocentre/fireauth", version = "0.1.8", rev="0440c14" }
-ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.18",  rev="dbd9bd1" }
-ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.50",  rev="dbd9bd1" }
-ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15", rev="dbd9bd1" }
+fireauth =  { git = "https://github.com/Apocentre/fireauth", version = "0.1.8" }
+ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.18" }
+ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.50" }
+ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15" }
 serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1.57"
 qstring = "0.7.2"

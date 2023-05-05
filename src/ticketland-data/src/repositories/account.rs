@@ -78,4 +78,25 @@ impl PostgresConnection {
 
     Ok(())
   }
+
+  pub async fn delete_account(
+    &mut self,
+    user_id: String,
+  ) -> Result<()> {
+    let query = sql_query(format!(
+      "
+      UPDATE accounts
+      SET deleted_at = now()
+      SET name = ''
+      SET email = ''
+      SET photo_url = ''
+      WHERE uid = '{}';
+      ",
+      user_id,
+    ));
+
+    query.execute(self.borrow_mut()).await?;
+
+    Ok(())
+  }
 }

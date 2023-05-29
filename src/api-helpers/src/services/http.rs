@@ -72,7 +72,7 @@ pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, lim
       })
   })
   .unwrap_or_else(|error| {
-    ConsoleLogger.error("{:?}",error);
+    ConsoleLogger.error(&format!("{:?}", error));
 
     return internal_server_error(Some(error.root_cause()));
   })
@@ -83,7 +83,7 @@ pub fn create_write_response(result: Result<()>) -> HttpResponse {
   result
   .map(|_| HttpResponse::Ok().finish())
   .unwrap_or_else(|error| {
-    ConsoleLogger.error("{:?}",error);
+    ConsoleLogger.error(&format!("{:?}", error));
 
     return internal_server_error(Some(error.root_cause()));
   }

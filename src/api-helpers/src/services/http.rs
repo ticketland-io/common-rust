@@ -11,18 +11,24 @@ use ticketland_utils::logger::{
 };
 
 pub fn internal_server_error<E: Error>(_error: Option<E>) -> HttpResponse {
+  ConsoleLogger.error(&format!("{:?}", _error));
+
   HttpResponse::InternalServerError()
   .reason("500")
   .body("")
 }
 
 pub fn unauthorized_error() -> HttpResponse {
+  ConsoleLogger.error("Unauthorized error");
+
   HttpResponse::Unauthorized()
   .reason("401")
   .finish()
 }
 
 pub fn bad_request_error() -> HttpResponse {
+  ConsoleLogger.error("Bad request error");
+
   HttpResponse::BadRequest()
   .reason("400")
   .finish()
@@ -71,22 +77,13 @@ pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, lim
         limit: limit,
       })
   })
-  .unwrap_or_else(|error| {
-    ConsoleLogger.error(&format!("{:?}", error));
-
-    return internal_server_error(Some(error.root_cause()));
-  })
-  
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
 pub fn create_write_response(result: Result<()>) -> HttpResponse {
   result
   .map(|_| HttpResponse::Ok().finish())
-  .unwrap_or_else(|error| {
-    ConsoleLogger.error(&format!("{:?}", error));
-
-    return internal_server_error(Some(error.root_cause()));
-  })
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
 pub fn create_response<T: Serialize>(result: Result<T>) -> HttpResponse {

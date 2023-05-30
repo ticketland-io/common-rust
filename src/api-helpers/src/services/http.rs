@@ -86,6 +86,11 @@ pub fn create_write_response(result: Result<()>) -> HttpResponse {
     ConsoleLogger.error(&format!("{:?}", error));
 
     return internal_server_error(Some(error.root_cause()));
-  }
-)
+  })
+}
+
+pub fn create_response<T: Serialize>(result: Result<T>) -> HttpResponse {
+  result
+  .map(|result| HttpResponse::Ok().json(result))
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }

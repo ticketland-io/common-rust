@@ -5,30 +5,20 @@ use actix_web::{
   HttpResponse,
 };
 use serde::Serialize;
-use ticketland_utils::logger::{
-  interface::Logger,
-  console_logger::ConsoleLogger,
-};
 
 pub fn internal_server_error<E: Error>(_error: Option<E>) -> HttpResponse {
-  ConsoleLogger.error(&format!("{:?}", _error));
-
   HttpResponse::InternalServerError()
   .reason("500")
   .body("")
 }
 
 pub fn unauthorized_error() -> HttpResponse {
-  ConsoleLogger.error("Unauthorized error");
-
   HttpResponse::Unauthorized()
   .reason("401")
   .finish()
 }
 
 pub fn bad_request_error() -> HttpResponse {
-  ConsoleLogger.error("Bad request error");
-
   HttpResponse::BadRequest()
   .reason("400")
   .finish()

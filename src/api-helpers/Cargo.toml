@@ -18,6 +18,7 @@ fireauth =  { git = "https://github.com/Apocentre/fireauth", version = "0.1.8" }
 ticketland-core = { git = "https://github.com/ticketland-io/common-rust", version = "0.2.18" }
 ticketland-data = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.50" }
 ticketland-crypto = { git = "https://github.com/ticketland-io/common-rust", version = "0.1.15" }
+ticketland-utils= { git = "https://github.com/ticketland-io/common-rust", version = "0.2.3" }
 serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1.57"
 qstring = "0.7.2"

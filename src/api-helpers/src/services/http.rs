@@ -5,11 +5,14 @@ use actix_web::{
   HttpResponse,
 };
 use serde::Serialize;
+use super::data::CustomError;
 
 pub fn internal_server_error<E: Error>(_error: Option<E>) -> HttpResponse {
-  HttpResponse::InternalServerError()
-  .reason("500")
-  .finish()
+  let my_error = _error
+  .map(|e| CustomError { message: e.to_string() })
+  .unwrap_or_else(|| CustomError {message: "Internal Server Error".to_string()});
+
+  HttpResponse::from_error(my_error)
 }
 
 pub fn unauthorized_error() -> HttpResponse {
@@ -67,17 +70,17 @@ pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, lim
         limit: limit,
       })
   })
-  .unwrap()
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
 pub fn create_write_response(result: Result<()>) -> HttpResponse {
   result
   .map(|_| HttpResponse::Ok().finish())
-  .unwrap()
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }
 
 pub fn create_response<T: Serialize>(result: Result<T>) -> HttpResponse {
   result
   .map(|result| HttpResponse::Ok().json(result))
-  .unwrap()
+  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
 }

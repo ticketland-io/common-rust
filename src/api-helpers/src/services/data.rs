@@ -23,6 +23,7 @@ QueryString! {
 pub struct CustomError {
   pub message: String,
 }
+
 impl Display for CustomError {
   fn fmt(&self, f: &mut Formatter) -> Result {
     write!(f, "{}", self.message)

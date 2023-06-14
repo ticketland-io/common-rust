@@ -19,25 +19,3 @@ pub trait QueryStringTrait {
 QueryString! {
   pub struct QueryString {}
 }
-
-pub struct CustomError {
-  pub message: String,
-}
-
-impl Display for CustomError {
-  fn fmt(&self, f: &mut Formatter) -> Result {
-    write!(f, "{}", self.message)
-  }
-}
-
-impl Debug for CustomError {
-  fn fmt(&self, f: &mut Formatter) -> Result {
-    write!(f, "{}", self.message)
-  }
-}
-
-impl ResponseError for CustomError {
-  fn error_response(&self) -> HttpResponse {
-    HttpResponse::InternalServerError().json(self.message.clone())
-  }
-}

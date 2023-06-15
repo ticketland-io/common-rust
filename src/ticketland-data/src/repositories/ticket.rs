@@ -5,11 +5,11 @@ use diesel_async::{AsyncConnection, RunQueryDsl};
 use crate::{
   connection::PostgresConnection,
   models::{
-    ticket::{Ticket, TicketWithMetadata, PartialSellListing, TicketWithEvent},
+    ticket::{Cnt, CntWithMetadata, PartialSellListing, TicketWithEvent},
     ticket_onchain_account::TicketOnchainAccount, sale::Sale, event::Event,
   },
   schema::{
-    tickets::dsl::{self as tickets_dsl},
+    cnts::dsl::{self as cnts_dsl},
     ticket_onchain_accounts::dsl::{
       self as ticket_onchain_accounts_dsl,
       ticket_onchain_accounts,
@@ -18,20 +18,20 @@ use crate::{
 };
 
 impl PostgresConnection {
-  pub async fn upsert_user_ticket(&mut self, user_ticket: Ticket, ticket: TicketOnchainAccount) -> Result<()> {
+  pub async fn upsert_user_ticket(&mut self, user_ticket: Cnt, ticket: TicketOnchainAccount) -> Result<()> {
     self.borrow_mut()
     .transaction::<_, Error, _>(|conn| Box::pin(async move {
       // ignore if the ticket nft is already stored
       diesel::insert_into(ticket_onchain_accounts)
       .values(&ticket)
-      .on_conflict(ticket_onchain_accounts_dsl::ticket_nft)
+      .on_conflict(ticket_onchain_accounts_dsl::cnt_nft)
       .do_nothing()
       .execute(conn)
       .await?;
 
-      diesel::insert_into(tickets_dsl::tickets)
+      diesel::insert_into(cnts_dsl::cnts)
       .values(&user_ticket)
-      .on_conflict(tickets_dsl::ticket_nft)
+      .on_conflict(cnts_dsl::cnt_nft)
       .do_update()
       .set(&user_ticket)
       .execute(conn)
@@ -44,7 +44,7 @@ impl PostgresConnection {
     Ok(())
   }
 
-  pub async fn read_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<TicketWithMetadata>> {
+  pub async fn read_tickets_for_event(&mut self, evt_id: String, skip: i64, limit: i64) -> Result<Vec<CntWithMetadata>> {
     let query = sql_query(format!(
       "
       SELECT DISTINCT tickets.*, sell_listings.sol_account, ticket_onchain_accounts.ticket_metadata
@@ -64,9 +64,9 @@ impl PostgresConnection {
       ", evt_id, limit, skip * limit
     ));
 
-    let records = query.load::<(Ticket, TicketOnchainAccount, Option<PartialSellListing>)>(self.borrow_mut()).await?;
+    let records = query.load::<(Cnt, TicketOnchainAccount, Option<PartialSellListing>)>(self.borrow_mut()).await?;
 
-    Ok(TicketWithMetadata::from_tuple(records))
+    Ok(CntWithMetadata::from_tuple(records))
   }
 
   pub async fn read_user_tickets(
@@ -105,15 +105,15 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Ticket, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
+    let records = query.load::<(Cnt, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>(self.borrow_mut()).await?;
 
     Ok(TicketWithEvent::from_tuple(records))
   }
 
   pub async fn update_attended(&mut self, ticket_nft_acc: String) -> Result<()> {
-    diesel::update(tickets_dsl::tickets)
-    .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
-    .set(tickets_dsl::attended.eq(true))
+    diesel::update(cnts_dsl::cnts)
+    .filter(cnts_dsl::cnt_nft.eq(ticket_nft_acc))
+    .set(cnts_dsl::attended.eq(true))
     .execute(self.borrow_mut())
     .await?;
 
@@ -122,30 +122,30 @@ impl PostgresConnection {
 
   pub async fn has_attended(&mut self, ticket_nft_acc: String) -> Result<bool> {
     Ok(
-      tickets_dsl::tickets
-      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
-      .select(tickets_dsl::attended)
+      cnts_dsl::cnts
+      .filter(cnts_dsl::cnt_nft.eq(ticket_nft_acc))
+      .select(cnts_dsl::attended)
       .first(self.borrow_mut())
       .await?
     )
   }
 
-  pub async fn read_ticket_by_ticket_metadata(&mut self, ticket_metadata: String) -> Result<Ticket> {
+  pub async fn read_ticket_by_ticket_metadata(&mut self, ticket_metadata: String) -> Result<Cnt> {
     Ok(
       ticket_onchain_accounts
       .filter(ticket_onchain_accounts_dsl::ticket_metadata.eq(ticket_metadata))
-      .inner_join(tickets_dsl::tickets.on(tickets_dsl::ticket_nft.eq(ticket_onchain_accounts_dsl::ticket_nft)))
-      .first::<(TicketOnchainAccount, Ticket)>(self.borrow_mut())
+      .inner_join(cnts_dsl::cnts.on(cnts_dsl::cnt_nft.eq(ticket_onchain_accounts_dsl::cnt_nft)))
+      .first::<(TicketOnchainAccount, Cnt)>(self.borrow_mut())
       .await?
       .1
     )
   }
 
-  pub async fn read_ticket(&mut self, ticket_nft_acc: String) -> Result<Vec<Ticket>> {
+  pub async fn read_ticket(&mut self, ticket_nft_acc: String) -> Result<Vec<Cnt>> {
     Ok(
-      tickets_dsl::tickets
-      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_acc))
-      .load::<Ticket>(self.borrow_mut())
+      cnts_dsl::cnts
+      .filter(cnts_dsl::cnt_nft.eq(ticket_nft_acc))
+      .load::<Cnt>(self.borrow_mut())
       .await?
     )
   }

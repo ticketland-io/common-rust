@@ -45,7 +45,7 @@ impl PostgresConnection {
 
       diesel::insert_into(ticket_images)
       .values(&ticket_images_list)
-      .on_conflict((ticket_images_dsl::event_id, ticket_images_dsl::ticket_image_type))
+      .on_conflict((ticket_images_dsl::event_id, ticket_images_dsl::ticket_type_index, ticket_images_dsl::ticket_nft_index))
       .do_nothing()
       .execute(conn)
       .await?;

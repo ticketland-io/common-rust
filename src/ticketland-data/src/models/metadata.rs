@@ -9,6 +9,10 @@ use serde_aux::prelude::*;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TicketImage {
   pub ticket_image_type: i16,
+  // pub ticket_type_index: i16,
+  // pub ticket_nft_index: i16,
+  // pub name: String,
+  // pub description: String,
   pub path: String,
 }
 

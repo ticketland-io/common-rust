@@ -13,9 +13,9 @@ use crate::{
   },
   schema::{
     sell_listings::dsl::*,
-    tickets::dsl::{
+    cnts::dsl::{
       self as tickets_dsl,
-      tickets,
+      cnts,
     }
   },
 };
@@ -109,8 +109,8 @@ impl PostgresConnection {
       .execute(conn)
       .await?;
 
-      diesel::update(tickets)
-      .filter(tickets_dsl::ticket_nft.eq(ticket_nft_account))
+      diesel::update(cnts)
+      .filter(tickets_dsl::cnt_nft.eq(ticket_nft_account))
       .set(tickets_dsl::account_id.eq(new_owner))
       .execute(conn)
       .await?;

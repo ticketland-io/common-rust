@@ -122,7 +122,7 @@ diesel::table! {
     sell_listings (sol_account) {
         sol_account -> Varchar,
         account_id -> Varchar,
-        ticket_nft -> Varchar,
+        cnt_nft -> Varchar,
         event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
         ask_price -> Int8,
@@ -151,9 +151,12 @@ diesel::table! {
 }
 
 diesel::table! {
-    ticket_images (event_id, ticket_image_type) {
+    ticket_images (event_id, ticket_type_index, ticket_nft_index) {
         event_id -> Varchar,
-        ticket_image_type -> Int2,
+        ticket_type_index -> Int2,
+        ticket_nft_index -> Int2,
+        name -> Varchar,
+        description -> Text,
         content_type -> Varchar,
         arweave_tx_id -> Nullable<Varchar>,
         uploaded -> Bool,
@@ -161,15 +164,16 @@ diesel::table! {
 }
 
 diesel::table! {
-    ticket_onchain_accounts (ticket_nft) {
-        ticket_nft -> Varchar,
+    ticket_onchain_accounts (cnt_nft) {
+        cnt_nft -> Varchar,
         ticket_metadata -> Varchar,
     }
 }
 
 diesel::table! {
-    tickets (ticket_nft) {
-        ticket_nft -> Varchar,
+    cnts (cnt_nft) {
+        cnt_nft -> Varchar,
+        name -> Varchar,
         event_id -> Varchar,
         account_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
@@ -193,13 +197,13 @@ diesel::joinable!(sales -> events (event_id));
 diesel::joinable!(seat_ranges -> sales (sale_account));
 diesel::joinable!(sell_listings -> accounts (account_id));
 diesel::joinable!(sell_listings -> events (event_id));
-diesel::joinable!(sell_listings -> ticket_onchain_accounts (ticket_nft));
+diesel::joinable!(sell_listings -> ticket_onchain_accounts (cnt_nft));
 diesel::joinable!(stripe_accounts -> accounts (account_id));
 diesel::joinable!(stripe_customers -> accounts (account_id));
 diesel::joinable!(ticket_images -> events (event_id));
-diesel::joinable!(tickets -> accounts (account_id));
-diesel::joinable!(tickets -> events (event_id));
-diesel::joinable!(tickets -> ticket_onchain_accounts (ticket_nft));
+diesel::joinable!(cnts -> accounts (account_id));
+diesel::joinable!(cnts -> events (event_id));
+diesel::joinable!(cnts -> ticket_onchain_accounts (cnt_nft));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
@@ -217,5 +221,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     stripe_customers,
     ticket_images,
     ticket_onchain_accounts,
-    tickets,
+    cnts
+    // tickets,
 );

@@ -50,7 +50,10 @@ pub struct Event {
 #[diesel(table_name = ticket_images)]
 pub struct TicketImage {
   pub event_id: String,
-  pub ticket_image_type: i16,
+  pub ticket_type_index: i16,
+  pub ticket_nft_index: i16,
+  pub name: String,
+  pub description: String,
   pub content_type: String,
   pub arweave_tx_id: Option<String>,
   pub uploaded: bool,
@@ -60,7 +63,10 @@ pub struct TicketImage {
 #[diesel(table_name = ticket_images)]
 pub struct TicketImageUpdate {
   pub event_id: String,
-  pub ticket_image_type: i16,
+  pub ticket_type_index: i16,
+  pub ticket_nft_index: i16,
+  pub name: String,
+  pub description: String,
   pub arweave_tx_id: String,
 }
 
@@ -114,11 +120,11 @@ impl EventWithSale {
 
 
       if let Some(index) = existing_index {
-        let existing_ticket_image_type = acc[index].ticket_images
+        let existing_ticket_type_index = acc[index].ticket_images
         .iter()
-        .position(|item| item.ticket_image_type == ticket_image.ticket_image_type);
+        .position(|item| item.ticket_type_index == ticket_image.ticket_type_index && item.ticket_nft_index == ticket_image.ticket_nft_index);
 
-        if existing_ticket_image_type == None {
+        if existing_ticket_type_index == None {
           acc[index].ticket_images.push(ticket_image);
         }
 

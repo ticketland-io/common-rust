@@ -3,13 +3,14 @@ use diesel::{prelude::*, sql_types};
 use chrono::{
   NaiveDateTime,
 };
-use crate::schema::tickets;
+use crate::schema::cnts;
 use super::{ticket_onchain_account::TicketOnchainAccount, event::Event, sale::Sale};
 
 #[derive( Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
-#[diesel(table_name = tickets)]
-pub struct Ticket {
-  pub ticket_nft: String,
+#[diesel(table_name = cnts)]
+pub struct Cnt {
+  pub cnt_nft: String,
+  pub name: String,
   pub event_id: String,
   pub account_id: String,
   pub created_at: Option<NaiveDateTime>,
@@ -27,8 +28,8 @@ pub struct PartialSellListing {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
-pub struct TicketWithMetadata {
-  pub ticket_nft: String,
+pub struct CntWithMetadata {
+  pub cnt_nft: String,
   pub ticket_metadata: String,
   pub event_id: String,
   pub account_id: String,
@@ -41,13 +42,13 @@ pub struct TicketWithMetadata {
   pub sell_listing: Option<PartialSellListing>,
 }
 
-impl TicketWithMetadata {
-  pub fn from_tuple(values: Vec<(Ticket, TicketOnchainAccount, Option<PartialSellListing>)>) -> Vec<Self> {
+impl CntWithMetadata {
+  pub fn from_tuple(values: Vec<(Cnt, TicketOnchainAccount, Option<PartialSellListing>)>) -> Vec<Self> {
     values
     .into_iter()
     .map(|(ticket, ticket_onchain_account, sell_listing)| {
-      TicketWithMetadata {
-        ticket_nft: ticket.ticket_nft,
+      CntWithMetadata {
+        cnt_nft: ticket.cnt_nft,
         ticket_metadata: ticket_onchain_account.ticket_metadata,
         event_id: ticket.event_id,
         account_id: ticket.account_id,
@@ -82,12 +83,12 @@ pub struct TicketWithEvent {
 }
 
 impl TicketWithEvent {
-  pub fn from_tuple(values: Vec<(Ticket, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>) -> Vec<Self> {
+  pub fn from_tuple(values: Vec<(Cnt, TicketOnchainAccount, Event, Sale, Option<PartialSellListing>)>) -> Vec<Self> {
     values
     .into_iter()
     .map(|(ticket, ticket_onchain_account, event, sale, sell_listing)| {
       TicketWithEvent {
-        ticket_nft: ticket.ticket_nft,
+        ticket_nft: ticket.cnt_nft,
         ticket_metadata: ticket_onchain_account.ticket_metadata,
         event_id: ticket.event_id,
         account_id: ticket.account_id,

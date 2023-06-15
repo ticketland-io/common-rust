@@ -8,7 +8,7 @@ use crate::schema::sell_listings;
 pub struct SellListing {
   pub sol_account: String,
   pub account_id: String,
-  pub ticket_nft: String,
+  pub cnt_nft: String,
   pub event_id: String,
   pub created_at: Option<NaiveDateTime>,
   pub ask_price: i64,
@@ -21,7 +21,7 @@ pub struct SellListing {
 #[diesel(table_name = sell_listings)]
 pub struct NewSellListing<'a> {
   pub account_id: &'a str,
-  pub ticket_nft: &'a str,
+  pub cnt_nft: &'a str,
   pub event_id: &'a str,
   pub sol_account: &'a str,
   pub ask_price: i64,

@@ -1,38 +1,68 @@
-use diesel::{
-  prelude::*,
-  result::Error,
-  sql_query,
-};
 use chrono::NaiveDateTime;
+use diesel::{prelude::*, sql_query};
+use diesel::result::Error;
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use eyre::Result;
+use crate::models::nft_detail::TicketTypeNftDetail;
+use crate::models::ticket_type::TicketType;
 use crate::{
   connection::PostgresConnection,
   models::{
     account::Account,
-    event::{Event, EventWithSale, TicketImage, TicketImageUpdate},
-    sale::Sale,
+    event::{Event, ExtendedEvent},
+    ticket_type::{NewTicketType},
     seat_range::SeatRange,
-    event::AttendedTicketCount
+    event::AttendedTicketCount,
+    nft_detail::{NewNftDetail, NewEventNftDetail, NewTicketTypeNftDetail},
+    // properties::NewProperty
   },
   schema::{
     events::dsl::{
       self as events_dsl,
       events,
     },
-    ticket_images::dsl::{
-      self as ticket_images_dsl,
-      ticket_images,
-    },
     accounts::dsl::{
       self as accounts_dsl,
       accounts,
     },
+    ticket_types::dsl::{
+      self as ticket_types_dsl,
+      ticket_types,
+    },
+    seat_ranges::dsl::{
+      self as seat_ranges_dsl,
+      seat_ranges,
+    },
+    nft_details::dsl::{
+      self as nft_details_dsl,
+      nft_details,
+    },
+    event_nft_details::dsl::{
+      self as event_nft_details_dsl,
+      event_nft_details,
+    },
+    ticket_type_nft_details::dsl::{
+      self as ticket_type_nft_details_dsl,
+      ticket_type_nft_details,
+    },
+    // properties::dsl::{
+    //   self as properties_dsl,
+    //   properties,
+    // },
   },
 };
 
 impl PostgresConnection {
-  pub async fn upsert_event(&mut self, event: Event, ticket_images_list: Vec<TicketImage>) -> Result<()> {
+  pub async fn upsert_event(
+    &mut self,
+    event: Event,
+    seat_ranges_list: Vec<SeatRange>,
+    ticket_types_list: Vec<NewTicketType>,
+    nft_details_list: Vec<NewNftDetail>,
+    event_nft_detail: NewEventNftDetail,
+    ticket_type_nfts_details_list: Vec<NewTicketTypeNftDetail>,
+    // properties_list: Vec<NewProperty>,
+  ) -> Result<()> {
     self.borrow_mut()
     .transaction::<_, Error, _>(|conn| Box::pin(async move {
       diesel::insert_into(events)
@@ -43,25 +73,48 @@ impl PostgresConnection {
       .execute(conn)
       .await?;
 
-      diesel::insert_into(ticket_images)
-      .values(&ticket_images_list)
-      .on_conflict((ticket_images_dsl::event_id, ticket_images_dsl::ticket_type_index, ticket_images_dsl::ticket_nft_index))
+      diesel::insert_into(ticket_types)
+      .values(&ticket_types_list)
+      .on_conflict((ticket_types_dsl::event_id, ticket_types_dsl::ticket_type_index))
+      .do_nothing()
+      .execute(conn)
+      .await?;
+
+      diesel::insert_into(seat_ranges)
+      .values(&seat_ranges_list)
+      .on_conflict((
+        seat_ranges_dsl::event_id,
+        seat_ranges_dsl::ticket_type_index,
+        seat_ranges_dsl::l,
+        seat_ranges_dsl::r
+      ))
+      .do_nothing()
+      .execute(conn)
+      .await?;
+
+      diesel::insert_into(nft_details)
+      .values(&nft_details_list)
+      .on_conflict(nft_details_dsl::arweave_tx_id)
+      .do_nothing()
+      .execute(conn)
+      .await?;
+
+      diesel::insert_into(event_nft_details)
+      .values(&event_nft_detail)
+      .on_conflict(event_nft_details_dsl::ref_name)
+      .do_nothing()
+      .execute(conn)
+      .await?;
+
+      diesel::insert_into(ticket_type_nft_details)
+      .values(&ticket_type_nfts_details_list)
+      .on_conflict(ticket_type_nft_details_dsl::ref_name)
       .do_nothing()
       .execute(conn)
       .await?;
 
       Ok(())
     }))
-    .await?;
-
-    Ok(())
-  }
-
-  pub async fn update_metadata_uploaded(&mut self, id: String, arweave_tx: String) -> Result<()> {
-    diesel::update(events)
-    .filter(events_dsl::event_id.eq(id))
-    .set(events_dsl::arweave_tx_id.eq(arweave_tx))
-    .execute(self.borrow_mut())
     .await?;
 
     Ok(())
@@ -98,7 +151,7 @@ impl PostgresConnection {
     name: Option<String>,
     skip: i64,
     limit: i64
-  ) -> Result<Vec<EventWithSale>> {
+  ) -> Result<Vec<ExtendedEvent>> {
     let mut filters = vec![];
 
     if let Some(name) = name {
@@ -136,12 +189,11 @@ impl PostgresConnection {
         LIMIT {2}
         OFFSET {3}
       ) events
-      INNER JOIN ticket_images
-      ON ticket_images.event_id = events.event_id
-      INNER JOIN sales
-      ON sales.event_id = events.event_id
-      INNER JOIN seat_ranges
-      ON seat_ranges.sale_account = sales.account
+      INNER JOIN ticket_types USING(event_id)
+      INNER JOIN seat_ranges USING(event_id, ticket_type_index)
+      INNER JOIN ticket_type_nft_details USING(event_id, ticket_type_index)
+      INNER JOIN nft_details
+      ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
       ORDER BY events.start_date
       ",
       user_id,
@@ -150,9 +202,11 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
+    let records = query
+    .load::<(Event, TicketType, SeatRange, TicketTypeNftDetail)>(self.borrow_mut())
+    .await?;
 
-    Ok(EventWithSale::from_tuple(records))
+    Ok(ExtendedEvent::from_tuple(records))
   }
 
   pub async fn read_event(&mut self, evt_id: String) -> Result<Event> {
@@ -175,30 +229,6 @@ impl PostgresConnection {
     )
   }
 
-  pub async fn read_events(&mut self, skip: i64, limit: i64) -> Result<Vec<EventWithSale>> {
-    let query = sql_query(format!(
-      "
-      SELECT *
-      FROM (
-        SELECT * FROM (SELECT * FROM events WHERE events.draft = false) events
-        LIMIT {}
-        OFFSET {}
-      ) events
-      INNER JOIN ticket_images
-      ON ticket_images.event_id = events.event_id
-      INNER JOIN sales
-      ON sales.event_id = events.event_id
-      INNER JOIN seat_ranges
-      ON seat_ranges.sale_account = sales.account
-      ORDER BY events.start_date
-      ", limit, skip * limit
-    ));
-
-    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
-
-    Ok(EventWithSale::from_tuple(records))
-  }
-
   pub async fn read_filtered_events(
     &mut self,
     category: Option<i16>,
@@ -208,7 +238,7 @@ impl PostgresConnection {
     name: Option<String>,
     skip: i64,
     limit: i64,
-  ) -> Result<Vec<EventWithSale>> {
+  ) -> Result<Vec<ExtendedEvent>> {
     let mut filters = vec![];
 
     if let Some(category) = category {
@@ -254,9 +284,11 @@ impl PostgresConnection {
       WITH filtered_events AS (
         SELECT *
         FROM (SELECT * FROM events WHERE events.draft = false) events
-        INNER JOIN ticket_images using(event_id)
-        INNER JOIN sales using(event_id)
-        INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
+        INNER JOIN ticket_types USING(event_id)
+        INNER JOIN seat_ranges USING(event_id, ticket_type_index)
+        INNER JOIN ticket_type_nft_details USING(event_id, ticket_type_index)
+        INNER JOIN nft_details
+        ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
         WHERE {}
       )
       SELECT * FROM filtered_events
@@ -269,54 +301,104 @@ impl PostgresConnection {
     );
 
     let records = query
-    .load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut())
+    .load::<(Event, TicketType, SeatRange, TicketTypeNftDetail)>(self.borrow_mut())
     .await?;
 
-    Ok(EventWithSale::from_tuple(records))
+    Ok(ExtendedEvent::from_tuple(records))
   }
 
-  pub async fn update_event_draft(&mut self, evt_id: String) -> Result<()> {
-    diesel::update(events)
-    .filter(events_dsl::event_id.eq(evt_id))
-    .set(events_dsl::draft.eq(false))
-    .execute(self.borrow_mut())
+  pub async fn commit_event(
+    &mut self,
+    evt_id: String,
+    event_sui_address: String,
+    organizer_cap: String,
+    operator_cap: String,
+    event_nft: String,
+    event_capacity_bitmap_address: String,
+    ticket_type_accounts: Vec<String>,
+  ) -> Result<()> {
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
+      let update_event_query = sql_query(format!(
+        "
+        UPDATE events
+        SET event_sui_address = '{1}',
+            organizer_cap = '{2}',
+            operator_cap = '{3}',
+            event_nft = '{4}',
+            event_capacity_bitmap_address = '{5}',
+            draft = false
+        WHERE events.event_id = '{0}';
+        ",
+        evt_id,
+        event_sui_address,
+        organizer_cap,
+        operator_cap,
+        event_nft,
+        event_capacity_bitmap_address,
+      ));
+
+      update_event_query.execute(conn).await?;
+
+      // We cannot do multiple UPDATEs in one query, so these need to be separate
+      for (ticket_type_index, ticket_type_account) in ticket_type_accounts.iter().enumerate() {
+        let update_query = format!(
+          "
+          UPDATE ticket_types
+          SET ticket_type_sui_address = '{}'
+          WHERE ticket_types.event_id = '{}' AND ticket_type_index = {};
+          ",
+          ticket_type_account,
+          evt_id.clone(),
+          ticket_type_index
+        );
+
+        sql_query(update_query).execute(conn).await?;
+      }
+
+      Ok(())
+    }))
     .await?;
+
 
     Ok(())
   }
 
-  pub async fn read_event_with_sales(&mut self, evt_id: String, draft: bool) -> Result<Vec<EventWithSale>> {
+  pub async fn read_event_with_ticket_types(&mut self, evt_id: String, draft: bool) -> Result<Vec<ExtendedEvent>> {
     let query = sql_query(format!(
       "
-      SELECT *
-      FROM (
+      SELECT * FROM (
         SELECT * FROM events
         WHERE events.event_id = '{}' AND events.draft = {}
       ) events
-      INNER JOIN ticket_images
-      ON ticket_images.event_id = events.event_id
-      INNER JOIN sales
-      ON sales.event_id = events.event_id
+      INNER JOIN ticket_types
+      ON ticket_types.event_id = events.event_id
       INNER JOIN seat_ranges
-      ON seat_ranges.sale_account = sales.account
+      ON seat_ranges.event_id = ticket_types.event_id AND seat_ranges.ticket_type_index = ticket_types.ticket_type_index
+      INNER JOIN ticket_type_nft_details
+      ON ticket_type_nft_details.event_id = ticket_types.event_id AND ticket_type_nft_details.ticket_type_index = ticket_types.ticket_type_index
+      INNER JOIN nft_details
+      ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
       ", evt_id, draft
     ));
 
-    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
+    let records = query
+    .load::<(Event, TicketType, SeatRange, TicketTypeNftDetail)>(self.borrow_mut())
+    .await?;
 
-    Ok(EventWithSale::from_tuple(records))
+    Ok(ExtendedEvent::from_tuple(records))
   }
 
   pub async fn read_attended_tickets_count(&mut self, evt_id: String) -> Result<Vec<AttendedTicketCount>> {
     let query = sql_query(format!(
       "
-      SELECT sales.ticket_type_index,
-      COUNT(tickets.ticket_type_index) AS total_count,
+      SELECT ticket_types.ticket_type_index,
+      COUNT(cnts.ticket_type_index) AS total_count,
       COUNT(CASE WHEN attended = TRUE THEN 1 END) AS attended_count
-      FROM sales 
-      LEFT OUTER JOIN tickets ON sales.ticket_type_index = tickets.ticket_type_index AND sales.event_id = tickets.event_id
-      WHERE sales.event_id = '{}'
-      GROUP BY sales.ticket_type_index;
+      FROM ticket_types
+      LEFT OUTER JOIN cnts ON ticket_types.ticket_type_index = cnts.ticket_type_index AND ticket_types.event_id = cnts.event_id
+      WHERE ticket_types.event_id = '{}'
+      GROUP BY ticket_types.ticket_type_index;
       ", evt_id
     ));
 
@@ -333,7 +415,7 @@ impl PostgresConnection {
     name: Option<String>,
     skip: i64,
     limit: i64
-  ) -> Result<Vec<EventWithSale>> {
+  ) -> Result<Vec<ExtendedEvent>> {
     let mut filters = vec![];
 
     if let Some(name) = name {
@@ -368,13 +450,15 @@ impl PostgresConnection {
       FROM (
         SELECT events.* FROM events
         WHERE events.draft = false AND
-              EXISTS (SELECT * FROM tickets WHERE events.event_id = tickets.event_id AND tickets.account_id = '{}' AND {})
+              EXISTS (SELECT * FROM cnts WHERE events.event_id = cnts.event_id AND cnts.account_id = '{}' AND {})
         LIMIT {}
         OFFSET {}
       ) events
-      INNER JOIN ticket_images ON ticket_images.event_id = events.event_id
-      INNER JOIN sales ON events.event_id = sales.event_id
-      INNER JOIN seat_ranges ON seat_ranges.sale_account = sales.account
+      INNER JOIN ticket_types USING(event_id)
+      INNER JOIN seat_ranges USING(event_id, ticket_type_index)
+      INNER JOIN ticket_type_nft_details USING(event_id, ticket_type_index)
+      INNER JOIN nft_details
+      ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
       ORDER BY events.start_date
       ",
       user_id,
@@ -383,30 +467,10 @@ impl PostgresConnection {
       skip * limit,
     ));
 
-    let records = query.load::<(Event, TicketImage, Sale, SeatRange)>(self.borrow_mut()).await?;
-
-    Ok(EventWithSale::from_tuple(records))
-  }
-
-  pub async fn update_ticket_images_uploaded(
-    &mut self,
-    ticket_image_updates: Vec<TicketImageUpdate>,
-  ) -> Result<()> {
-    self.borrow_mut()
-    .transaction::<_, Error, _>(|conn| Box::pin(async move {
-      for ticket_image_update in ticket_image_updates {
-        diesel::update(ticket_images)
-        .filter(ticket_images_dsl::event_id.eq(ticket_image_update.event_id.clone()))
-        .set((ticket_images_dsl::uploaded.eq(true), ticket_images_dsl::arweave_tx_id.eq(ticket_image_update.arweave_tx_id.clone())))
-        .execute(conn)
-        .await?;
-      };
-
-      Ok(())
-    }))
+    let records = query
+    .load::<(Event, TicketType, SeatRange, TicketTypeNftDetail)>(self.borrow_mut())
     .await?;
 
-    Ok(())
+    Ok(ExtendedEvent::from_tuple(records))
   }
-
 }

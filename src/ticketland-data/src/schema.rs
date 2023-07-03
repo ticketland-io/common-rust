@@ -24,20 +24,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    buy_listings (sol_account) {
-        sol_account -> Varchar,
-        account_id -> Varchar,
-        event_id -> Varchar,
-        created_at -> Nullable<Timestamptz>,
-        bid_price -> Int8,
-        is_open -> Bool,
-        closed_at -> Nullable<Timestamptz>,
-        n_listing -> Int8,
-        draft -> Bool,
-    }
-}
-
-diesel::table! {
     canva_accounts (canva_uid) {
         canva_uid -> Varchar,
         account_id -> Varchar,
@@ -57,6 +43,37 @@ diesel::table! {
 }
 
 diesel::table! {
+    cnts (event_id, seat_index) {
+        cnt_sui_address -> Nullable<Varchar>,
+        event_id -> Varchar,
+        account_id -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        ticket_type_index -> Int2,
+        seat_name -> Varchar,
+        seat_index -> Int4,
+        attended -> Bool,
+        draft -> Bool,
+    }
+}
+
+diesel::table! {
+    event_nft_details (ref_name) {
+        ref_name -> Varchar,
+        event_id -> Varchar,
+        nft_details_id -> Varchar,
+    }
+}
+
+diesel::table! {
+    event_nfts (ref_name) {
+        event_nft_sui_address -> Nullable<Varchar>,
+        account_id -> Varchar,
+        event_id -> Varchar,
+        ref_name -> Varchar,
+    }
+}
+
+diesel::table! {
     events (event_id) {
         event_id -> Varchar,
         account_id -> Varchar,
@@ -64,71 +81,76 @@ diesel::table! {
         name -> Varchar,
         description -> Text,
         location -> Nullable<Jsonb>,
-        venue -> Nullable<Varchar>,
+        venue -> Varchar,
         event_type -> Int2,
         visibility -> Int2,
         start_date -> Timestamptz,
         end_date -> Timestamptz,
         category -> Int2,
-        event_capacity -> Varchar,
-        arweave_tx_id -> Nullable<Varchar>,
+        event_sui_address -> Nullable<Varchar>,
+        organizer_cap -> Nullable<Varchar>,
+        operator_cap -> Nullable<Varchar>,
+        event_nft -> Nullable<Varchar>,
+        event_capacity_bitmap_address -> Nullable<Varchar>,
         webbundle_arweave_tx_id -> Nullable<Varchar>,
         draft -> Bool,
     }
 }
 
 diesel::table! {
-    metadata (id) {
-        id -> Int4,
+    listings (listing_id) {
+        listing_id -> Varchar,
+        listing_sui_address -> Nullable<Varchar>,
+        account_id -> Varchar,
         event_id -> Varchar,
-        name -> Varchar,
-        description -> Text,
-        image -> Varchar,
+        cnt_sui_address -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        ask_price -> Int8,
+        is_open -> Bool,
+        closed_at -> Nullable<Timestamptz>,
+        draft -> Bool,
     }
 }
 
 diesel::table! {
-    metadata_attributes (id) {
+    nft_details (arweave_tx_id) {
+        nft_name -> Varchar,
+        nft_description -> Text,
+        content_type -> Varchar,
+        arweave_tx_id -> Varchar,
+    }
+}
+
+diesel::table! {
+    offers (offer_id) {
+        offer_id -> Varchar,
+        offer_sui_address -> Nullable<Varchar>,
+        account_id -> Varchar,
+        event_id -> Varchar,
+        ticket_type_index -> Int2,
+        created_at -> Nullable<Timestamptz>,
+        bid_price -> Int8,
+        is_open -> Bool,
+        closed_at -> Nullable<Timestamptz>,
+        draft -> Bool,
+    }
+}
+
+diesel::table! {
+    properties (id) {
         id -> Int4,
-        metadata_id -> Int4,
+        nft_details_id -> Varchar,
         trait_type -> Varchar,
         value -> Varchar,
     }
 }
 
 diesel::table! {
-    sales (account) {
-        account -> Varchar,
+    seat_ranges (event_id, ticket_type_index, l, r) {
         event_id -> Varchar,
-        created_at -> Nullable<Timestamptz>,
         ticket_type_index -> Int2,
-        ticket_type_name -> Varchar,
-        n_tickets -> Int4,
-        sale_start_ts -> Timestamptz,
-        sale_end_ts -> Timestamptz,
-        sale_type -> Jsonb,
-    }
-}
-
-diesel::table! {
-    seat_ranges (sale_account, l, r) {
-        sale_account -> Varchar,
         l -> Int4,
         r -> Int4,
-    }
-}
-
-diesel::table! {
-    sell_listings (sol_account) {
-        sol_account -> Varchar,
-        account_id -> Varchar,
-        cnt_nft -> Varchar,
-        event_id -> Varchar,
-        created_at -> Nullable<Timestamptz>,
-        ask_price -> Int8,
-        is_open -> Bool,
-        closed_at -> Nullable<Timestamptz>,
-        draft -> Bool,
     }
 }
 
@@ -151,76 +173,80 @@ diesel::table! {
 }
 
 diesel::table! {
-    ticket_images (event_id, ticket_type_index, ticket_nft_index) {
+    ticket_type_nft_details (ref_name) {
+        ref_name -> Varchar,
         event_id -> Varchar,
         ticket_type_index -> Int2,
-        ticket_nft_index -> Int2,
-        name -> Varchar,
-        description -> Text,
-        content_type -> Varchar,
-        arweave_tx_id -> Nullable<Varchar>,
-        uploaded -> Bool,
+        nft_details_id -> Varchar,
     }
 }
 
 diesel::table! {
-    ticket_onchain_accounts (cnt_nft) {
-        cnt_nft -> Varchar,
-        ticket_metadata -> Varchar,
-    }
-}
-
-diesel::table! {
-    cnts (cnt_nft) {
-        cnt_nft -> Varchar,
-        name -> Varchar,
-        event_id -> Varchar,
+    ticket_type_nfts (ref_name) {
+        ticket_type_nft_sui_address -> Nullable<Varchar>,
         account_id -> Varchar,
+        ref_name -> Varchar,
+        event_id -> Varchar,
+        ticket_type_index -> Int2,
+    }
+}
+
+diesel::table! {
+    ticket_types (event_id, ticket_type_index) {
+        ticket_type_sui_address -> Nullable<Varchar>,
+        event_id -> Varchar,
         created_at -> Nullable<Timestamptz>,
         ticket_type_index -> Int2,
-        seat_name -> Varchar,
-        seat_index -> Int4,
-        attended -> Bool,
-        draft -> Bool,
+        ticket_type_name -> Varchar,
+        n_tickets -> Int4,
+        sale_start_ts -> Timestamptz,
+        sale_end_ts -> Timestamptz,
+        sale_type -> Jsonb,
     }
 }
 
 diesel::joinable!(api_clients -> accounts (account_id));
-diesel::joinable!(buy_listings -> accounts (account_id));
-diesel::joinable!(buy_listings -> events (event_id));
 diesel::joinable!(canva_accounts -> accounts (account_id));
 diesel::joinable!(canva_designs -> canva_accounts (canva_uid));
-diesel::joinable!(events -> accounts (account_id));
-diesel::joinable!(metadata -> events (event_id));
-diesel::joinable!(metadata_attributes -> metadata (metadata_id));
-diesel::joinable!(sales -> events (event_id));
-diesel::joinable!(seat_ranges -> sales (sale_account));
-diesel::joinable!(sell_listings -> accounts (account_id));
-diesel::joinable!(sell_listings -> events (event_id));
-diesel::joinable!(sell_listings -> ticket_onchain_accounts (cnt_nft));
-diesel::joinable!(stripe_accounts -> accounts (account_id));
-diesel::joinable!(stripe_customers -> accounts (account_id));
-diesel::joinable!(ticket_images -> events (event_id));
 diesel::joinable!(cnts -> accounts (account_id));
 diesel::joinable!(cnts -> events (event_id));
-diesel::joinable!(cnts -> ticket_onchain_accounts (cnt_nft));
+diesel::joinable!(event_nft_details -> events (event_id));
+diesel::joinable!(event_nft_details -> nft_details (nft_details_id));
+diesel::joinable!(event_nfts -> accounts (account_id));
+diesel::joinable!(event_nfts -> event_nft_details (ref_name));
+diesel::joinable!(event_nfts -> events (event_id));
+diesel::joinable!(events -> accounts (account_id));
+diesel::joinable!(listings -> accounts (account_id));
+diesel::joinable!(listings -> events (event_id));
+diesel::joinable!(offers -> accounts (account_id));
+diesel::joinable!(offers -> events (event_id));
+diesel::joinable!(properties -> nft_details (nft_details_id));
+diesel::joinable!(stripe_accounts -> accounts (account_id));
+diesel::joinable!(stripe_customers -> accounts (account_id));
+diesel::joinable!(ticket_type_nft_details -> events (event_id));
+diesel::joinable!(ticket_type_nft_details -> nft_details (nft_details_id));
+diesel::joinable!(ticket_type_nfts -> accounts (account_id));
+diesel::joinable!(ticket_type_nfts -> events (event_id));
+diesel::joinable!(ticket_type_nfts -> ticket_type_nft_details (ref_name));
+diesel::joinable!(ticket_types -> events (event_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
     api_clients,
-    buy_listings,
     canva_accounts,
     canva_designs,
+    cnts,
+    event_nft_details,
+    event_nfts,
     events,
-    metadata,
-    metadata_attributes,
-    sales,
+    listings,
+    nft_details,
+    offers,
+    properties,
     seat_ranges,
-    sell_listings,
     stripe_accounts,
     stripe_customers,
-    ticket_images,
-    ticket_onchain_accounts,
-    cnts
-    // tickets,
+    ticket_type_nft_details,
+    ticket_type_nfts,
+    ticket_types,
 );

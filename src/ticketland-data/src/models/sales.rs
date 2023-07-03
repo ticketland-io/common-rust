@@ -4,7 +4,7 @@ use serde::{Serialize};
 use diesel::{prelude::*, sql_types};
 
 #[derive(QueryableByName, Serialize)]
-pub struct ClosedListingsData {
+pub struct ClosedSalesData {
   #[diesel(sql_type = sql_types::BigInt)]
   count: i64,
   #[diesel(sql_type = sql_types::Timestamptz)]
@@ -12,7 +12,7 @@ pub struct ClosedListingsData {
 }
 
 #[derive(QueryableByName, Serialize)]
-pub struct AverageListingsPrice {
+pub struct AverageSalesPrice {
   #[diesel(sql_type = sql_types::BigInt)]
   count: i64,
   #[diesel(sql_type = sql_types::Timestamptz)]

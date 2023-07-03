@@ -1,8 +1,5 @@
-// TODO: Using solana sdk crate just for the keccak256 might be an overkill. Find an alternative keccak256 crate.
-use solana_sdk::{
-  keccak::hashv,
-};
+use keccak_hash::keccak;
 
 pub fn hash(msg: &[u8]) -> [u8; 32] {
-  hashv(&[msg]).0
+  keccak(msg).0
 }

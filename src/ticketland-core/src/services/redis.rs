@@ -70,7 +70,7 @@ impl Redis {
     .map_err(Into::<_>::into)
   }
 
-  pub async fn keys(&mut self, key_pattern: &str) -> Result<()> {
+  pub async fn keys(&mut self, key_pattern: &str) -> Result<Vec<String>> {
     cmd("keys")
     .arg(key_pattern)
     .query_async(&mut self.0).await

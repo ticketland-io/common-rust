@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
-use crate::schema::sell_listings;
+use crate::schema::listings;
 
 #[derive(Queryable, QueryableByName, AsChangeset, Serialize, Deserialize, Clone, Default)]
-#[diesel(table_name = sell_listings)]
-pub struct SellListing {
-  pub sol_account: String,
+#[diesel(table_name = listings)]
+pub struct Listing {
+  pub listing_id: String,
+  pub listing_sui_address: Option<String>,
   pub account_id: String,
-  pub ticket_nft: String,
   pub event_id: String,
+  pub cnt_sui_address: String,
   pub created_at: Option<NaiveDateTime>,
   pub ask_price: i64,
   pub is_open: bool,
@@ -18,12 +19,13 @@ pub struct SellListing {
 }
 
 #[derive(Insertable, AsChangeset, Deserialize)]
-#[diesel(table_name = sell_listings)]
-pub struct NewSellListing<'a> {
+#[diesel(table_name = listings)]
+pub struct NewListing<'a> {
+  pub listing_id: &'a str,
   pub account_id: &'a str,
-  pub ticket_nft: &'a str,
   pub event_id: &'a str,
-  pub sol_account: &'a str,
+  pub listing_sui_address: Option<&'a str>,
+  pub cnt_sui_address: &'a str,
   pub ask_price: i64,
   pub is_open: bool,
   pub draft: bool,

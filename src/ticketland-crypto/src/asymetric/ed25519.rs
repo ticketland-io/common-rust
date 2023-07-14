@@ -39,7 +39,7 @@ pub fn sign(msg: &[u8], keypair: &[u8]) -> Result<Signature> {
 
 pub fn verify(msg: &[u8], pub_key: &[u8], sig: &str) -> Result<()> {
   let pub_key = base64::decode(pub_key)?;
-  let public_key: PublicKey = serde_json::from_slice(&pub_key)?;
+  let public_key: PublicKey = PublicKey::from_bytes(&pub_key)?;
   let msg = keccak256::hash(msg);
 
   Ok(public_key.verify(msg.as_ref(), &Signature::from_str(sig)?)?)

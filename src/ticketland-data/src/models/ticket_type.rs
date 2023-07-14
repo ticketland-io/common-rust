@@ -13,9 +13,12 @@ use chrono::{
   }
 };
 use diesel_as_jsonb::AsJsonb;
-use crate::schema::sales;
+use crate::schema::ticket_types;
+use super::{
+  seat_range::SeatRange,
+  nft_detail::TicketTypeNftDetail,
+};
 
-use super::seat_range::SeatRange;
 
 #[derive(AsJsonb)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -47,9 +50,9 @@ impl Default for SaleType {
 }
 
 #[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
-#[diesel(table_name = sales)]
-pub struct Sale {
-  pub account: String,
+#[diesel(table_name = ticket_types)]
+pub struct TicketType {
+  pub ticket_type_sui_address: Option<String>,
   pub event_id: String,
   pub created_at: Option<NaiveDateTime>,
   pub ticket_type_index: i16,
@@ -63,8 +66,8 @@ pub struct Sale {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
-pub struct SaleWithSeatRange {
-  pub account: String,
+pub struct ExtendedTicketType {
+  pub ticket_type_sui_address: Option<String>,
   pub event_id: String,
   pub created_at: Option<NaiveDateTime>,
   pub ticket_type_index: i16,
@@ -76,31 +79,31 @@ pub struct SaleWithSeatRange {
   pub sale_end_ts: NaiveDateTime,
   pub sale_type: SaleType,
   pub seat_range: SeatRange,
+  pub ticket_type_nft_details: Vec<TicketTypeNftDetail>,
 }
 
 
-impl From<Sale> for SaleWithSeatRange {
-  fn from(sale: Sale) -> Self {
-    SaleWithSeatRange {
-      account: sale.account,
-      event_id: sale.event_id,
-      created_at: sale.created_at,
-      ticket_type_index: sale.ticket_type_index,
-      ticket_type_name: sale.ticket_type_name,
-      n_tickets: sale.n_tickets,
-      sale_start_ts: sale.sale_start_ts,
-      sale_end_ts: sale.sale_end_ts,
-      sale_type: sale.sale_type,
+impl From<TicketType> for ExtendedTicketType {
+  fn from(ticket_type: TicketType) -> Self {
+    ExtendedTicketType {
+      ticket_type_sui_address: ticket_type.ticket_type_sui_address,
+      event_id: ticket_type.event_id,
+      created_at: ticket_type.created_at,
+      ticket_type_index: ticket_type.ticket_type_index,
+      ticket_type_name: ticket_type.ticket_type_name,
+      n_tickets: ticket_type.n_tickets,
+      sale_start_ts: ticket_type.sale_start_ts,
+      sale_end_ts: ticket_type.sale_end_ts,
+      sale_type: ticket_type.sale_type,
       seat_range: SeatRange::default(),
+      ticket_type_nft_details: vec![],
     }
   }
-
 }
 
 #[derive(Insertable, Deserialize, Clone)]
-#[diesel(table_name = sales)]
-pub struct NewSale {
-  pub account: String,
+#[diesel(table_name = ticket_types)]
+pub struct NewTicketType {
   pub event_id: String,
   pub ticket_type_index: i16,
   pub ticket_type_name: String,

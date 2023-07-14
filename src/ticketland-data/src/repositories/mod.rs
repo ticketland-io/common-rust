@@ -9,3 +9,4 @@ pub mod seat_range;
 pub mod sales;
 pub mod offer;
 pub mod listing;
+pub mod nfts;

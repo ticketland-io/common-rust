@@ -4,7 +4,13 @@ use chrono::{
   NaiveDateTime,
 };
 use crate::schema::cnts;
-use super::{event::Event, ticket_type::{ExtendedTicketType, TicketType}, seat_range::SeatRange, nft_detail::TicketTypeNftDetail};
+use super::{
+  event::Event,
+  ticket_type::{ExtendedTicketType, TicketType},
+  seat_range::SeatRange,
+  nft_detail::TicketTypeNftDetail,
+  nft::TicketTypeNft
+};
 
 #[derive(Insertable, Queryable, AsChangeset, QueryableByName, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = cnts)]
@@ -39,15 +45,16 @@ pub struct CNTWithMetadata {
   pub draft: bool,
   pub listing: Option<PartialListing>,
   pub ticket_type: ExtendedTicketType,
+  pub nfts: Vec<TicketTypeNft>,
 }
 
 impl CNTWithMetadata {
-  pub fn from_tuple(values: Vec<(CNT, TicketType, SeatRange, TicketTypeNftDetail, Option<PartialListing>)>) -> Vec<Self> {
+  pub fn from_tuple(values: Vec<(CNT, TicketType, SeatRange, TicketTypeNftDetail, Option<TicketTypeNft>, Option<PartialListing>)>) -> Vec<Self> {
     values
     .into_iter()
     .fold(
       Vec::new(),
-      |mut acc: Vec<CNTWithMetadata>, (cnt, ticket_type, seat_range, ticket_type_nft_details, listing)| {
+      |mut acc: Vec<CNTWithMetadata>, (cnt, ticket_type, seat_range, ticket_type_nft_details, ticket_type_nft, listing)| {
       let key = cnt.cnt_sui_address.clone();
         let mut extended_ticket_type = ExtendedTicketType::from(ticket_type);
         extended_ticket_type.seat_range = seat_range;
@@ -59,6 +66,10 @@ impl CNTWithMetadata {
 
         if let Some(index) = existing_cnt_index {
           acc[index].ticket_type.ticket_type_nft_details.push(ticket_type_nft_details);
+
+          if let Some(ticket_type_nft) = ticket_type_nft {
+            acc[index].nfts.push(ticket_type_nft);
+          }
         } else {
           acc.push(CNTWithMetadata {
             cnt_sui_address: cnt.cnt_sui_address,
@@ -72,6 +83,7 @@ impl CNTWithMetadata {
             draft: cnt.draft,
             listing,
             ticket_type: extended_ticket_type,
+            nfts: ticket_type_nft.map_or(vec![], |ticket_type_nft| vec![ticket_type_nft]),
           });
         }
 
@@ -94,15 +106,16 @@ pub struct CNTWithEvent {
   pub listing: Option<PartialListing>,
   pub event: Event,
   pub ticket_type: ExtendedTicketType,
+  pub nfts: Vec<TicketTypeNft>,
 }
 
 impl CNTWithEvent {
-  pub fn from_tuple(values: Vec<(CNT, Event, TicketType, SeatRange, TicketTypeNftDetail, Option<PartialListing>)>) -> Vec<Self> {
+  pub fn from_tuple(values: Vec<(CNT, Event, TicketType, SeatRange, TicketTypeNftDetail, Option<TicketTypeNft>, Option<PartialListing>)>) -> Vec<Self> {
     values
     .into_iter()
     .fold(
       Vec::new(),
-      |mut acc: Vec<CNTWithEvent>, (cnt, event, ticket_type, seat_range, ticket_type_nft_details, listing)| {
+      |mut acc: Vec<CNTWithEvent>, (cnt, event, ticket_type, seat_range, ticket_type_nft_details, ticket_type_nft, listing)| {
       let key = cnt.cnt_sui_address.clone();
         let mut extended_ticket_type = ExtendedTicketType::from(ticket_type);
         extended_ticket_type.seat_range = seat_range;
@@ -114,6 +127,10 @@ impl CNTWithEvent {
 
         if let Some(index) = existing_cnt_index {
           acc[index].ticket_type.ticket_type_nft_details.push(ticket_type_nft_details);
+
+          if let Some(ticket_type_nft) = ticket_type_nft {
+            acc[index].nfts.push(ticket_type_nft);
+          }
         } else {
           acc.push(CNTWithEvent {
             cnt_sui_address: cnt.cnt_sui_address,
@@ -128,6 +145,7 @@ impl CNTWithEvent {
             listing,
             event,
             ticket_type: extended_ticket_type,
+            nfts: ticket_type_nft.map_or(vec![], |ticket_type_nft| vec![ticket_type_nft]),
           });
         }
 

@@ -6,7 +6,7 @@ use crate::{
   models::{
     cnt::{CNT, CNTWithMetadata, PartialListing, CNTWithEvent},
     ticket_type::TicketType,
-    event::Event, seat_range::SeatRange, nft_detail::TicketTypeNftDetail,
+    event::Event, seat_range::SeatRange, nft_detail::TicketTypeNftDetail, nft::TicketTypeNft,
   },
   schema::{
     cnts::dsl::{self as cnts_dsl},
@@ -49,6 +49,7 @@ impl PostgresConnection {
         seat_ranges.*,
         ticket_type_nft_details.*,
         nft_details.*,
+        ticket_type_nfts.*,
         listings.listing_sui_address
       FROM (
         SELECT * FROM cnts
@@ -60,6 +61,7 @@ impl PostgresConnection {
       INNER JOIN seat_ranges USING(event_id, ticket_type_index)
       INNER JOIN ticket_type_nft_details USING(event_id, ticket_type_index)
       INNER JOIN nft_details ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
+      LEFT JOIN ticket_type_nfts USING(ref_name, cnt_sui_address)
       LEFT JOIN listings ON (
         listings.event_id = cnts.event_id
         AND listings.cnt_sui_address = cnts.cnt_sui_address
@@ -70,7 +72,7 @@ impl PostgresConnection {
     ));
 
     let records = query
-    .load::<(CNT, TicketType, SeatRange, TicketTypeNftDetail, Option<PartialListing>)>(self.borrow_mut())
+    .load::<(CNT, TicketType, SeatRange, TicketTypeNftDetail, Option<TicketTypeNft>, Option<PartialListing>)>(self.borrow_mut())
     .await?;
 
     Ok(CNTWithMetadata::from_tuple(records))
@@ -96,6 +98,7 @@ impl PostgresConnection {
         seat_ranges.*,
         ticket_type_nft_details.*,
         nft_details.*,
+        ticket_type_nfts.*,
         listings.listing_sui_address
       FROM (
         SELECT * FROM cnts
@@ -108,6 +111,7 @@ impl PostgresConnection {
       INNER JOIN seat_ranges USING(event_id, ticket_type_index)
       INNER JOIN ticket_type_nft_details USING(event_id, ticket_type_index)
       INNER JOIN nft_details ON nft_details.arweave_tx_id = ticket_type_nft_details.nft_details_id
+      LEFT JOIN ticket_type_nfts USING(ref_name, cnt_sui_address)
       LEFT JOIN listings ON (
         listings.event_id = cnts.event_id
         AND listings.cnt_sui_address = cnts.cnt_sui_address
@@ -122,7 +126,7 @@ impl PostgresConnection {
     ));
 
     let records = query
-    .load::<(CNT, Event, TicketType, SeatRange, TicketTypeNftDetail, Option<PartialListing>)>(self.borrow_mut())
+    .load::<(CNT, Event, TicketType, SeatRange, TicketTypeNftDetail, Option<TicketTypeNft>, Option<PartialListing>)>(self.borrow_mut())
     .await?;
 
     Ok(CNTWithEvent::from_tuple(records))

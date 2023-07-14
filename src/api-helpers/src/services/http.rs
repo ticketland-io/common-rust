@@ -1,15 +1,13 @@
-use std::error::Error;
 use eyre::Result;
 use actix_web::{
   HttpRequest,
   HttpResponse,
 };
 use serde::Serialize;
+use ticketland_core::error::Error;
 
-pub fn internal_server_error<E: Error>(_error: Option<E>) -> HttpResponse {
-  HttpResponse::InternalServerError()
-  .reason("500")
-  .body("")
+pub fn internal_server_error(error: Option<Error>) -> Result<HttpResponse, Error> {
+  Err(error.map_or( Error::GenericError("Internal Server Error".to_owned()),Into::<_>::into))
 }
 
 pub fn unauthorized_error() -> HttpResponse {
@@ -56,7 +54,7 @@ macro_rules! QueryString {
   }
 }
 
-pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> HttpResponse {
+pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, limit: i64) -> Result<HttpResponse, Error> {
   result
   .map(|result| {
     HttpResponse::Ok()
@@ -67,11 +65,17 @@ pub fn create_read_response<T: Serialize>(result: Result<Vec<T>>, skip: i64, lim
         limit: limit,
       })
   })
-  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
+  .map_err(|error| error.into())
 }
 
-pub fn create_write_response(result: Result<()>) -> HttpResponse {
+pub fn create_write_response(result: Result<()>) -> Result<HttpResponse, Error> {
   result
   .map(|_| HttpResponse::Ok().finish())
-  .unwrap_or_else(|error| internal_server_error(Some(error.root_cause())))
+  .map_err(|error| error.into())
+}
+
+pub fn create_response<T: Serialize>(result: Result<T>) -> Result<HttpResponse, Error> {
+  result
+  .map(|result| HttpResponse::Ok().json(result))
+  .map_err(|error| error.into())
 }

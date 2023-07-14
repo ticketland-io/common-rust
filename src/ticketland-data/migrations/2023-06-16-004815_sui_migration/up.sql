@@ -71,7 +71,6 @@ CREATE TABLE cnts (
 );
 
 CREATE TABLE nft_details (
-  -- id SERIAL PRIMARY KEY,
   nft_name VARCHAR NOT NULL,
   nft_description TEXT NOT NULL,
   content_type VARCHAR NOT NULL,
@@ -107,9 +106,10 @@ CREATE TABLE event_nfts (
 );
 
 CREATE TABLE ticket_type_nfts (
-  ticket_type_nft_sui_address VARCHAR(66) UNIQUE,
+  ticket_type_nft_sui_address VARCHAR(66) PRIMARY KEY,
   account_id VARCHAR NOT NULL REFERENCES accounts(uid) ON DELETE CASCADE ON UPDATE CASCADE,
-  ref_name VARCHAR PRIMARY KEY REFERENCES ticket_type_nft_details(ref_name)  ON DELETE CASCADE ON UPDATE CASCADE,
+  cnt_sui_address VARCHAR(66) NOT NULL REFERENCES cnts(cnt_sui_address),
+  ref_name VARCHAR NOT NULL REFERENCES ticket_type_nft_details(ref_name)  ON DELETE CASCADE ON UPDATE CASCADE,
   event_id VARCHAR NOT NULL REFERENCES events(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
   ticket_type_index SMALLINT NOT NULL,
   FOREIGN KEY(event_id, ticket_type_index) REFERENCES ticket_types(event_id, ticket_type_index) ON DELETE CASCADE ON UPDATE CASCADE

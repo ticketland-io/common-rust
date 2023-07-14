@@ -182,9 +182,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    ticket_type_nfts (ref_name) {
-        ticket_type_nft_sui_address -> Nullable<Varchar>,
+    ticket_type_nfts (ticket_type_nft_sui_address) {
+        ticket_type_nft_sui_address -> Varchar,
         account_id -> Varchar,
+        cnt_sui_address -> Varchar,
         ref_name -> Varchar,
         event_id -> Varchar,
         ticket_type_index -> Int2,

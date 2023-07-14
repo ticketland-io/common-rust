@@ -62,6 +62,7 @@ impl Event {
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct ExtendedEvent {
   pub event_id: String,
+  pub account_id: String,
   pub created_at: Option<NaiveDateTime>,
   pub name: String,
   pub description: String,
@@ -146,6 +147,7 @@ impl ExtendedEvent {
       } else {
         acc.push(ExtendedEvent {
           event_id: event.event_id.clone(),
+          account_id: event.account_id.clone(),
           created_at: event.created_at,
           name: event.name.clone(),
           description: event.description.clone(),

@@ -120,6 +120,41 @@ impl PostgresConnection {
     Ok(())
   }
 
+  pub async fn update_ticket_type_nft_details(
+    &mut self,
+    nft_details_list: Vec<NewNftDetail>,
+    ticket_type_nfts_details_list: Vec<NewTicketTypeNftDetail>,
+    // properties_list: Vec<NewProperty>,
+  ) -> Result<()> {
+    self.borrow_mut()
+    .transaction::<_, Error, _>(|conn| Box::pin(async move {
+      for nft_detail in nft_details_list.iter() {
+        diesel::insert_into(nft_details)
+        .values(nft_detail)
+        .on_conflict(nft_details_dsl::arweave_tx_id)
+        .do_update()
+        .set(nft_detail)
+        .execute(conn)
+        .await?;
+      }
+      for ticket_type_nfts_detail in ticket_type_nfts_details_list.iter() {
+        diesel::insert_into(ticket_type_nft_details)
+        .values(ticket_type_nfts_detail)
+        .on_conflict(ticket_type_nft_details_dsl::ref_name)
+        .do_update()
+        .set(ticket_type_nfts_detail)
+        .execute(conn)
+        .await?;
+      }
+
+      Ok(())
+    }))
+    .await?;
+
+    Ok(())
+  }
+
+
   pub async fn update_webbundle_uploaded(&mut self, id: String, arweave_tx: String) -> Result<()> {
     diesel::update(events)
     .filter(events_dsl::event_id.eq(id))

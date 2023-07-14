@@ -115,6 +115,7 @@ pub async fn verify_ticket(
     let cnt = postgres.read_cnt(cnt_sui_address.to_string()).await?;
     let ticket_type_index = cnt.get(0).context("CNT not found")?.ticket_type_index as u8;
 
+    // TODO: fetch cnt object and check its existence
     // 3. check that signer is the owner of the given cnt_sui_addressk
     // let cnt_object = get_cnt_object(
     //   Arc::clone(&rpc_client),

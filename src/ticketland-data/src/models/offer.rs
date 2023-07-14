@@ -6,7 +6,6 @@ use crate::schema::offers;
 #[derive(Queryable, QueryableByName, AsChangeset, Serialize, Deserialize, Clone, Default)]
 #[diesel(table_name = offers)]
 pub struct Offer {
-  // TODO: consider this being an option
   pub offer_id: String,
   pub offer_sui_address: Option<String>,
   pub account_id: String,
